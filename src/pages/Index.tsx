@@ -10,7 +10,7 @@ import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
-import appChat from "@/assets/app-chat.png";
+import StaticChatMockup from "@/components/landing/StaticChatMockup";
 import appQuoteForm from "@/assets/app-quote-form.png";
 import appQuoteResult from "@/assets/app-quote-result.png";
 import appDashboard from "@/assets/app-dashboard.png";
