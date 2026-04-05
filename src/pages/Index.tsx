@@ -10,7 +10,7 @@ import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
-import appChat from "@/assets/app-chat.png";
+import StaticChatMockup from "@/components/landing/StaticChatMockup";
 import appQuoteForm from "@/assets/app-quote-form.png";
 import appQuoteResult from "@/assets/app-quote-result.png";
 import appDashboard from "@/assets/app-dashboard.png";
@@ -33,7 +33,7 @@ const Index = () => (
       badge="AI Booking"
       title="AI Booking That Closes Jobs For You"
       description="Your AI assistant responds to leads instantly, sends quotes, and books jobs — even while you sleep."
-      phoneImage={appChat}
+      customPhone={<StaticChatMockup />}
       features={[
         { icon: Bot, title: "Instant Lead Response", description: "AI replies in seconds so you never lose a lead to slow follow-up." },
         { icon: MessageSquare, title: "Smart Quoting", description: "Generates accurate quotes based on your pricing and job details." },

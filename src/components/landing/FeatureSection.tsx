@@ -7,9 +7,10 @@ interface FeatureSectionProps {
   features: { icon: LucideIcon; title: string; description: string }[];
   reversed?: boolean;
   phoneImage?: string;
+  customPhone?: React.ReactNode;
 }
 
-const FeatureSection = ({ badge, title, description, features, reversed, phoneImage }: FeatureSectionProps) => (
+const FeatureSection = ({ badge, title, description, features, reversed, phoneImage, customPhone }: FeatureSectionProps) => (
   <section className="w-full py-20 px-4">
     <div className={`max-w-7xl mx-auto flex flex-col ${reversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}>
       <div className="flex-1 space-y-6">
@@ -33,22 +34,21 @@ const FeatureSection = ({ badge, title, description, features, reversed, phoneIm
         </div>
       </div>
       <div className="flex-1 flex justify-center">
-        {phoneImage ? (
+        {(phoneImage || customPhone) ? (
           <div className="relative w-[280px] sm:w-[300px]">
-            {/* iPhone frame */}
             <div className="rounded-[2.5rem] border-2 border-border bg-background p-2 shadow-2xl shadow-black/40">
               <div className="rounded-[2rem] overflow-hidden bg-background">
-                {/* Notch */}
                 <div className="flex justify-center pt-2 pb-1">
                   <div className="w-24 h-5 bg-card rounded-full" />
                 </div>
-                <img
-                  src={phoneImage}
-                  alt={`${badge} feature preview`}
-                  className="w-full object-cover"
-                  loading="lazy"
-                />
-                {/* Bottom bar */}
+                {customPhone ? customPhone : (
+                  <img
+                    src={phoneImage}
+                    alt={`${badge} feature preview`}
+                    className="w-full object-cover"
+                    loading="lazy"
+                  />
+                )}
                 <div className="flex justify-center py-2">
                   <div className="w-28 h-1 bg-muted-foreground/30 rounded-full" />
                 </div>
