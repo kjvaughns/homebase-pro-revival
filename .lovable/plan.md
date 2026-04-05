@@ -1,28 +1,33 @@
 
 
-## Fix: Chat Demo Scroll Hijacking Page
+## Recreate AI Booking Screenshot as Static Chat UI
 
-### Problem
-`scrollIntoView({ behavior: "smooth" })` on the `chatEndRef` scrolls the entire page, not just the chat container, because `scrollIntoView` bubbles up to the nearest scrollable ancestor (the page itself).
+### What
+Replace the static `appChat` image in the AI Booking `FeatureSection` with a code-rendered static chat mockup that matches the uploaded screenshot — showing the same conversation text used in the `AIDemoSection` ("My sink is leaking" flow).
 
-### Fix
-**File: `src/components/landing/AIDemoSection.tsx`**
+### How
 
-Replace the `scrollToBottom` function to use the chat container's `scrollTop` instead of `scrollIntoView`:
+**1. New component: `src/components/landing/StaticChatMockup.tsx`**
 
-1. Add a `chatContainerRef` pointing to the chat body `div` (the scrollable `div` with `overflow-y-auto`)
-2. Change `scrollToBottom` to:
-   ```ts
-   const scrollToBottom = useCallback(() => {
-     setTimeout(() => {
-       if (chatContainerRef.current) {
-         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
-       }
-     }, 50);
-   }, []);
-   ```
-3. Attach `ref={chatContainerRef}` to the chat body div (the one with `overflow-y-auto` class)
-4. Remove `chatEndRef` div and ref since they're no longer needed
+A static, non-interactive chat UI rendered in code (no image) that replicates the screenshot:
+- Dark background
+- "< Main" back button at top (white pill)
+- User bubble (green, right-aligned): "My sink is leaking"
+- AI response (dark card, left-aligned) with small green home icon: the full diagnosis text from the demo
+- "Find a Pro" action button (green border, Users icon + chevron)
+- Bottom input bar: "Ask about home services..." with send icon
+- No animations, no interactivity — purely visual
 
-This keeps scrolling contained within the chat panel without affecting the page.
+**2. Edit: `src/components/landing/FeatureSection.tsx`**
+
+Add support for a `customPhone` React node prop as an alternative to `phoneImage`. When provided, render it inside the iPhone frame instead of an `<img>`.
+
+**3. Edit: `src/pages/Index.tsx`**
+
+For the AI Booking `FeatureSection`, pass `<StaticChatMockup />` via the new `customPhone` prop instead of the `appChat` image.
+
+### Design Details
+- Matches the uploaded screenshot: black chat area, green user bubble, dark gray AI bubble with green home icon, green "Find a Pro" button
+- Uses the exact same message text as the `AIDemoSection` CONVERSATION array for consistency
+- Wrapped in the existing iPhone frame from `FeatureSection`
 
