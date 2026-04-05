@@ -35,7 +35,7 @@ const FeatureSection = ({ badge, title, description, features, reversed }: Featu
         <div className="w-full max-w-md aspect-square bg-card rounded-3xl border border-border flex items-center justify-center">
           <div className="text-center space-y-2 p-8">
             <div className="w-16 h-16 bg-primary/20 rounded-2xl mx-auto flex items-center justify-center">
-              {features[0] && <features[0].icon className="h-8 w-8 text-primary" />}
+              {features[0] && (() => { const IconComp = features[0].icon; return <IconComp className="h-8 w-8 text-primary" />; })()}
             </div>
             <p className="font-semibold text-lg">{badge}</p>
             <p className="text-sm text-muted-foreground">{description.slice(0, 60)}...</p>
