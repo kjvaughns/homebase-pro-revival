@@ -1,4 +1,4 @@
-import { Home } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Footer = () => (
   <footer className="w-full border-t border-border py-12 px-4">
@@ -6,9 +6,7 @@ const Footer = () => (
       <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
         <div className="space-y-4">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <Home className="h-4 w-4 text-primary-foreground" />
-            </div>
+            <img src={logo} alt="HomeBase logo" className="w-8 h-8" />
             <span className="text-lg font-bold">HomeBase</span>
           </div>
           <p className="text-sm text-muted-foreground">The all-in-one platform for home service professionals.</p>
