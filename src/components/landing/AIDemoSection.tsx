@@ -249,7 +249,7 @@ const AIDemoSection = () => {
                 })}
 
                 {isTyping && <TypingDots />}
-                <div ref={chatEndRef} />
+                
               </div>
 
               {/* Input bar */}
