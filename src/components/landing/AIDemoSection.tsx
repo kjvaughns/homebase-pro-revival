@@ -185,7 +185,7 @@ const AIDemoSection = () => {
               </div>
 
               {/* Chat body */}
-              <div className="min-h-[380px] max-h-[420px] overflow-y-auto px-4 py-4 space-y-3 bg-background relative">
+              <div ref={chatContainerRef} className="min-h-[380px] max-h-[420px] overflow-y-auto px-4 py-4 space-y-3 bg-background relative">
                 {/* Overlay */}
                 {showOverlay && (
                   <div className="absolute inset-0 bg-background/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4">
