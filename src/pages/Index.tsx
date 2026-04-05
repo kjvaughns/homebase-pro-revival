@@ -2,6 +2,7 @@ import TopBanner from "@/components/landing/TopBanner";
 import Navbar from "@/components/landing/Navbar";
 import HeroSection from "@/components/landing/HeroSection";
 import FeatureSection from "@/components/landing/FeatureSection";
+import AIDemoSection from "@/components/landing/AIDemoSection";
 import HouseFaxSection from "@/components/landing/HouseFaxSection";
 import CaseStudiesSection from "@/components/landing/CaseStudiesSection";
 import PricingSection from "@/components/landing/PricingSection";

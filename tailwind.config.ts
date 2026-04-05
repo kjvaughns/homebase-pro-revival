@@ -80,10 +80,20 @@ export default {
             height: "0",
           },
         },
+        "message-in": {
+          "0%": { opacity: "0", transform: "translateY(8px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "bounce-dot": {
+          "0%, 80%, 100%": { transform: "translateY(0)" },
+          "40%": { transform: "translateY(-6px)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "message-in": "message-in 0.3s ease-out",
+        "bounce-dot": "bounce-dot 1.4s infinite ease-in-out",
       },
     },
   },
