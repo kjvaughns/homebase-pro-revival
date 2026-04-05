@@ -53,11 +53,15 @@ const AIDemoSection = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [demoComplete, setDemoComplete] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
-    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, 50);
   }, []);
 
   const runDemo = useCallback(async () => {
