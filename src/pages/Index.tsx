@@ -36,6 +36,8 @@ const Index = () => (
       ]}
     />
 
+    <AIDemoSection />
+
     <FeatureSection
       badge="Client Retention"
       title="Turn One-Time Clients Into Repeat Customers"
