@@ -1,4 +1,4 @@
-import { Home } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Footer = () => (
   <footer className="w-full border-t border-border py-12 px-4">
