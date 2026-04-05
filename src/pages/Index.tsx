@@ -11,10 +11,10 @@ import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
 import Footer from "@/components/landing/Footer";
 import StaticChatMockup from "@/components/landing/StaticChatMockup";
-import appQuoteForm from "@/assets/app-quote-form.png";
-import appQuoteResult from "@/assets/app-quote-result.png";
-import appDashboard from "@/assets/app-dashboard.png";
-import appDashboard2 from "@/assets/app-dashboard-2.png";
+import ClientsMockup from "@/components/landing/ClientsMockup";
+import FinancesMockup from "@/components/landing/FinancesMockup";
+import ScheduleMockup from "@/components/landing/ScheduleMockup";
+import GrowthMockup from "@/components/landing/GrowthMockup";
 import {
   Bot, MessageSquare, CalendarCheck, TrendingUp,
   Heart, Gift, Mail, Repeat,
@@ -49,7 +49,7 @@ const Index = () => (
       title="Turn One-Time Clients Into Repeat Customers"
       description="Automated follow-ups and smart engagement keep clients coming back."
       reversed
-      phoneImage={appDashboard}
+      customPhone={<ClientsMockup />}
       features={[
         { icon: Heart, title: "Post-Job Follow-Ups", description: "Automated thank-you messages and satisfaction checks after every job." },
         { icon: Gift, title: "Loyalty Rewards", description: "Incentivize repeat bookings with built-in referral and discount tools." },
@@ -62,7 +62,7 @@ const Index = () => (
       badge="Payments"
       title="Get Paid Faster"
       description="Collect deposits, send invoices, and get paid instantly — all from one place."
-      phoneImage={appDashboard2}
+      customPhone={<FinancesMockup />}
       features={[
         { icon: CreditCard, title: "Deposit Collection", description: "Require upfront deposits to eliminate no-shows and secure revenue." },
         { icon: Wallet, title: "Buy Now, Pay Later", description: "Offer flexible payment options so clients can book bigger jobs." },
@@ -76,7 +76,7 @@ const Index = () => (
       title="Your Business, Fully Automated"
       description="From scheduling to invoicing to CRM — HomeBase runs your back office."
       reversed
-      phoneImage={appQuoteForm}
+      customPhone={<ScheduleMockup />}
       features={[
         { icon: CalendarDays, title: "Smart Scheduling", description: "Drag-and-drop calendar with route optimization and conflict detection." },
         { icon: FileText, title: "Auto Invoicing", description: "Invoices created and sent the moment a job is marked complete." },
@@ -89,7 +89,7 @@ const Index = () => (
       badge="Growth"
       title="Built-In Growth Engine"
       description="Everything you need to attract new clients and build your reputation."
-      phoneImage={appQuoteResult}
+      customPhone={<GrowthMockup />}
       features={[
         { icon: Link2, title: "Booking Link", description: "Share a professional booking page that converts visitors into clients." },
         { icon: Star, title: "Review Collection", description: "Automated review requests after every completed job." },
