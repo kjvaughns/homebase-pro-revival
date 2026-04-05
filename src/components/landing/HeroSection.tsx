@@ -49,24 +49,14 @@ const HeroSection = () => (
 
       {/* Right — Phone Mockup */}
       <div className="flex-1 relative flex justify-center">
-        <div className="w-[280px] h-[560px] bg-card rounded-[2.5rem] border-2 border-border p-3 shadow-2xl shadow-primary/5 relative">
-          <div className="w-full h-full bg-background rounded-[2rem] overflow-hidden p-4 space-y-4">
-            <div className="text-center">
-              <p className="text-xs text-muted-foreground">Dashboard</p>
-              <p className="text-lg font-bold mt-1">$4,250</p>
-              <p className="text-xs text-primary">+12% this week</p>
+        <div className="w-[280px] bg-card rounded-[2.5rem] border-2 border-border p-2 shadow-2xl shadow-primary/5 relative">
+          <div className="rounded-[2rem] overflow-hidden bg-background">
+            <div className="flex justify-center pt-2 pb-1">
+              <div className="w-24 h-5 bg-card rounded-full" />
             </div>
-            <div className="space-y-3">
-              {[
-                { label: "Today's Jobs", value: "3", color: "bg-primary/20 text-primary" },
-                { label: "Pending", value: "5", color: "bg-yellow-500/20 text-yellow-400" },
-                { label: "Completed", value: "12", color: "bg-blue-500/20 text-blue-400" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center justify-between bg-secondary/50 rounded-xl px-4 py-3">
-                  <span className="text-sm text-muted-foreground">{item.label}</span>
-                  <span className={`text-sm font-semibold px-2 py-0.5 rounded-lg ${item.color}`}>{item.value}</span>
-                </div>
-              ))}
+            <img src={appDashboard2} alt="HomeBase Pro dashboard" className="w-full object-cover" />
+            <div className="flex justify-center py-2">
+              <div className="w-28 h-1 bg-muted-foreground/30 rounded-full" />
             </div>
           </div>
         </div>
