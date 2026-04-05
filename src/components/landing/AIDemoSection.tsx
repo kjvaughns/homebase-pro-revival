@@ -53,11 +53,15 @@ const AIDemoSection = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [demoComplete, setDemoComplete] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
   const cancelRef = useRef(false);
 
   const scrollToBottom = useCallback(() => {
-    setTimeout(() => chatEndRef.current?.scrollIntoView({ behavior: "smooth" }), 50);
+    setTimeout(() => {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
+    }, 50);
   }, []);
 
   const runDemo = useCallback(async () => {
@@ -181,7 +185,7 @@ const AIDemoSection = () => {
               </div>
 
               {/* Chat body */}
-              <div className="min-h-[380px] max-h-[420px] overflow-y-auto px-4 py-4 space-y-3 bg-background relative">
+              <div ref={chatContainerRef} className="min-h-[380px] max-h-[420px] overflow-y-auto px-4 py-4 space-y-3 bg-background relative">
                 {/* Overlay */}
                 {showOverlay && (
                   <div className="absolute inset-0 bg-background/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4">
@@ -245,7 +249,7 @@ const AIDemoSection = () => {
                 })}
 
                 {isTyping && <TypingDots />}
-                <div ref={chatEndRef} />
+                
               </div>
 
               {/* Input bar */}
