@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Check, Shield, Clock, CreditCard, Bell, DollarSign, Calendar } from "lucide-react";
+import appDashboard2 from "@/assets/app-dashboard-2.png";
 
 const HeroSection = () => (
   <section className="w-full py-20 lg:py-28 px-4">
