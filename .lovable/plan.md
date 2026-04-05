@@ -1,65 +1,149 @@
 
 
-## Custom App Preview Mockups for Feature Sections
+## Public Web Marketplace — Implementation Plan
 
-### What
-Replace the generic dashboard screenshots in the 4 remaining feature sections (Client Retention, Payments, Automation, Growth) with code-rendered static mockups -- like the StaticChatMockup done for AI Booking -- that accurately represent the actual app screens for each section.
+### Audit Summary
 
-### Mapping Sections to App Screens
+**App's marketplace structure (from GitHub repo):**
+- `Marketplace.tsx` — main listing page querying `organizations` table (filtered by `marketplace_published = true`) with search, category filters, pagination
+- `PublicProviderProfile.tsx` — provider detail page loaded by slug, showing about/services/reviews/contact
+- `ProviderCard.tsx` — glass-style card with avatar, name, rating, category, location, "Book Now" button
+- `CategoryIcons.tsx` — 9 categories (Plumbing, Cleaning, Handyman, Lawn Care, Painting, HVAC, Electrical, Contractor, Other)
+- `GlassSearchBar.tsx` — search input with glass backdrop
+- `FilterDrawer.tsx` — side sheet with service type, availability, price range, rating, distance filters
+- `MarketplaceEmpty.tsx` — empty state
 
-| Section | Mockup | Based On |
-|---------|--------|----------|
-| **Client Retention** | Clients list screen | ClientsScreen.tsx + IMG_2481 screenshot |
-| **Payments** | Finances screen with payouts/stats | FinancesScreen.tsx + IMG_2483 screenshot |
-| **Automation** | Schedule screen with jobs/calendar | ScheduleScreen.tsx + IMG_2482 screenshot |
-| **Growth** | Booking link / public profile preview | BookingLinkScreen.tsx |
+**Current Supabase schema (this project):**
+- `providers` table — has `business_name`, `description`, `service_area`, `average_rating`, `review_count`, `capability_tags`, `slug`, `is_public`, `avatar_url`, `phone`, `email`, `website`, `hourly_rate`
+- `provider_custom_services` — services with `name`, `category`, `base_price`, `duration`, `provider_id`
+- `reviews` — has `rating`, `comment`, `provider_id`, `user_id`
+- `service_categories` — `id`, `name`, `description`, `icon`, `sort_order`
+- `booking_links` — for booking flow redirect
 
-### New Components
+**Key difference:** The app uses an `organizations` table; this Supabase uses `providers`. All queries need to target `providers` instead.
 
-**1. `src/components/landing/ClientsMockup.tsx`**
-Static replica of the Clients screen:
-- Header: "Clients" title with search bar and add button
-- Filter chips row: All, Lead, Active, Inactive
-- Client cards with avatar circle (initials), name, status pill (green "Active"), phone/email icons
-- 3-4 sample clients with realistic names
-- Bottom tab bar hint (Home, Schedule, Clients highlighted, Finances, More)
+**Data state:** 23 providers exist, only 2 have `is_public = true`. We'll use `is_public = true` as the marketplace visibility flag (equivalent to `marketplace_published`).
 
-**2. `src/components/landing/FinancesMockup.tsx`**
-Static replica of the Finances screen:
-- Header: "Finances" title
-- 2x2 stats grid: Revenue MTD ($4,250), Jobs Completed (12), Active Clients (8), Upcoming Jobs (3)
-- Segment tabs: Payouts | Payments | Refunds (Payouts selected)
-- 2-3 payout rows: bank icon, "Bank ••••4521", amount ($850), status pill ("In Transit" / "Paid")
-- Matches the dark card style from the app
+---
 
-**3. `src/components/landing/ScheduleMockup.tsx`**
-Static replica of the Schedule screen:
-- Header: "Schedule" with filter chips (All, Scheduled, Active, Done)
-- Week strip: horizontal day selector with current day highlighted in green, dot indicators for jobs
-- Today banner card: "3 Jobs | $1,200 Expected | Next Up: Kitchen Repair @ 2:00 PM"
-- 2 job cards with: job title, client name, time, status pill (Scheduled/In Progress), quick action button
+### Security Approach
 
-**4. `src/components/landing/GrowthMockup.tsx`**
-Static replica of a booking link / public profile:
-- Header: "Business Hub" or "Booking Link"
-- Active booking link card with URL display, "Active" status pill, copy/share icons
-- Public profile preview: business name, rating stars, service list
-- "Share Link" green button
+No new database views or RPC needed. We'll query `providers` directly but only select public-safe columns:
+- `id`, `business_name`, `description`, `service_area`, `average_rating`, `review_count`, `avatar_url`, `capability_tags`, `slug`, `hourly_rate`, `is_public`
+- Never expose: `user_id`, `stripe_account_id`, `email`, `phone` (phone/email shown only on detail page where provider opted in via `is_public`)
 
-### Edits
+**RLS note:** Currently no RLS policies on `providers`. We should add a SELECT policy allowing public read of `is_public = true` rows. Migration needed.
 
-**5. `src/pages/Index.tsx`**
-- Import all 4 new mockup components
-- Replace `phoneImage={appDashboard}` with `customPhone={<ClientsMockup />}` for Client Retention
-- Replace `phoneImage={appDashboard2}` with `customPhone={<FinancesMockup />}` for Payments
-- Replace `phoneImage={appQuoteForm}` with `customPhone={<ScheduleMockup />}` for Automation
-- Replace `phoneImage={appQuoteResult}` with `customPhone={<GrowthMockup />}` for Growth
-- Remove unused image imports
+---
 
-### Design Details
-- All mockups use the same scale/styling as StaticChatMockup: `text-[10px]`, compact spacing, fits inside the iPhone frame
-- Dark theme colors: `bg-background`, `bg-secondary`, `bg-card`, `border-border`
-- Green accent (`text-primary`, `bg-primary`) for active states, buttons, and highlights
-- Status pills: green for active/paid, blue for in-transit, yellow for pending
-- Realistic but fake data that showcases actual app features
+### What We'll Build
+
+**3 new pages:**
+
+1. **`/marketplace`** — Provider listing with hero, search bar, category icons, provider grid, filters drawer, pagination
+2. **`/marketplace/:id`** — Provider detail page with hero, about, services list, reviews, contact info, booking CTA
+3. **`/marketplace` landing** — integrated into the listing page with hero section
+
+**New components (in `src/components/marketplace/`):**
+
+| Component | Purpose |
+|-----------|---------|
+| `MarketplaceNavbar.tsx` | Site navbar adapted for marketplace pages (logo, back to home, search) |
+| `MarketplaceHero.tsx` | "Find Your Pro" hero with search bar |
+| `CategoryIcons.tsx` | Category filter pills (adapted from app) |
+| `ProviderCard.tsx` | Glass-style provider card (adapted from app) |
+| `SearchBar.tsx` | Glass search input (adapted from app) |
+| `FilterSheet.tsx` | Filter drawer (service type, rating, price range) |
+| `EmptyState.tsx` | Empty/no results state |
+| `AppDownloadCTA.tsx` | Reusable app download prompt component |
+
+**Routes added to `App.tsx`:**
+```
+/marketplace → MarketplacePage
+/marketplace/:id → ProviderDetailPage
+```
+
+### Data Fetching
+
+**Listing page:**
+```sql
+SELECT id, business_name, description, service_area, average_rating, 
+       review_count, avatar_url, capability_tags, slug, hourly_rate
+FROM providers 
+WHERE is_public = true
+ORDER BY review_count DESC
+```
+With search: `business_name.ilike.%term%,description.ilike.%term%`
+With category filter: join to `provider_custom_services` where `category` matches
+
+**Detail page:**
+```sql
+-- Provider
+SELECT * FROM providers WHERE id = :id AND is_public = true
+
+-- Services
+SELECT * FROM provider_custom_services WHERE provider_id = :id AND is_published = true
+
+-- Reviews
+SELECT r.*, u.first_name FROM reviews r 
+LEFT JOIN users u ON r.user_id = u.id
+WHERE r.provider_id = :id ORDER BY created_at DESC LIMIT 10
+```
+
+### App Download CTAs
+
+Placed at:
+- Sticky mobile bottom bar on marketplace pages
+- After viewing provider detail (inline CTA card)
+- In place of "Book Now" button action (opens modal: "Download the app to book")
+- After search with results
+- Empty state fallback
+- Footer of marketplace pages
+
+### Database Migration
+
+Add RLS policy on `providers` for public SELECT:
+```sql
+ALTER TABLE providers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view public providers" 
+  ON providers FOR SELECT 
+  USING (is_public = true);
+```
+
+Also add read policy on `provider_custom_services` and `reviews` for marketplace access:
+```sql
+ALTER TABLE provider_custom_services ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view published services" 
+  ON provider_custom_services FOR SELECT 
+  USING (is_published = true);
+
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view reviews" 
+  ON reviews FOR SELECT 
+  USING (true);
+
+ALTER TABLE service_categories ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public can view categories" 
+  ON service_categories FOR SELECT 
+  USING (true);
+```
+
+### Design Direction
+
+- Black background (`bg-background` / `#000`)
+- Glass-morphism cards: `bg-white/5 backdrop-blur-xl border border-white/10`
+- Green accent (`primary`) for CTAs, ratings, active states
+- Same typography and card patterns as current landing page
+- Mobile-first responsive grid (1 col mobile, 2 col tablet, 3 col desktop)
+- HomeBase logo in navbar
+- Smooth entry animations (CSS only, no framer-motion dependency needed)
+
+### Implementation Order
+
+1. Database migration (RLS policies)
+2. Marketplace listing page + components
+3. Provider detail page
+4. App download CTA components throughout
+5. Route wiring in App.tsx
+6. Add "Browse Providers" link to landing page navbar
 
