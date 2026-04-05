@@ -14,6 +14,7 @@ const Navbar = () => (
           Resources <ChevronDown className="h-3 w-3" />
         </button>
         <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
+        <a href="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Browse Pros</a>
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Pros</a>
       </div>
       <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
