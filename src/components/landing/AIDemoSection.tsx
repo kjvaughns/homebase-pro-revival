@@ -1,13 +1,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { Home, CheckCircle2, Play, Clock, MapPin, User, Wrench, DollarSign, Star, CalendarCheck, Loader2 } from "lucide-react";
+import { Home, CheckCircle2, Play, ChevronRight, User, Wrench, DollarSign, Star, CalendarCheck, Loader2, Send, Users, MessageSquare, ClipboardList } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-type Step = 0 | 1 | 2 | 3;
-
-const CATEGORIES = ["Plumbing", "Electrical", "HVAC", "Cleaning", "Handyman", "Painting"];
-const ISSUE_TEXT = "My kitchen sink is leaking under the cabinet";
-const NAME_TEXT = "Sarah Johnson";
-const ADDRESS_TEXT = "123 Oak Street";
+type Step = 0 | 1 | 2 | 3 | 4 | 5;
 
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
@@ -26,6 +21,19 @@ const useTypewriter = (text: string, active: boolean, speed = 40) => {
   return displayed;
 };
 
+const TypingDots = () => (
+  <div className="flex items-end gap-2.5">
+    <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 border border-primary/30">
+      <Home className="h-3.5 w-3.5 text-primary" />
+    </div>
+    <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-3.5 py-2.5 flex gap-1 items-center">
+      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "0ms" }} />
+      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "150ms" }} />
+      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/60 animate-bounce" style={{ animationDelay: "300ms" }} />
+    </div>
+  </div>
+);
+
 const AIDemoSection = () => {
   const [step, setStep] = useState<Step>(0);
   const [showOverlay, setShowOverlay] = useState(true);
@@ -33,31 +41,37 @@ const AIDemoSection = () => {
   const [isRunning, setIsRunning] = useState(false);
   const cancelRef = useRef(false);
 
-  // Step 1 sub-states
-  const [categorySelected, setCategorySelected] = useState(false);
-  const [showIssue, setShowIssue] = useState(false);
-  const [typingIssue, setTypingIssue] = useState(false);
-  const [showName, setShowName] = useState(false);
-  const [typingName, setTypingName] = useState(false);
-  const [showTime, setShowTime] = useState(false);
-  const [timeSelected, setTimeSelected] = useState(false);
-  const [showAddress, setShowAddress] = useState(false);
-  const [typingAddress, setTypingAddress] = useState(false);
-  const [submitPressed, setSubmitPressed] = useState(false);
+  // Step 1: Chat sub-states
+  const [chatMessages, setChatMessages] = useState<Array<{ role: "user" | "ai"; text: string }>>([]);
+  const [showTypingDots, setShowTypingDots] = useState(false);
+  const [showStartIntake, setShowStartIntake] = useState(false);
 
-  // Step 2 sub-states
+  // Step 2: Questionnaire sub-states
+  const [q1Visible, setQ1Visible] = useState(false);
+  const [q1Answered, setQ1Answered] = useState(false);
+  const [q2Visible, setQ2Visible] = useState(false);
+  const [q2Answered, setQ2Answered] = useState(false);
+  const [q3Visible, setQ3Visible] = useState(false);
+  const [q3Answered, setQ3Answered] = useState(false);
+  const [q4Visible, setQ4Visible] = useState(false);
+  const [q4Answered, setQ4Answered] = useState(false);
+  const [showSubmitQ, setShowSubmitQ] = useState(false);
+  const [submitQPressed, setSubmitQPressed] = useState(false);
+
+  // Step 3: AI analysis
   const [analyzing, setAnalyzing] = useState(false);
-  const [summaryVisible, setSummaryVisible] = useState(false);
 
-  const issueText = useTypewriter(ISSUE_TEXT, typingIssue, 35);
-  const nameText = useTypewriter(NAME_TEXT, typingName, 50);
-  const addressText = useTypewriter(ADDRESS_TEXT, typingAddress, 50);
+  // Step 4: Results
+  const [showDiagnosis, setShowDiagnosis] = useState(false);
+  const [showEstimate, setShowEstimate] = useState(false);
+  const [showPro, setShowPro] = useState(false);
+  const [showBookBtn, setShowBookBtn] = useState(false);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const scrollToBottom = useCallback(() => {
     setTimeout(() => {
       if (contentRef.current) contentRef.current.scrollTop = contentRef.current.scrollHeight;
-    }, 50);
+    }, 60);
   }, []);
 
   const runDemo = useCallback(async () => {
@@ -68,79 +82,141 @@ const AIDemoSection = () => {
     setDemoComplete(false);
 
     // Reset all
-    setCategorySelected(false); setShowIssue(false); setTypingIssue(false);
-    setShowName(false); setTypingName(false); setShowTime(false); setTimeSelected(false);
-    setShowAddress(false); setTypingAddress(false); setSubmitPressed(false);
-    setAnalyzing(false); setSummaryVisible(false);
-
-    // Step 1: Intake Form
-    setStep(1);
-    await wait(600);
-    if (cancelRef.current) return;
-
-    // Select category
-    setCategorySelected(true);
-    scrollToBottom();
-    await wait(800);
-    if (cancelRef.current) return;
-
-    // Show & type issue
-    setShowIssue(true);
-    scrollToBottom();
-    await wait(300);
-    setTypingIssue(true);
-    await wait(ISSUE_TEXT.length * 35 + 400);
-    if (cancelRef.current) return;
-    scrollToBottom();
-
-    // Show & type name
-    setShowName(true);
-    scrollToBottom();
-    await wait(300);
-    setTypingName(true);
-    await wait(NAME_TEXT.length * 50 + 400);
-    if (cancelRef.current) return;
-
-    // Show & select time
-    setShowTime(true);
-    scrollToBottom();
-    await wait(600);
-    setTimeSelected(true);
-    await wait(600);
-    if (cancelRef.current) return;
-
-    // Show & type address
-    setShowAddress(true);
-    scrollToBottom();
-    await wait(300);
-    setTypingAddress(true);
-    await wait(ADDRESS_TEXT.length * 50 + 400);
-    if (cancelRef.current) return;
-    scrollToBottom();
-
-    // Submit press
-    await wait(500);
-    setSubmitPressed(true);
-    await wait(800);
-    if (cancelRef.current) return;
-
-    // Step 2: AI Analysis
-    setStep(2);
-    setAnalyzing(true);
-    await wait(2500);
-    if (cancelRef.current) return;
+    setChatMessages([]); setShowTypingDots(false); setShowStartIntake(false);
+    setQ1Visible(false); setQ1Answered(false); setQ2Visible(false); setQ2Answered(false);
+    setQ3Visible(false); setQ3Answered(false); setQ4Visible(false); setQ4Answered(false);
+    setShowSubmitQ(false); setSubmitQPressed(false);
     setAnalyzing(false);
-    setSummaryVisible(true);
-    scrollToBottom();
-    await wait(3000);
-    if (cancelRef.current) return;
+    setShowDiagnosis(false); setShowEstimate(false); setShowPro(false); setShowBookBtn(false);
 
-    // Step 3: Confirmed
+    const c = cancelRef;
+
+    // === STEP 1: AI Chat ===
+    setStep(1);
+    await wait(500);
+
+    // User message
+    setChatMessages([{ role: "user", text: "My sink is leaking" }]);
+    scrollToBottom();
+    await wait(800);
+    if (c.current) return;
+
+    // AI typing
+    setShowTypingDots(true);
+    scrollToBottom();
+    await wait(1800);
+    if (c.current) return;
+    setShowTypingDots(false);
+
+    // AI response
+    setChatMessages(prev => [...prev, {
+      role: "ai",
+      text: "I can help with that! Let me gather a few details so I can diagnose the issue, give you a price estimate, and match you with the right pro."
+    }]);
+    scrollToBottom();
+    await wait(2000);
+    if (c.current) return;
+
+    // Show "Start Smart Intake" button
+    setShowStartIntake(true);
+    scrollToBottom();
+    await wait(1500);
+    if (c.current) return;
+
+    // === STEP 2: Questionnaire ===
+    setStep(2);
+    await wait(400);
+
+    // Q1
+    setQ1Visible(true);
+    scrollToBottom();
+    await wait(1200);
+    if (c.current) return;
+    setQ1Answered(true);
+    scrollToBottom();
+    await wait(600);
+
+    // Q2
+    setQ2Visible(true);
+    scrollToBottom();
+    await wait(1200);
+    if (c.current) return;
+    setQ2Answered(true);
+    scrollToBottom();
+    await wait(600);
+
+    // Q3
+    setQ3Visible(true);
+    scrollToBottom();
+    await wait(1200);
+    if (c.current) return;
+    setQ3Answered(true);
+    scrollToBottom();
+    await wait(600);
+
+    // Q4
+    setQ4Visible(true);
+    scrollToBottom();
+    await wait(1200);
+    if (c.current) return;
+    setQ4Answered(true);
+    scrollToBottom();
+    await wait(600);
+
+    // Submit
+    setShowSubmitQ(true);
+    scrollToBottom();
+    await wait(800);
+    if (c.current) return;
+    setSubmitQPressed(true);
+    await wait(600);
+
+    // === STEP 3: AI Analyzing ===
     setStep(3);
+    setAnalyzing(true);
+    await wait(2800);
+    if (c.current) return;
+    setAnalyzing(false);
+
+    // === STEP 4: Results ===
+    setStep(4);
+    await wait(300);
+
+    setShowDiagnosis(true);
+    scrollToBottom();
     await wait(1000);
+    if (c.current) return;
+
+    setShowEstimate(true);
+    scrollToBottom();
+    await wait(1000);
+    if (c.current) return;
+
+    setShowPro(true);
+    scrollToBottom();
+    await wait(1000);
+    if (c.current) return;
+
+    setShowBookBtn(true);
+    scrollToBottom();
+    await wait(1500);
+    if (c.current) return;
+
+    // === STEP 5: Confirmed ===
+    setStep(5);
+    await wait(800);
     setDemoComplete(true);
     setIsRunning(false);
   }, [isRunning, scrollToBottom]);
+
+  // Step indicator
+  const stepLabels = [
+    { icon: MessageSquare, label: "AI Chat" },
+    { icon: ClipboardList, label: "Smart Intake" },
+    { icon: Loader2, label: "AI Analysis" },
+    { icon: CheckCircle2, label: "Book" },
+  ];
+  const activeStepIndex = step <= 1 ? 0 : step === 2 ? 1 : step === 3 ? 2 : 3;
 
   return (
     <section className="w-full py-20 px-4">
@@ -151,7 +227,7 @@ const AIDemoSection = () => {
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold leading-tight">See It In Action</h2>
           <p className="text-muted-foreground mt-3 max-w-lg mx-auto">
-            Watch how HomeBase AI handles a real service request — from intake form to booked job.
+            Watch how HomeBase AI handles a real service request — from first message to booked job.
           </p>
         </div>
 
@@ -161,11 +237,20 @@ const AIDemoSection = () => {
             <div className={`rounded-2xl border border-border bg-card p-6 transition-all duration-500 ${demoComplete ? "opacity-0 h-0 overflow-hidden p-0 border-0" : ""}`}>
               <h3 className="text-lg font-bold mb-3">The Scenario</h3>
               <p className="text-muted-foreground text-sm leading-relaxed">
-                It's <span className="text-foreground font-medium">9:47 PM</span>. Sarah opens the HomeBase app and submits a service request for a{" "}
-                <span className="text-primary font-medium">leaking kitchen sink</span>.
+                It's <span className="text-foreground font-medium">9:47 PM</span>. Sarah opens HomeBase and tells the AI her{" "}
+                <span className="text-primary font-medium">sink is leaking</span>.
               </p>
-              <p className="text-muted-foreground text-sm leading-relaxed mt-2">
-                She fills out the intake form, and <span className="text-primary font-medium">HomeBase AI takes over</span> — analyzes the issue, finds the best pro, generates a quote, and books the job instantly.
+              <p className="text-muted-foreground text-sm leading-relaxed mt-3">
+                The AI guides her through a <span className="text-primary font-medium">smart intake questionnaire</span> to understand the issue. Then it:
+              </p>
+              <ul className="text-muted-foreground text-sm mt-2 space-y-1.5 ml-1">
+                <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" /> Diagnoses the problem</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" /> Generates a price estimate</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" /> Creates a full job summary for the pro</li>
+                <li className="flex items-start gap-2"><CheckCircle2 className="h-3.5 w-3.5 text-primary mt-0.5 flex-shrink-0" /> Matches & books the right provider</li>
+              </ul>
+              <p className="text-muted-foreground text-xs mt-3 italic">
+                No back-and-forth. The provider gets a complete picture before they even show up.
               </p>
             </div>
 
@@ -182,7 +267,7 @@ const AIDemoSection = () => {
                 </div>
                 <div className="space-y-2 mb-5">
                   <p className="text-sm text-muted-foreground">
-                    HomeBase AI analyzed the intake form, diagnosed the issue, matched a top-rated pro, generated a quote, and confirmed the booking — all automatically.
+                    The AI set proper expectations with a diagnosis and estimate. The provider received a full job summary — no phone tag, no guesswork, no wasted time.
                   </p>
                 </div>
                 <Button className="w-full rounded-xl font-semibold" size="lg">
@@ -201,23 +286,39 @@ const AIDemoSection = () => {
               </div>
 
               {/* Header */}
-              <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-background">
-                <div className="w-9 h-9 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
-                  <Home className="h-5 w-5 text-primary" />
+              <div className="flex items-center gap-3 px-4 py-2.5 border-b border-border bg-background">
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center border border-primary/30">
+                  <Home className="h-4 w-4 text-primary" />
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-semibold">HomeBase AI</p>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-2 h-2 rounded-full bg-primary" />
-                    <span className="text-xs text-primary">
-                      {step === 2 && analyzing ? "Analyzing..." : "Online"}
-                    </span>
-                  </div>
+                  <span className="text-[10px] text-primary">Online</span>
                 </div>
               </div>
 
+              {/* Step indicator */}
+              {step >= 1 && (
+                <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/50">
+                  {stepLabels.map((s, i) => (
+                    <div key={i} className="flex items-center gap-1">
+                      <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all duration-300 ${
+                        i < activeStepIndex ? "bg-primary text-primary-foreground" :
+                        i === activeStepIndex ? "bg-primary/20 text-primary border border-primary/50" :
+                        "bg-card text-muted-foreground border border-border"
+                      }`}>
+                        {i < activeStepIndex ? <CheckCircle2 className="h-3 w-3" /> : i + 1}
+                      </div>
+                      <span className={`text-[9px] hidden sm:inline ${i === activeStepIndex ? "text-primary font-medium" : "text-muted-foreground"}`}>
+                        {s.label}
+                      </span>
+                      {i < stepLabels.length - 1 && <div className="w-3 sm:w-6 h-px bg-border mx-0.5" />}
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Content area */}
-              <div ref={contentRef} className="min-h-[380px] max-h-[420px] overflow-y-auto px-4 py-4 bg-background relative">
+              <div ref={contentRef} className="min-h-[340px] max-h-[380px] overflow-y-auto px-4 py-3 bg-background relative">
                 {/* Step 0: Play Overlay */}
                 {showOverlay && (
                   <div className="absolute inset-0 bg-background/70 backdrop-blur-sm z-10 flex flex-col items-center justify-center gap-4">
@@ -231,208 +332,215 @@ const AIDemoSection = () => {
                   </div>
                 )}
 
-                {/* Step 1: Intake Form */}
+                {/* Step 1: AI Chat */}
                 {step === 1 && (
-                  <div className="space-y-4 animate-fade-in">
-                    <div>
-                      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Service Type</p>
-                      <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.map((cat) => (
-                          <span
-                            key={cat}
-                            className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                              cat === "Plumbing" && categorySelected
-                                ? "bg-primary text-primary-foreground border-primary"
-                                : "bg-card border-border text-muted-foreground"
-                            }`}
-                          >
-                            {cat}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    {showIssue && (
-                      <div className="animate-fade-in">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Describe Your Issue</p>
-                        <div className="bg-card border border-border rounded-xl px-3 py-2.5 min-h-[60px]">
-                          <p className="text-sm text-foreground">{issueText}<span className="animate-pulse">|</span></p>
+                  <div className="space-y-3 animate-fade-in">
+                    {chatMessages.map((msg, i) =>
+                      msg.role === "user" ? (
+                        <div key={i} className="flex justify-end animate-fade-in">
+                          <div className="bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-3.5 py-2 max-w-[80%]">
+                            <p className="text-sm">{msg.text}</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div key={i} className="flex items-end gap-2 animate-fade-in">
+                          <div className="w-7 h-7 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0 border border-primary/30">
+                            <Home className="h-3.5 w-3.5 text-primary" />
+                          </div>
+                          <div className="bg-card border border-border rounded-2xl rounded-bl-sm px-3.5 py-2.5 max-w-[80%]">
+                            <p className="text-sm leading-relaxed">{msg.text}</p>
+                          </div>
+                        </div>
+                      )
+                    )}
+                    {showTypingDots && <TypingDots />}
+                    {showStartIntake && (
+                      <div className="pl-9 animate-fade-in">
+                        <div className="inline-flex items-center gap-2 bg-primary/10 border border-primary/30 rounded-xl px-4 py-2 cursor-default">
+                          <ClipboardList className="h-4 w-4 text-primary" />
+                          <span className="text-sm font-medium text-primary">Start Smart Intake</span>
+                          <ChevronRight className="h-4 w-4 text-primary" />
                         </div>
                       </div>
                     )}
+                  </div>
+                )}
 
-                    {showName && (
-                      <div className="animate-fade-in">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Your Name</p>
-                        <div className="bg-card border border-border rounded-xl px-3 py-2.5 flex items-center gap-2">
-                          <User className="h-3.5 w-3.5 text-muted-foreground" />
-                          <p className="text-sm text-foreground">{nameText}<span className="animate-pulse">|</span></p>
-                        </div>
-                      </div>
+                {/* Step 2: Questionnaire */}
+                {step === 2 && (
+                  <div className="space-y-3 animate-fade-in">
+                    <p className="text-xs text-center text-muted-foreground mb-2">Smart Intake — 4 quick questions</p>
+
+                    {q1Visible && (
+                      <QuestionCard
+                        num={1}
+                        question="Where is the leak?"
+                        options={["Kitchen sink", "Bathroom sink", "Bathtub", "Other"]}
+                        selected={q1Answered ? 0 : undefined}
+                      />
+                    )}
+                    {q2Visible && (
+                      <QuestionCard
+                        num={2}
+                        question="How severe is the leak?"
+                        options={["Slow drip", "Steady stream", "Only when faucet is on"]}
+                        selected={q2Answered ? 0 : undefined}
+                      />
+                    )}
+                    {q3Visible && (
+                      <QuestionCard
+                        num={3}
+                        question="How long has this been happening?"
+                        options={["Just started", "A few days", "Over a week"]}
+                        selected={q3Answered ? 0 : undefined}
+                      />
+                    )}
+                    {q4Visible && (
+                      <QuestionCard
+                        num={4}
+                        question="When are you available?"
+                        options={["ASAP", "Tomorrow morning", "This week"]}
+                        selected={q4Answered ? 1 : undefined}
+                      />
                     )}
 
-                    {showTime && (
-                      <div className="animate-fade-in">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Preferred Time</p>
-                        <div className="flex gap-2">
-                          {["ASAP", "Tomorrow AM", "This Week"].map((t) => (
-                            <span
-                              key={t}
-                              className={`text-xs px-3 py-1.5 rounded-full border transition-all duration-300 ${
-                                t === "Tomorrow AM" && timeSelected
-                                  ? "bg-primary text-primary-foreground border-primary"
-                                  : "bg-card border-border text-muted-foreground"
-                              }`}
-                            >
-                              {t}
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {showAddress && (
-                      <div className="animate-fade-in">
-                        <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Address</p>
-                        <div className="bg-card border border-border rounded-xl px-3 py-2.5 flex items-center gap-2">
-                          <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                          <p className="text-sm text-foreground">{addressText}<span className="animate-pulse">|</span></p>
-                        </div>
-                      </div>
-                    )}
-
-                    {showAddress && (
+                    {showSubmitQ && (
                       <button
-                        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                          submitPressed
+                        className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 mt-2 ${
+                          submitQPressed
                             ? "bg-primary/80 text-primary-foreground scale-95"
                             : "bg-primary text-primary-foreground"
                         }`}
                       >
-                        Submit Request
+                        Submit Answers
                       </button>
                     )}
                   </div>
                 )}
 
-                {/* Step 2: AI Analysis */}
-                {step === 2 && (
-                  <div className="flex flex-col items-center justify-center min-h-[360px]">
-                    {analyzing ? (
-                      <div className="flex flex-col items-center gap-4 animate-fade-in">
-                        <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center">
-                          <Loader2 className="h-7 w-7 text-primary animate-spin" />
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-semibold">AI is analyzing your request...</p>
-                          <p className="text-xs text-muted-foreground mt-1">Matching you with the best pro</p>
-                        </div>
-                      </div>
-                    ) : summaryVisible ? (
-                      <div className="w-full space-y-3 animate-fade-in">
-                        <div className="text-center mb-4">
-                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-2">
-                            <Home className="h-5 w-5 text-primary" />
-                          </div>
-                          <p className="text-xs font-semibold text-primary uppercase tracking-wider">AI Analysis Complete</p>
-                        </div>
-
-                        <div className="bg-card border border-border rounded-xl p-3 space-y-3">
-                          <div className="flex items-start gap-2.5">
-                            <Wrench className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p className="text-xs font-semibold text-muted-foreground">Issue Identified</p>
-                              <p className="text-sm">Kitchen sink leak — likely loose P-trap or worn washer</p>
-                            </div>
-                          </div>
-                          <div className="border-t border-border" />
-                          <div className="flex items-start gap-2.5">
-                            <Wrench className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p className="text-xs font-semibold text-muted-foreground">Recommended Service</p>
-                              <p className="text-sm">Leak Diagnosis & Repair</p>
-                            </div>
-                          </div>
-                          <div className="border-t border-border" />
-                          <div className="flex items-start gap-2.5">
-                            <DollarSign className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                            <div>
-                              <p className="text-xs font-semibold text-muted-foreground">Estimated Cost</p>
-                              <p className="text-sm font-semibold text-primary">$80 – $150</p>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="bg-primary/5 border border-primary/30 rounded-xl p-3">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
-                              <User className="h-5 w-5 text-primary" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-sm font-semibold">Mike's Plumbing</p>
-                              <div className="flex items-center gap-2 mt-0.5">
-                                <div className="flex items-center gap-0.5">
-                                  <Star className="h-3 w-3 text-primary fill-primary" />
-                                  <span className="text-xs font-medium">4.9</span>
-                                </div>
-                                <span className="text-xs text-muted-foreground">· 127 reviews</span>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-                            <CalendarCheck className="h-3.5 w-3.5 text-primary" />
-                            <span>Available Tomorrow 9:30 AM</span>
-                          </div>
-                        </div>
-
-                        <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground">
-                          Confirm Booking
-                        </button>
-                      </div>
-                    ) : null}
+                {/* Step 3: AI Analyzing */}
+                {step === 3 && (
+                  <div className="flex flex-col items-center justify-center min-h-[320px] animate-fade-in">
+                    <div className="w-14 h-14 rounded-full bg-primary/20 flex items-center justify-center mb-4">
+                      <Loader2 className="h-7 w-7 text-primary animate-spin" />
+                    </div>
+                    <p className="text-sm font-semibold">AI is analyzing your answers...</p>
+                    <p className="text-xs text-muted-foreground mt-1.5 text-center max-w-[250px]">
+                      Diagnosing the issue, estimating cost, and finding the best pro for you
+                    </p>
                   </div>
                 )}
 
-                {/* Step 3: Booking Confirmed */}
-                {step === 3 && (
-                  <div className="flex flex-col items-center justify-center min-h-[360px] animate-fade-in">
+                {/* Step 4: Results */}
+                {step === 4 && (
+                  <div className="space-y-3 animate-fade-in">
+                    <div className="text-center mb-2">
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wider">AI Job Summary</p>
+                    </div>
+
+                    {showDiagnosis && (
+                      <div className="bg-card border border-border rounded-xl p-3 animate-fade-in">
+                        <div className="flex items-start gap-2.5">
+                          <Wrench className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-[10px] font-semibold text-muted-foreground uppercase">Diagnosis</p>
+                            <p className="text-sm mt-0.5">Kitchen sink leak — likely loose P-trap connection or worn washer. Slow drip under cabinet, started recently.</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {showEstimate && (
+                      <div className="bg-card border border-border rounded-xl p-3 animate-fade-in">
+                        <div className="flex items-start gap-2.5">
+                          <DollarSign className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-[10px] font-semibold text-muted-foreground uppercase">Estimated Cost</p>
+                            <p className="text-lg font-bold text-primary mt-0.5">$80 – $150</p>
+                            <p className="text-[10px] text-muted-foreground">Leak Diagnosis & Repair · Small job</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {showPro && (
+                      <div className="bg-primary/5 border border-primary/30 rounded-xl p-3 animate-fade-in">
+                        <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-2">Recommended Pro</p>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
+                            <User className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold">Mike's Plumbing</p>
+                            <div className="flex items-center gap-2 mt-0.5">
+                              <Star className="h-3 w-3 text-primary fill-primary" />
+                              <span className="text-xs font-medium">4.9</span>
+                              <span className="text-[10px] text-muted-foreground">· 127 reviews</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                          <CalendarCheck className="h-3.5 w-3.5 text-primary" />
+                          <span>Available Tomorrow 9:30 AM</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {showBookBtn && (
+                      <button className="w-full py-2.5 rounded-xl text-sm font-semibold bg-primary text-primary-foreground animate-fade-in">
+                        Book Mike's Plumbing →
+                      </button>
+                    )}
+                  </div>
+                )}
+
+                {/* Step 5: Confirmed */}
+                {step === 5 && (
+                  <div className="flex flex-col items-center justify-center min-h-[320px] animate-fade-in">
                     <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center mb-4">
                       <CheckCircle2 className="h-8 w-8 text-primary" />
                     </div>
                     <h3 className="text-lg font-bold mb-1">Booking Confirmed</h3>
-                    <p className="text-xs text-muted-foreground mb-6">You're all set!</p>
+                    <p className="text-xs text-muted-foreground mb-5">You're all set!</p>
 
-                    <div className="w-full bg-card border border-border rounded-xl p-4 space-y-2.5">
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Service</span>
-                        <span className="text-sm font-medium">Sink Leak Repair</span>
-                      </div>
-                      <div className="border-t border-border" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">When</span>
-                        <span className="text-sm font-medium">Tomorrow 9:30 AM</span>
-                      </div>
-                      <div className="border-t border-border" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Provider</span>
-                        <span className="text-sm font-medium">Mike's Plumbing</span>
-                      </div>
-                      <div className="border-t border-border" />
-                      <div className="flex items-center justify-between">
-                        <span className="text-xs text-muted-foreground">Est. Cost</span>
-                        <span className="text-sm font-semibold text-primary">$80 – $150</span>
-                      </div>
+                    <div className="w-full bg-card border border-border rounded-xl p-3.5 space-y-2">
+                      {[
+                        ["Service", "Sink Leak Repair"],
+                        ["When", "Tomorrow 9:30 AM"],
+                        ["Provider", "Mike's Plumbing"],
+                        ["Est. Cost", "$80 – $150"],
+                      ].map(([label, value], i) => (
+                        <div key={i}>
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10px] text-muted-foreground">{label}</span>
+                            <span className={`text-xs font-medium ${label === "Est. Cost" ? "text-primary" : ""}`}>{value}</span>
+                          </div>
+                          {i < 3 && <div className="border-t border-border mt-2" />}
+                        </div>
+                      ))}
                     </div>
 
-                    <p className="text-xs text-muted-foreground mt-4 text-center">
-                      You'll receive a confirmation text shortly.
+                    <p className="text-[10px] text-muted-foreground mt-3 text-center">
+                      The provider has received a full AI job summary with your answers.
                     </p>
                   </div>
                 )}
               </div>
 
+              {/* Input bar (chat step only) */}
+              {step === 1 && (
+                <div className="border-t border-border px-3 py-2 flex items-center gap-2 bg-background">
+                  <div className="flex-1 bg-card border border-border rounded-full px-3.5 py-2 text-xs text-muted-foreground/50">
+                    Ask about home services...
+                  </div>
+                  <div className="w-8 h-8 rounded-full bg-card border border-border flex items-center justify-center">
+                    <Send className="h-3.5 w-3.5 text-muted-foreground/50" />
+                  </div>
+                </div>
+              )}
+
               {/* Bottom bar */}
-              <div className="flex justify-center pb-2 pt-1 bg-background border-t border-border">
+              <div className="flex justify-center pb-2 pt-1 bg-background">
                 <div className="w-32 h-1 bg-muted-foreground/30 rounded-full" />
               </div>
             </div>
@@ -442,5 +550,33 @@ const AIDemoSection = () => {
     </section>
   );
 };
+
+// Reusable question card
+const QuestionCard = ({ num, question, options, selected }: {
+  num: number;
+  question: string;
+  options: string[];
+  selected?: number;
+}) => (
+  <div className="bg-card border border-border rounded-xl p-3 animate-fade-in">
+    <p className="text-xs font-semibold text-foreground mb-2">
+      <span className="text-primary mr-1.5">{num}.</span>{question}
+    </p>
+    <div className="flex flex-wrap gap-1.5">
+      {options.map((opt, i) => (
+        <span
+          key={i}
+          className={`text-[11px] px-2.5 py-1 rounded-full border transition-all duration-300 ${
+            selected === i
+              ? "bg-primary text-primary-foreground border-primary"
+              : "bg-background border-border text-muted-foreground"
+          }`}
+        >
+          {opt}
+        </span>
+      ))}
+    </div>
+  </div>
+);
 
 export default AIDemoSection;
