@@ -7,6 +7,7 @@ interface FeatureSectionProps {
   features: { icon: LucideIcon; title: string; description: string }[];
   reversed?: boolean;
   phoneImage?: string;
+  customPhone?: React.ReactNode;
 }
 
 const FeatureSection = ({ badge, title, description, features, reversed, phoneImage }: FeatureSectionProps) => (
