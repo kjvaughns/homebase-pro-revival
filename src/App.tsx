@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
+import BookingPage from "./pages/BookingPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -20,6 +21,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
+          <Route path="/book/:slug" element={<BookingPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
