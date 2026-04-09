@@ -125,12 +125,12 @@ function AuthGate() {
           Our AI analyzes your home problem and matches you with verified local professionals.
         </p>
         <div className="flex flex-col gap-3 pt-2">
-          <Link to="/#">
+          <Link to="/signup">
             <Button className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full">
               Create Free Account
             </Button>
           </Link>
-          <Link to="/#">
+          <Link to="/login">
             <Button variant="outline" className="w-full rounded-full border-gray-700 text-gray-300 hover:text-white">
               Sign In
             </Button>

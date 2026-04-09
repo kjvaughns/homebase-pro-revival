@@ -12,6 +12,8 @@ import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import FAQPage from "./pages/FAQPage.tsx";
 import AIBookingPage from "./pages/AIBookingPage.tsx";
+import SignUpPage from "./pages/SignUpPage.tsx";
+import SignInPage from "./pages/SignInPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/ai-booking" element={<AIBookingPage />} />
+          <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/login" element={<SignInPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
