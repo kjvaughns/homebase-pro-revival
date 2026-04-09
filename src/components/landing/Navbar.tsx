@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { ChevronDown } from "lucide-react";
+import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 
 const Navbar = () => (
@@ -14,12 +15,14 @@ const Navbar = () => (
           Resources <ChevronDown className="h-3 w-3" />
         </button>
         <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-        <a href="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Browse Pros</a>
+        <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Browse Pros</Link>
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Pros</a>
       </div>
-      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
-        Start Free
-      </Button>
+      <Link to="/marketplace">
+        <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
+          Start Free
+        </Button>
+      </Link>
     </div>
   </nav>
 );

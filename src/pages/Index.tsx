@@ -29,18 +29,22 @@ const Index = () => (
     <Navbar />
     <HeroSection />
 
-    <FeatureSection
-      badge="AI Booking"
-      title="AI Booking That Closes Jobs For You"
-      description="Your AI assistant responds to leads instantly, sends quotes, and books jobs — even while you sleep."
-      customPhone={<StaticChatMockup />}
-      features={[
-        { icon: Bot, title: "Instant Lead Response", description: "AI replies in seconds so you never lose a lead to slow follow-up." },
-        { icon: MessageSquare, title: "Smart Quoting", description: "Generates accurate quotes based on your pricing and job details." },
-        { icon: CalendarCheck, title: "Auto-Scheduling", description: "Books jobs directly on your calendar without back-and-forth." },
-        { icon: TrendingUp, title: "Lead Insights", description: "Track conversion rates and see which channels bring the best clients." },
-      ]}
-    />
+    <div id="features">
+      <div id="ai-booking">
+        <FeatureSection
+          badge="AI Booking"
+          title="AI Booking That Closes Jobs For You"
+          description="Your AI assistant responds to leads instantly, sends quotes, and books jobs — even while you sleep."
+          customPhone={<StaticChatMockup />}
+          features={[
+            { icon: Bot, title: "Instant Lead Response", description: "AI replies in seconds so you never lose a lead to slow follow-up." },
+            { icon: MessageSquare, title: "Smart Quoting", description: "Generates accurate quotes based on your pricing and job details." },
+            { icon: CalendarCheck, title: "Auto-Scheduling", description: "Books jobs directly on your calendar without back-and-forth." },
+            { icon: TrendingUp, title: "Lead Insights", description: "Track conversion rates and see which channels bring the best clients." },
+          ]}
+        />
+      </div>
+    </div>
 
     <AIDemoSection />
 
@@ -97,9 +101,13 @@ const Index = () => (
       ]}
     />
 
-    <HouseFaxSection />
+    <div id="housefax">
+      <HouseFaxSection />
+    </div>
     <CaseStudiesSection />
-    <PricingSection />
+    <div id="pricing">
+      <PricingSection />
+    </div>
     <TestimonialsSection />
     <FAQSection />
     <FinalCTA />
