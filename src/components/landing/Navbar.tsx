@@ -11,9 +11,7 @@ const Navbar = () => (
         <span className="text-lg font-bold text-foreground">HomeBase</span>
       </div>
       <div className="hidden md:flex items-center gap-8">
-        <button className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1">
-          Resources <ChevronDown className="h-3 w-3" />
-        </button>
+        <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
         <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
         <Link to="/ai-booking" className="text-sm text-muted-foreground hover:text-foreground transition-colors">AI Booking</Link>
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Pros</a>
