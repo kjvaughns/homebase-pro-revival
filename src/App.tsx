@@ -26,6 +26,8 @@ const App = () => (
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/book/:slug" element={<BookingPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/faq" element={<FAQPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
