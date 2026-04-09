@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
@@ -7,8 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Loader2, ArrowLeft, ShieldCheck, MessageCircle, Clock, CheckCircle2, XCircle, Droplets, Zap, Wind, Sparkles, TreePine, Home, Bug, Hammer, ClipboardList, Tag, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
-
-const API_BASE = "https://api.homebaseproapp.com";
 
 type StepKey = "describe" | "loading-analyze" | "questions" | "loading-refine" | "options" | "loading-match" | "providers";
 const STEP_LABELS = ["Describe", "Questions", "Options", "Pros"] as const;
