@@ -12,7 +12,7 @@ const Navbar = () => (
       <div className="hidden md:flex items-center gap-8">
         <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
         <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-        <Link to="/ai-booking" className="text-sm text-muted-foreground hover:text-foreground transition-colors">AI Booking</Link>
+        
         <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Pros</a>
       </div>
       <Link to="/marketplace">
