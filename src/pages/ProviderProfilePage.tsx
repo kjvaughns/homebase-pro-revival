@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, ArrowLeft, Shield, MapPin } from "lucide-react";
+import { Star, ArrowLeft, MapPin, Heart, Phone, MessageCircle, Briefcase, CheckCircle2, Clock } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 interface Provider {
@@ -18,13 +18,14 @@ interface Provider {
   is_verified?: boolean | null;
   category?: string;
   price_range?: string;
+  years_experience?: number | null;
 }
 
 const MOCK_PROVIDERS: Record<string, Provider> = {
   "mock-1": {
     id: "mock-1",
     business_name: "Marcus Johnson",
-    description: "Licensed master plumber, 12 years experience. Same-day service available. Specializing in drain cleaning, pipe repairs, water heater installations, and bathroom remodels. Fully insured and licensed.",
+    description: "Licensed master plumber with 15 years of experience. We handle everything from leaky faucets to full bathroom remodels.",
     average_rating: 4.9,
     review_count: 127,
     hourly_rate: 65,
@@ -33,6 +34,7 @@ const MOCK_PROVIDERS: Record<string, Provider> = {
     price_range: "$65–$95/hr",
     capability_tags: ["Plumbing", "Drain Cleaning", "Water Heaters", "Pipe Repair"],
     service_area: "Austin, TX",
+    years_experience: 15,
   },
   "mock-2": {
     id: "mock-2",
@@ -46,6 +48,7 @@ const MOCK_PROVIDERS: Record<string, Provider> = {
     price_range: "$75–$110/hr",
     capability_tags: ["Electrical", "Panel Upgrades", "Smart Home", "Rewiring"],
     service_area: "Austin, TX",
+    years_experience: 10,
   },
   "mock-3": {
     id: "mock-3",
@@ -59,6 +62,7 @@ const MOCK_PROVIDERS: Record<string, Provider> = {
     price_range: "$80–$130/hr",
     capability_tags: ["HVAC", "AC Repair", "Heating", "Maintenance"],
     service_area: "Austin, TX",
+    years_experience: 8,
   },
   "mock-4": {
     id: "mock-4",
@@ -72,6 +76,7 @@ const MOCK_PROVIDERS: Record<string, Provider> = {
     price_range: "$45–$65/hr",
     capability_tags: ["Cleaning", "Deep Clean", "Eco-Friendly", "Recurring"],
     service_area: "Austin, TX",
+    years_experience: 6,
   },
 };
 
@@ -80,28 +85,28 @@ const RatingStars = ({ rating }: { rating: number }) => (
     {Array.from({ length: 5 }).map((_, i) => (
       <Star
         key={i}
-        className={`h-4 w-4 ${i < Math.round(rating) ? "fill-primary text-primary" : "text-muted-foreground/30"}`}
+        className={`h-4 w-4 ${i < Math.round(rating) ? "fill-green-500 text-green-500" : "text-gray-600"}`}
       />
     ))}
   </div>
 );
+
+type Tab = "about" | "services" | "reviews";
 
 const ProviderProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [provider, setProvider] = useState<Provider | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState<Tab>("about");
 
   useEffect(() => {
     if (!id) return;
-
-    // Check mock first
     if (MOCK_PROVIDERS[id]) {
       setProvider(MOCK_PROVIDERS[id]);
       setLoading(false);
       return;
     }
-
     const fetchProvider = async () => {
       setLoading(true);
       const { data } = await supabase
@@ -110,7 +115,6 @@ const ProviderProfilePage = () => {
         .eq("id", id)
         .eq("is_public", true)
         .maybeSingle();
-
       if (data) setProvider(data as Provider);
       setLoading(false);
     };
@@ -131,36 +135,28 @@ const ProviderProfilePage = () => {
     navigate(`/book?${params.toString()}`);
   };
 
-  // Navbar
   const Navbar = () => (
-    <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="HomeBase" className="w-8 h-8" />
-          <span className="text-lg font-bold text-foreground">HomeBase</span>
-        </Link>
-        <div className="hidden md:flex items-center gap-6">
-          <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
-          <Link to="/ai-booking" className="text-sm text-muted-foreground hover:text-foreground transition-colors">AI Booking</Link>
-        </div>
-        <div className="flex items-center gap-3">
-          <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sign In</Link>
-          <Link to="/signup" className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">
-            Sign Up
-          </Link>
-        </div>
+    <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
+      <div className="max-w-3xl mx-auto px-4 flex items-center h-14">
+        <button
+          onClick={() => navigate("/marketplace")}
+          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span className="text-sm">Main</span>
+        </button>
       </div>
     </nav>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
         <Navbar />
-        <div className="max-w-3xl mx-auto px-4 py-16 space-y-6">
-          <div className="h-24 rounded-2xl bg-card animate-pulse" />
-          <div className="h-40 rounded-2xl bg-card animate-pulse" />
-          <div className="h-60 rounded-2xl bg-card animate-pulse" />
+        <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+          <div className="h-32 rounded-2xl bg-gray-900 animate-pulse" />
+          <div className="h-12 rounded-xl bg-gray-900 animate-pulse" />
+          <div className="h-48 rounded-2xl bg-gray-900 animate-pulse" />
         </div>
       </div>
     );
@@ -168,12 +164,12 @@ const ProviderProfilePage = () => {
 
   if (!provider) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
         <Navbar />
         <div className="max-w-3xl mx-auto px-4 py-16 text-center space-y-4">
-          <h2 className="text-2xl font-bold">Provider not found</h2>
-          <p className="text-muted-foreground">This provider may not be available.</p>
-          <Link to="/marketplace" className="text-primary hover:underline inline-flex items-center gap-1">
+          <h2 className="text-2xl font-bold text-white">Provider not found</h2>
+          <p className="text-gray-400">This provider may not be available.</p>
+          <Link to="/marketplace" className="text-green-400 hover:underline inline-flex items-center gap-1">
             <ArrowLeft className="h-4 w-4" /> Browse all providers
           </Link>
         </div>
@@ -182,94 +178,164 @@ const ProviderProfilePage = () => {
   }
 
   const displayCategory = provider.category || provider.capability_tags?.[0] || "";
-  const priceDisplay = provider.price_range || (provider.hourly_rate ? `$${provider.hourly_rate}/hr` : "");
+  const yearsExp = provider.years_experience || 5;
+  const jobsDone = provider.review_count ? provider.review_count * 3 : 342;
+  const milesAway = 2.3;
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "about", label: "About" },
+    { key: "services", label: "Services" },
+    { key: "reviews", label: "Reviews" },
+  ];
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen pb-36" style={{ background: "#0a0a0a" }}>
       <Navbar />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        {/* Back */}
-        <button
-          onClick={() => navigate("/marketplace")}
-          className="text-sm text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" /> Back to Marketplace
-        </button>
+      <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
+        {/* Hero card */}
+        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 relative">
+          {/* Favorite button */}
+          <button className="absolute top-5 right-5 text-gray-600 hover:text-gray-400 transition-colors">
+            <Heart className="h-6 w-6" />
+          </button>
 
-        {/* Hero */}
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
-          {provider.avatar_url ? (
-            <img src={provider.avatar_url} alt={provider.business_name} className="w-24 h-24 rounded-full object-cover" />
-          ) : (
-            <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center">
-              <span className="text-3xl font-bold text-primary">{provider.business_name.charAt(0)}</span>
+          <div className="flex items-center gap-4">
+            {provider.avatar_url ? (
+              <img src={provider.avatar_url} alt={provider.business_name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover" />
+            ) : (
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-green-500 flex items-center justify-center shrink-0">
+                <span className="text-3xl font-bold text-white">{provider.business_name.charAt(0)}{provider.business_name.split(" ")[1]?.charAt(0) || ""}</span>
+              </div>
+            )}
+            <div className="space-y-1">
+              <h1 className="text-2xl font-bold text-white">{provider.business_name}</h1>
+              {displayCategory && (
+                <p className="text-sm text-gray-400">{provider.business_name}'s {displayCategory} Pro</p>
+              )}
+              <div className="flex items-center gap-2">
+                <RatingStars rating={provider.average_rating || 0} />
+                <span className="text-sm text-green-400 font-medium">
+                  {Number(provider.average_rating || 0).toFixed(1)} ({provider.review_count || 0})
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {provider.is_verified && (
+            <div className="mt-4">
+              <span className="inline-flex items-center text-xs font-semibold px-3 py-1.5 rounded-full border border-green-500/30 text-green-400 bg-green-500/5">
+                Verified Pro
+              </span>
             </div>
           )}
-          <div className="flex-1 space-y-2">
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <h1 className="text-3xl font-bold">{provider.business_name}</h1>
-              {provider.is_verified && <Shield className="h-5 w-5 text-primary" />}
-            </div>
-            {displayCategory && (
-              <span className="inline-block text-xs font-medium px-3 py-1 rounded-full bg-primary/10 text-primary">
-                {displayCategory}
-              </span>
-            )}
-            <div className="flex items-center justify-center sm:justify-start gap-2">
-              <RatingStars rating={provider.average_rating || 0} />
-              <span className="text-sm text-muted-foreground">
-                {Number(provider.average_rating || 0).toFixed(1)} ({provider.review_count || 0} reviews)
-              </span>
-            </div>
-            {provider.service_area && (
-              <p className="text-sm text-muted-foreground flex items-center justify-center sm:justify-start gap-1">
-                <MapPin className="h-3.5 w-3.5" /> {provider.service_area}
-              </p>
-            )}
-          </div>
         </div>
 
-        {/* About */}
-        {provider.description && (
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">About {provider.business_name}</h2>
-            <p className="text-muted-foreground leading-relaxed">{provider.description}</p>
-          </div>
-        )}
+        {/* Tabs */}
+        <div className="flex border-b border-gray-800">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 text-center py-3 text-sm font-medium transition-colors relative ${
+                activeTab === tab.key ? "text-green-400" : "text-gray-500 hover:text-gray-300"
+              }`}
+            >
+              {tab.label}
+              {activeTab === tab.key && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500" />
+              )}
+            </button>
+          ))}
+        </div>
 
-        {/* Services / Tags */}
-        {provider.capability_tags && provider.capability_tags.length > 0 && (
-          <div className="space-y-2">
-            <h2 className="text-lg font-semibold">Services</h2>
-            <div className="flex flex-wrap gap-2">
-              {provider.capability_tags.map((tag) => (
-                <span key={tag} className="text-xs font-medium px-3 py-1.5 rounded-full bg-card border border-border text-foreground">
-                  {tag}
-                </span>
-              ))}
+        {/* Tab content */}
+        {activeTab === "about" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-lg font-bold text-white mb-2">About</h2>
+              <p className="text-gray-400 leading-relaxed">{provider.description}</p>
+            </div>
+
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+                <Briefcase className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">{yearsExp}</p>
+                <p className="text-xs text-gray-500">Years Exp.</p>
+              </div>
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+                <CheckCircle2 className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">{jobsDone}</p>
+                <p className="text-xs text-gray-500">Jobs Done</p>
+              </div>
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+                <Clock className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">{milesAway}</p>
+                <p className="text-xs text-gray-500">Miles Away</p>
+              </div>
+            </div>
+
+            {/* Response time */}
+            <div className="flex items-center gap-2 text-gray-400">
+              <MessageCircle className="h-5 w-5" />
+              <span className="text-sm">Usually responds in 1 hour</span>
             </div>
           </div>
         )}
 
-        {/* Pricing */}
-        {priceDisplay && (
-          <div className="rounded-2xl border border-border bg-card p-5 space-y-1">
-            <h2 className="text-lg font-semibold">Pricing</h2>
-            <p className="text-2xl font-bold text-primary">{priceDisplay}</p>
+        {activeTab === "services" && (
+          <div className="space-y-4">
+            <h2 className="text-lg font-bold text-white">Services Offered</h2>
+            {provider.capability_tags && provider.capability_tags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {provider.capability_tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-sm font-medium px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-gray-300"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-sm">No services listed yet.</p>
+            )}
+            {provider.price_range && (
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mt-4">
+                <p className="text-sm text-gray-400 mb-1">Pricing</p>
+                <p className="text-2xl font-bold text-green-400">{provider.price_range}</p>
+              </div>
+            )}
           </div>
         )}
 
-        {/* CTA */}
-        <button
-          onClick={handleBook}
-          className="w-full bg-primary text-primary-foreground font-semibold py-4 rounded-xl text-base hover:bg-primary/90 transition-colors"
-        >
-          Book {provider.business_name} Now →
-        </button>
-        <p className="text-center text-xs text-muted-foreground">
-          No account needed · Free to request · Provider confirms within 2 hours
-        </p>
+        {activeTab === "reviews" && (
+          <div className="text-center py-12">
+            <Star className="h-10 w-10 text-gray-700 mx-auto mb-3" />
+            <p className="text-gray-500 text-sm">No reviews yet</p>
+          </div>
+        )}
+      </div>
+
+      {/* Sticky bottom bar */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-gray-800 p-4 z-50">
+        <div className="max-w-3xl mx-auto flex gap-3">
+          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors">
+            <Phone className="h-4 w-4 text-green-400" />
+            Call
+          </button>
+          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors">
+            <MessageCircle className="h-4 w-4 text-green-400" />
+            Text
+          </button>
+          <button
+            onClick={handleBook}
+            className="flex-[2] py-3.5 rounded-xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors text-base"
+          >
+            Book Now
+          </button>
+        </div>
       </div>
     </div>
   );

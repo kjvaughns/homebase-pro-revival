@@ -5,9 +5,28 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, ClipboardList, Tag, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
+
+function getNext7Days() {
+  const days = [];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    days.push({
+      dayName: dayNames[d.getDay()],
+      date: d.getDate(),
+      month: monthNames[d.getMonth()],
+      full: d.toISOString().split("T")[0],
+    });
+  }
+  return days;
+}
+
+const TIME_SLOTS = ["Morning (8am-12pm)", "Afternoon (12pm-5pm)", "Evening (5pm-8pm)"];
 
 export default function GuestBookingPage() {
   const [params] = useSearchParams();
@@ -30,10 +49,10 @@ export default function GuestBookingPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = "Book a Pro — HomeBase";
+    document.title = "Book Appointment — HomeBase";
   }, []);
 
-  const today = new Date().toISOString().split("T")[0];
+  const next7Days = getNext7Days();
 
   const canSubmit = name.trim() && phone.trim() && email.trim() && address.trim() && serviceDetails.trim() && preferredDate && preferredTime;
 
@@ -70,90 +89,137 @@ export default function GuestBookingPage() {
     );
   };
 
-  const inputClass = "bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50";
+  const inputClass = "bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50 rounded-xl";
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
       <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-2xl mx-auto px-4 flex items-center h-14">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="HomeBase logo" className="w-7 h-7" />
-            <span className="text-base font-bold text-white">HomeBase</span>
+        <div className="max-w-2xl mx-auto px-4 flex items-center h-14 gap-3">
+          <Link to="/ai-booking" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+            <span className="text-sm">← Get Help</span>
           </Link>
+          <span className="text-base font-bold text-white">Book Appointment</span>
         </div>
       </nav>
 
-      <div className="max-w-md mx-auto px-4 py-12">
-        {/* Provider card */}
-        {providerName && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 mb-6 flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-              <span className="text-sm font-bold text-green-400">{providerName.charAt(0)}</span>
+      <div className="max-w-md mx-auto px-4 py-8">
+        {/* Service Summary card */}
+        {summary && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-green-400" />
+              <h3 className="font-bold text-white">Service Summary</h3>
             </div>
-            <div>
-              <p className="font-semibold text-white text-sm">{providerName}</p>
-              {category && <Badge className="bg-green-500/10 text-green-400 border-green-500/30 text-[10px] mt-1">{category}</Badge>}
+            <p className="text-sm text-gray-400 leading-relaxed">{summary}</p>
+            <div className="flex items-center gap-4">
+              {category && (
+                <div className="flex items-center gap-1 text-sm text-gray-400">
+                  <Tag className="h-3.5 w-3.5 text-green-400" />
+                  <span>{category}</span>
+                </div>
+              )}
             </div>
           </div>
         )}
 
-        <p className="text-gray-400 text-sm mb-8">Complete your booking request — no account needed</p>
+        {/* Provider card */}
+        {providerName && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6 flex items-center gap-4">
+            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+              <span className="text-lg font-bold text-green-400">{providerName.charAt(0)}</span>
+            </div>
+            <div>
+              <p className="font-semibold text-white">{providerName}</p>
+              {category && <p className="text-sm text-gray-400">{category}</p>}
+            </div>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Your Name</Label>
-            <Input value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Date picker */}
+          <div className="space-y-3">
+            <h3 className="text-base font-bold text-white">Select Date</h3>
+            <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+              {next7Days.map((day) => (
+                <button
+                  type="button"
+                  key={day.full}
+                  onClick={() => setPreferredDate(day.full)}
+                  className={`flex flex-col items-center min-w-[72px] py-3 px-3 rounded-xl border transition-colors shrink-0 ${
+                    preferredDate === day.full
+                      ? "border-green-500 bg-green-500/10 text-green-400"
+                      : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                  }`}
+                >
+                  <span className="text-xs">{day.dayName}</span>
+                  <span className="text-xl font-bold">{day.date}</span>
+                  <span className="text-xs">{day.month}</span>
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Phone Number</Label>
-            <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
+
+          {/* Time slots */}
+          <div className="space-y-3">
+            <h3 className="text-base font-bold text-white">Select Time</h3>
+            <div className="flex flex-wrap gap-2">
+              {TIME_SLOTS.map((slot) => (
+                <button
+                  type="button"
+                  key={slot}
+                  onClick={() => setPreferredTime(slot)}
+                  className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                    preferredTime === slot
+                      ? "border-green-500 bg-green-500/10 text-green-400"
+                      : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                  }`}
+                >
+                  {slot}
+                </button>
+              ))}
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Email</Label>
-            <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Address / City</Label>
-            <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Main St, City, State" required className={inputClass} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Service Details</Label>
-            <Textarea value={serviceDetails} onChange={(e) => setServiceDetails(e.target.value)} required className={`min-h-[80px] ${inputClass}`} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Preferred Date</Label>
-            <Input type="date" min={today} value={preferredDate} onChange={(e) => setPreferredDate(e.target.value)} required className={inputClass} />
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Preferred Time</Label>
-            <select
-              value={preferredTime}
-              onChange={(e) => setPreferredTime(e.target.value)}
-              required
-              className="flex h-10 w-full rounded-md border border-gray-800 bg-gray-900 px-3 py-2 text-sm text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50"
-            >
-              <option value="">Select a time</option>
-              <option value="Morning (8am-12pm)">Morning (8am-12pm)</option>
-              <option value="Afternoon (12pm-5pm)">Afternoon (12pm-5pm)</option>
-              <option value="Evening (5pm-8pm)">Evening (5pm-8pm)</option>
-            </select>
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-gray-300 text-sm">Notes <span className="text-gray-600">(optional)</span></Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Anything else we should know?" className={`min-h-[60px] ${inputClass}`} />
+
+          {/* Contact info */}
+          <div className="space-y-4 pt-2">
+            <h3 className="text-base font-bold text-white">Your Details</h3>
+            <div className="space-y-1.5">
+              <Label className="text-gray-400 text-sm">Your Name</Label>
+              <Input value={name} onChange={(e) => setName(e.target.value)} required className={inputClass} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-gray-400 text-sm">Phone Number</Label>
+              <Input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} required className={inputClass} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-gray-400 text-sm">Email</Label>
+              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-gray-400 text-sm">Address / City</Label>
+              <Input value={address} onChange={(e) => setAddress(e.target.value)} placeholder="123 Main St, City, State" required className={inputClass} />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-gray-400 text-sm">Notes <span className="text-gray-600">(optional)</span></Label>
+              <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Anything else we should know?" className={`min-h-[60px] ${inputClass}`} />
+            </div>
           </div>
 
           {error && (
             <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm text-center">{error}</div>
           )}
 
-          <Button
-            type="submit"
-            disabled={!canSubmit || loading}
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-12 text-base disabled:opacity-40"
-          >
-            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Confirm Booking Request →"}
-          </Button>
+          {/* CTA */}
+          <div className="flex items-center gap-4 pt-2">
+            <p className="text-sm text-gray-500 shrink-0">Price to be confirmed</p>
+            <Button
+              type="submit"
+              disabled={!canSubmit || loading}
+              className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base disabled:opacity-40"
+            >
+              {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Request Appointment"}
+            </Button>
+          </div>
         </form>
       </div>
     </div>
