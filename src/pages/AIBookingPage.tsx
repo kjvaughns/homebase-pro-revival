@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Loader2, ArrowLeft, ShieldCheck } from "lucide-react";
+import { Check, Star, Loader2, ArrowLeft, ShieldCheck, MessageCircle, Clock, CheckCircle2, XCircle, Droplets, Zap, Wind, Sparkles, TreePine, Home, Bug, Hammer, ClipboardList, Tag, DollarSign } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import logo from "@/assets/logo.png";
 
@@ -46,6 +46,7 @@ interface ServiceOption {
   priceRange: string;
   timeEstimate: string;
   recommended?: boolean;
+  includedItems?: string[];
 }
 
 interface MatchedProvider {
@@ -61,15 +62,24 @@ interface MatchedProvider {
 }
 
 const QUICK_FILLS = [
-  { emoji: "🚿", label: "Leaky faucet or drain" },
-  { emoji: "❄️", label: "AC or heating issue" },
-  { emoji: "⚡", label: "Electrical problem" },
-  { emoji: "🔧", label: "Appliance repair" },
-  { emoji: "🌿", label: "Lawn or landscaping" },
-  { emoji: "🏠", label: "Roof or gutters" },
-  { emoji: "🪲", label: "Pest control" },
-  { emoji: "🔨", label: "Remodel or renovation" },
+  { label: "Leaking faucet" },
+  { label: "AC not cooling" },
+  { label: "Outlet sparking" },
+  { label: "Clogged drain" },
+  { label: "Lawn care" },
+  { label: "Roof leak" },
 ];
+
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+  Plumbing: <Droplets className="h-5 w-5 text-green-400" />,
+  Electrical: <Zap className="h-5 w-5 text-green-400" />,
+  HVAC: <Wind className="h-5 w-5 text-green-400" />,
+  Cleaning: <Sparkles className="h-5 w-5 text-green-400" />,
+  Landscaping: <TreePine className="h-5 w-5 text-green-400" />,
+  Roofing: <Home className="h-5 w-5 text-green-400" />,
+  "Pest Control": <Bug className="h-5 w-5 text-green-400" />,
+  Carpentry: <Hammer className="h-5 w-5 text-green-400" />,
+};
 
 function stepIndex(step: StepKey): number {
   if (step === "describe" || step === "loading-analyze") return 0;
@@ -116,6 +126,25 @@ function LoadingState({ message }: { message: string }) {
   );
 }
 
+function getNext7Days() {
+  const days = [];
+  const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    days.push({
+      dayName: dayNames[d.getDay()],
+      date: d.getDate(),
+      month: monthNames[d.getMonth()],
+      full: d.toISOString().split("T")[0],
+    });
+  }
+  return days;
+}
+
+const TIME_SLOTS = ["Morning (8am-12pm)", "Afternoon (12pm-5pm)", "Evening (5pm-8pm)"];
+
 export default function AIBookingPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<StepKey>("describe");
@@ -126,6 +155,8 @@ export default function AIBookingPage() {
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [providers, setProviders] = useState<MatchedProvider[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [selectedTime, setSelectedTime] = useState("");
 
   useEffect(() => {
     document.title = "AI Home Assistant — HomeBase";
@@ -204,6 +235,8 @@ export default function AIBookingPage() {
     setSelectedOption(null);
     setProviders([]);
     setError(null);
+    setSelectedDate("");
+    setSelectedTime("");
   };
 
   const allAnswered = analysis?.questions.every((q) => {
@@ -219,6 +252,8 @@ export default function AIBookingPage() {
       `/book?providerId=${provider.id}&providerName=${encodeURIComponent(provider.business_name || provider.name)}&category=${encodeURIComponent(provider.category || "")}&summary=${encodeURIComponent(summary)}`
     );
   };
+
+  const next7Days = getNext7Days();
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -244,33 +279,48 @@ export default function AIBookingPage() {
         {/* Step 1: Describe */}
         {step === "describe" && (
           <div className="space-y-6">
-            <div>
-              <h1 className="text-2xl font-bold text-white">What's going on at your home?</h1>
-              <p className="text-gray-400 text-sm mt-1">Describe it in your own words — our AI handles the rest.</p>
+            {/* Chat bubble icon */}
+            <div className="flex justify-center">
+              <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+                <MessageCircle className="h-8 w-8 text-green-400" />
+              </div>
             </div>
+
+            <div className="text-center">
+              <h1 className="text-2xl font-bold text-white">What's the issue?</h1>
+              <p className="text-gray-400 text-sm mt-2">
+                Describe your problem and we'll ask a few quick questions to get you accurate quotes.
+              </p>
+            </div>
+
             <Textarea
               value={problemText}
               onChange={(e) => setProblemText(e.target.value)}
-              placeholder="e.g. My kitchen sink has been slowly draining for two weeks and now barely drains at all..."
-              className="min-h-[120px] bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50"
+              placeholder="My sink is leaking"
+              className="min-h-[120px] bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50 rounded-2xl"
             />
-            <div className="flex flex-wrap gap-2">
-              {QUICK_FILLS.map((qf) => (
-                <button
-                  key={qf.label}
-                  onClick={() => setProblemText(qf.label)}
-                  className="text-xs px-3 py-1.5 rounded-full bg-gray-800 border border-gray-700 text-gray-400 hover:border-green-500 hover:text-green-400 transition-colors"
-                >
-                  {qf.emoji} {qf.label}
-                </button>
-              ))}
+
+            <div>
+              <p className="text-xs text-gray-500 mb-2">Try these:</p>
+              <div className="flex flex-wrap gap-2">
+                {QUICK_FILLS.map((qf) => (
+                  <button
+                    key={qf.label}
+                    onClick={() => setProblemText(qf.label)}
+                    className="text-xs px-4 py-2 rounded-full border border-green-500/30 text-green-400 bg-green-500/5 hover:bg-green-500/10 transition-colors"
+                  >
+                    {qf.label}
+                  </button>
+                ))}
+              </div>
             </div>
+
             <Button
               onClick={handleAnalyze}
               disabled={!problemText.trim()}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-12 text-base disabled:opacity-40"
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base disabled:opacity-40"
             >
-              Analyze My Problem →
+              Continue
             </Button>
           </div>
         )}
@@ -280,34 +330,42 @@ export default function AIBookingPage() {
         {/* Step 2: Questions */}
         {step === "questions" && analysis && (
           <div className="space-y-6">
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 border-l-4 border-l-green-500">
-              <div className="flex items-center gap-2 mb-2">
-                <Badge className="bg-green-500/10 text-green-400 border-green-500/30 text-xs">{analysis.category}</Badge>
-                <span className="text-xs text-gray-500">Est. {analysis.estimatedPriceRange}</span>
+            {/* Category card */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center shrink-0">
+                {CATEGORY_ICONS[analysis.category] || <ClipboardList className="h-5 w-5 text-green-400" />}
               </div>
-              <p className="text-sm text-gray-300">{analysis.summary}</p>
+              <div>
+                <p className="font-semibold text-white">{analysis.category}</p>
+                <p className="text-sm text-gray-400">{analysis.summary}</p>
+              </div>
             </div>
 
             <div>
-              <h2 className="text-xl font-bold text-white">A few quick questions</h2>
+              <h2 className="text-xl font-bold text-white">Help us understand better</h2>
+              <p className="text-gray-400 text-sm mt-1">Answer these questions to get accurate quotes</p>
             </div>
 
-            {analysis.questions.map((q) => (
-              <div key={q.id} className="space-y-2">
-                <p className="text-sm font-medium text-white">{q.question}</p>
+            {analysis.questions.map((q, idx) => (
+              <div key={q.id} className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <span className="text-green-400 font-bold text-lg mt-0.5">{idx + 1}</span>
+                  <p className="text-sm font-medium text-white leading-relaxed">{q.question}</p>
+                </div>
 
                 {q.type === "yes_no" && (
-                  <div className="flex gap-2">
+                  <div className="grid grid-cols-2 gap-2 ml-7">
                     {["Yes", "No"].map((opt) => (
                       <button
                         key={opt}
                         onClick={() => setAnswers((a) => ({ ...a, [q.id]: opt }))}
-                        className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                        className={`flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                           answers[q.id] === opt
-                            ? "border-green-500 bg-green-500/10 text-green-400"
-                            : "border-gray-700 bg-gray-800 text-gray-400 hover:border-green-500 hover:text-green-400"
+                            ? "bg-green-500/15 border border-green-500 text-green-400"
+                            : "bg-gray-800 border border-gray-700 text-gray-300 hover:border-gray-600"
                         }`}
                       >
+                        {opt === "Yes" ? <CheckCircle2 className="h-4 w-4" /> : <XCircle className="h-4 w-4" />}
                         {opt}
                       </button>
                     ))}
@@ -315,15 +373,15 @@ export default function AIBookingPage() {
                 )}
 
                 {q.type === "single_choice" && q.options && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 ml-7">
                     {q.options.map((opt) => (
                       <button
                         key={opt}
                         onClick={() => setAnswers((a) => ({ ...a, [q.id]: opt }))}
-                        className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                        className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                           answers[q.id] === opt
-                            ? "border-green-500 bg-green-500/10 text-green-400"
-                            : "border-gray-700 bg-gray-800 text-gray-400 hover:border-green-500 hover:text-green-400"
+                            ? "border-green-500 bg-green-500/15 text-green-400"
+                            : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
                         }`}
                       >
                         {opt}
@@ -333,7 +391,7 @@ export default function AIBookingPage() {
                 )}
 
                 {q.type === "multi_choice" && q.options && (
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 ml-7">
                     {q.options.map((opt) => {
                       const selected = Array.isArray(answers[q.id]) && (answers[q.id] as string[]).includes(opt);
                       return (
@@ -345,10 +403,10 @@ export default function AIBookingPage() {
                               return { ...a, [q.id]: selected ? prev.filter((x) => x !== opt) : [...prev, opt] };
                             })
                           }
-                          className={`px-4 py-2 rounded-full text-sm font-medium border transition-colors ${
+                          className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                             selected
-                              ? "border-green-500 bg-green-500/10 text-green-400"
-                              : "border-gray-700 bg-gray-800 text-gray-400 hover:border-green-500 hover:text-green-400"
+                              ? "border-green-500 bg-green-500/15 text-green-400"
+                              : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
                           }`}
                         >
                           {opt}
@@ -359,20 +417,25 @@ export default function AIBookingPage() {
                 )}
 
                 {q.type === "number" && (
-                  <Input
-                    type="number"
-                    value={(answers[q.id] as string) ?? ""}
-                    onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                    className="max-w-[200px] bg-gray-900 border-gray-800 text-white focus-visible:ring-green-500/50"
-                  />
+                  <div className="ml-7">
+                    <Input
+                      type="number"
+                      placeholder="Number of days"
+                      value={(answers[q.id] as string) ?? ""}
+                      onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
+                      className="max-w-full bg-gray-800 border-gray-700 text-white focus-visible:ring-green-500/50 rounded-xl"
+                    />
+                  </div>
                 )}
 
                 {q.type === "text" && (
-                  <Input
-                    value={(answers[q.id] as string) ?? ""}
-                    onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
-                    className="bg-gray-900 border-gray-800 text-white focus-visible:ring-green-500/50"
-                  />
+                  <div className="ml-7">
+                    <Input
+                      value={(answers[q.id] as string) ?? ""}
+                      onChange={(e) => setAnswers((a) => ({ ...a, [q.id]: e.target.value }))}
+                      className="bg-gray-800 border-gray-700 text-white focus-visible:ring-green-500/50 rounded-xl"
+                    />
+                  </div>
                 )}
               </div>
             ))}
@@ -380,9 +443,9 @@ export default function AIBookingPage() {
             <Button
               onClick={handleRefine}
               disabled={!allAnswered}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-12 text-base disabled:opacity-40"
+              className="w-full bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-full h-14 text-base disabled:opacity-40"
             >
-              See My Options →
+              Get My Quote
             </Button>
           </div>
         )}
@@ -392,22 +455,31 @@ export default function AIBookingPage() {
         {/* Step 3: Options */}
         {step === "options" && refined && (
           <div className="space-y-6">
-            <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-3">
-              <p className="text-sm text-gray-300">{refined.refinedSummary}</p>
-              <div className="flex flex-wrap gap-2">
-                <Badge className="bg-green-500/10 text-green-400 border-green-500/30 text-xs">{refined.severity}</Badge>
-                <Badge className="bg-yellow-500/10 text-yellow-400 border-yellow-500/30 text-xs">{refined.recommendedUrgency}</Badge>
-                <span className="text-xs text-gray-500">Est. {refined.timeEstimate}</span>
+            <h2 className="text-2xl font-bold text-white">Your Service Quote</h2>
+
+            {/* Issue Summary card */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
+              <p className="text-xs text-green-400 font-medium uppercase tracking-wide">Issue Summary</p>
+              <p className="text-sm text-gray-300 leading-relaxed">{refined.refinedSummary}</p>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-gray-400 text-sm">
+                  <Clock className="h-4 w-4" />
+                  <span>{refined.timeEstimate}</span>
+                </div>
+                <Badge className="bg-gray-800 text-white border-gray-700 text-xs font-medium px-3 py-1">
+                  {refined.recommendedUrgency}
+                </Badge>
               </div>
             </div>
 
+            {/* What's Included */}
             {refined.scopeOfWork.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-sm font-semibold text-white">Scope of work</h3>
-                <ul className="space-y-1.5">
+              <div className="space-y-3">
+                <p className="text-xs text-green-400 font-medium uppercase tracking-wide">What's Included</p>
+                <ul className="space-y-2.5">
                   {refined.scopeOfWork.map((item, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-gray-400">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
+                    <li key={i} className="flex items-start gap-3 text-sm text-gray-300">
+                      <CheckCircle2 className="h-4 w-4 text-green-500 mt-0.5 shrink-0" />
                       {item}
                     </li>
                   ))}
@@ -415,34 +487,53 @@ export default function AIBookingPage() {
               </div>
             )}
 
-            <div className="space-y-3">
-              <h3 className="text-sm font-semibold text-white">Service options</h3>
+            {/* Choose Your Service Level */}
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-white">Choose Your Service Level</h3>
               {refined.serviceOptions.map((opt, i) => (
                 <button
                   key={i}
                   onClick={() => setSelectedOption(i)}
-                  className={`w-full text-left bg-gray-900 rounded-xl p-5 border transition-colors relative ${
-                    selectedOption === i ? "border-green-500 bg-green-500/5" : "border-gray-800 hover:border-gray-700"
+                  className={`w-full text-left rounded-2xl p-5 border transition-all relative ${
+                    selectedOption === i
+                      ? "border-green-500 bg-gray-900"
+                      : opt.recommended
+                      ? "border-green-500 bg-gray-900"
+                      : "border-gray-800 bg-gray-900 hover:border-gray-700"
                   }`}
                 >
                   {opt.recommended && (
-                    <span className="absolute top-3 right-3 text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/20 text-green-400">
+                    <span className="absolute top-4 right-4 text-[11px] font-bold px-2.5 py-1 rounded bg-green-500 text-white">
                       Recommended
                     </span>
                   )}
-                  <p className="font-semibold text-white text-sm">{opt.title}</p>
-                  <p className="text-xs text-gray-400 mt-1">{opt.description}</p>
-                  <div className="flex items-center gap-3 mt-3">
-                    <span className="text-lg font-bold text-green-400">{opt.priceRange}</span>
-                    <span className="text-xs text-gray-500">{opt.timeEstimate}</span>
+                  <div className="flex items-start justify-between">
+                    <p className="font-bold text-white text-lg">{opt.title}</p>
+                    {!opt.recommended && (
+                      <span className="text-lg font-bold text-green-400">{opt.priceRange}</span>
+                    )}
                   </div>
+                  {opt.recommended && (
+                    <span className="text-lg font-bold text-green-400">{opt.priceRange}</span>
+                  )}
+                  <p className="text-sm text-gray-400 mt-2">{opt.description}</p>
+                  {opt.includedItems && opt.includedItems.length > 0 && (
+                    <ul className="mt-3 space-y-1.5">
+                      {opt.includedItems.map((item, j) => (
+                        <li key={j} className="flex items-center gap-2 text-sm text-white">
+                          <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                          {item}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </button>
               ))}
             </div>
 
             <Button
               onClick={handleMatchProviders}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-12 text-base"
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base"
             >
               Find Matching Pros →
             </Button>
@@ -451,63 +542,113 @@ export default function AIBookingPage() {
 
         {step === "loading-match" && <LoadingState message="Finding the best pros near you..." />}
 
-        {/* Step 4: Providers */}
+        {/* Step 4: Providers / Request Appointment */}
         {step === "providers" && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold text-white">Your top matches</h2>
-              {selectedOption !== null && refined && (
-                <p className="text-gray-400 text-sm mt-1">For: {refined.serviceOptions[selectedOption]?.title}</p>
-              )}
-            </div>
+            {/* Service summary card */}
+            {(refined || analysis) && (
+              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <ClipboardList className="h-5 w-5 text-green-400" />
+                  <h3 className="font-bold text-white">Service Summary</h3>
+                </div>
+                <p className="text-sm text-gray-400 leading-relaxed">
+                  {refined?.refinedSummary || analysis?.summary}
+                </p>
+                <div className="flex items-center gap-3">
+                  {selectedOption !== null && refined?.serviceOptions[selectedOption] && (
+                    <>
+                      <div className="flex items-center gap-1 text-sm text-gray-400">
+                        <Tag className="h-3.5 w-3.5 text-green-400" />
+                        <span>{refined.serviceOptions[selectedOption].title}</span>
+                      </div>
+                      <div className="flex items-center gap-1 text-sm text-gray-400">
+                        <DollarSign className="h-3.5 w-3.5 text-green-400" />
+                        <span>{refined.serviceOptions[selectedOption].priceRange}</span>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
 
             {providers.length === 0 ? (
               <div className="text-center py-16 text-gray-500 text-sm">
                 No providers found yet — check back soon.
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {providers.slice(0, 5).map((p) => (
-                  <div key={p.id} className="bg-gray-900 border border-gray-800 rounded-xl p-5 flex items-start gap-4">
-                    {p.avatar_url ? (
-                      <img src={p.avatar_url} alt={p.business_name} className="w-12 h-12 rounded-full object-cover shrink-0" />
-                    ) : (
-                      <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
-                        <span className="text-sm font-bold text-green-400">{p.business_name.charAt(0)}</span>
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <p className="font-semibold text-white text-sm truncate">{p.business_name}</p>
-                        {p.verified && <ShieldCheck className="h-4 w-4 text-green-500 shrink-0" />}
-                      </div>
-                      <p className="text-xs text-gray-500">{p.name}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex items-center gap-0.5">
-                          {Array.from({ length: 5 }).map((_, i) => (
-                            <Star
-                              key={i}
-                              className={`h-3 w-3 ${i < Math.round(p.rating) ? "fill-green-500 text-green-500" : "text-gray-700"}`}
-                            />
-                          ))}
+                  <div key={p.id} className="space-y-6">
+                    {/* Provider card */}
+                    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center gap-4">
+                      {p.avatar_url ? (
+                        <img src={p.avatar_url} alt={p.business_name} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
+                          <span className="text-lg font-bold text-green-400">{p.business_name.charAt(0)}</span>
                         </div>
-                        <span className="text-xs text-gray-500">({p.review_count})</span>
-                        <Badge className="bg-gray-800 text-gray-400 border-gray-700 text-[10px]">{p.category}</Badge>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-semibold text-white truncate">{p.business_name}</p>
+                          {p.verified && <ShieldCheck className="h-4 w-4 text-green-500 shrink-0" />}
+                        </div>
+                        <p className="text-sm text-gray-400">{p.category}</p>
                       </div>
-                      <div className="flex gap-2 mt-3">
-                        <Link to={`/providers/${p.id}`}>
-                          <Button variant="outline" size="sm" className="rounded-full border-gray-700 text-gray-300 hover:text-white text-xs h-8">
-                            View Profile
-                          </Button>
-                        </Link>
-                        <Button
-                          size="sm"
-                          className="rounded-full bg-green-500 hover:bg-green-600 text-white text-xs h-8"
-                          onClick={() => handleBookNow(p)}
-                        >
-                          Book Now
-                        </Button>
+                    </div>
+
+                    {/* Date picker */}
+                    <div className="space-y-3">
+                      <h3 className="text-base font-bold text-white">Select Date</h3>
+                      <div className="flex gap-2 overflow-x-auto pb-2 -mx-1 px-1">
+                        {next7Days.map((day) => (
+                          <button
+                            key={day.full}
+                            onClick={() => setSelectedDate(day.full)}
+                            className={`flex flex-col items-center min-w-[72px] py-3 px-3 rounded-xl border transition-colors shrink-0 ${
+                              selectedDate === day.full
+                                ? "border-green-500 bg-green-500/10 text-green-400"
+                                : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                            }`}
+                          >
+                            <span className="text-xs">{day.dayName}</span>
+                            <span className="text-xl font-bold">{day.date}</span>
+                            <span className="text-xs">{day.month}</span>
+                          </button>
+                        ))}
                       </div>
+                    </div>
+
+                    {/* Time slots */}
+                    <div className="space-y-3">
+                      <h3 className="text-base font-bold text-white">Select Time</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {TIME_SLOTS.map((slot) => (
+                          <button
+                            key={slot}
+                            onClick={() => setSelectedTime(slot)}
+                            className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                              selectedTime === slot
+                                ? "border-green-500 bg-green-500/10 text-green-400"
+                                : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                            }`}
+                          >
+                            {slot}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* CTA */}
+                    <div className="flex items-center gap-4">
+                      <p className="text-sm text-gray-500 shrink-0">Price to be confirmed</p>
+                      <Button
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base"
+                        onClick={() => handleBookNow(p)}
+                      >
+                        Request Appointment
+                      </Button>
                     </div>
                   </div>
                 ))}
