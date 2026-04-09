@@ -9,6 +9,8 @@ import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import TermsOfService from "./pages/TermsOfService.tsx";
+import FAQPage from "./pages/FAQPage.tsx";
 
 const queryClient = new QueryClient();
 
