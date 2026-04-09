@@ -1,4 +1,5 @@
 import logo from "@/assets/logo.png";
+import { Link } from "react-router-dom";
 
 const Footer = () => (
   <footer className="w-full border-t border-border py-12 px-4">
@@ -24,7 +25,7 @@ const Footer = () => (
         <div className="space-y-4">
           <p className="text-sm font-semibold">Legal</p>
           <ul className="space-y-2">
-            <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</a></li>
+            <li><Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Privacy</Link></li>
             <li><a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Terms</a></li>
           </ul>
         </div>
