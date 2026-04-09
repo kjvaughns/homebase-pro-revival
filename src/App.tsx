@@ -7,6 +7,7 @@ import Index from "./pages/Index.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
+import ProviderProfilePage from "./pages/ProviderProfilePage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
@@ -29,6 +30,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
+          <Route path="/providers/:id" element={<ProviderProfilePage />} />
           <Route path="/book/:slug" element={<BookingPage />} />
           <Route path="/book" element={<GuestBookingPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmedPage />} />
