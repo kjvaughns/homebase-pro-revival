@@ -145,6 +145,7 @@ const TIME_SLOTS = ["Morning (8am-12pm)", "Afternoon (12pm-5pm)", "Evening (5pm-
 
 export default function AIBookingPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [step, setStep] = useState<StepKey>("describe");
   const [problemText, setProblemText] = useState("");
   const [analysis, setAnalysis] = useState<Analysis | null>(null);
@@ -156,33 +157,42 @@ export default function AIBookingPage() {
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
 
+  // Pre-selected provider from marketplace
+  const preSelectedProvider = searchParams.get("providerId")
+    ? {
+        id: searchParams.get("providerId")!,
+        business_name: searchParams.get("providerName") || "Provider",
+        name: searchParams.get("providerName") || "Provider",
+        category: searchParams.get("category") || "",
+        rating: 4.8,
+        review_count: 0,
+        verified: true,
+      }
+    : null;
+
   useEffect(() => {
     document.title = "AI Home Assistant — HomeBase";
   }, []);
 
-  const apiCall = useCallback(
-    async (path: string, body: any) => {
-      setError(null);
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      const res = await fetch(`${API_BASE}${path}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) throw new Error(`API error ${res.status}`);
-      return res.json();
-    },
-    []
-  );
+  const invokeIntake = useCallback(async (action: string, params: any) => {
+    setError(null);
+    const { data, error: fnError } = await supabase.functions.invoke("ai-intake", {
+      body: { action, ...params },
+    });
+    if (fnError) {
+      console.error("Edge function error:", fnError);
+      throw new Error(fnError.message || "Something went wrong");
+    }
+    if (data?.error) {
+      throw new Error(data.error);
+    }
+    return data;
+  }, []);
 
   const handleAnalyze = async () => {
     setStep("loading-analyze");
     try {
-      const result = await apiCall("/api/intake/analyze", { problemText });
+      const result = await invokeIntake("analyze", { problemText });
       setAnalysis(result);
       setStep("questions");
     } catch {
@@ -199,7 +209,7 @@ export default function AIBookingPage() {
         question: q.question,
         answer: Array.isArray(answers[q.id]) ? (answers[q.id] as string[]).join(", ") : String(answers[q.id] ?? ""),
       }));
-      const result = await apiCall("/api/intake/refine", {
+      const result = await invokeIntake("refine", {
         originalAnalysis: { category: analysis.category, summary: analysis.summary, severity: analysis.severity },
         answers: mappedAnswers,
       });
@@ -213,10 +223,16 @@ export default function AIBookingPage() {
 
   const handleMatchProviders = async () => {
     if (!analysis) return;
+    // If provider was pre-selected from marketplace, skip the API call
+    if (preSelectedProvider) {
+      setProviders([preSelectedProvider as MatchedProvider]);
+      setStep("providers");
+      return;
+    }
     setStep("loading-match");
     try {
-      const result = await apiCall("/api/intake/match-providers", { category: analysis.category });
-      setProviders(result);
+      const result = await invokeIntake("match-providers", { category: analysis.category });
+      setProviders(Array.isArray(result) ? result : []);
       setStep("providers");
     } catch {
       setError("Something went wrong finding providers. Please try again.");
