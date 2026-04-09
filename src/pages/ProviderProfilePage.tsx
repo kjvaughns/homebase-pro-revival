@@ -132,7 +132,7 @@ const ProviderProfilePage = () => {
       providerName: provider.business_name,
       category: provider.category || provider.capability_tags?.[0] || "",
     });
-    navigate(`/book?${params.toString()}`);
+    navigate(`/ai-booking?${params.toString()}`);
   };
 
   const Navbar = () => (
