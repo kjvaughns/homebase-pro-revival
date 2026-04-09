@@ -14,6 +14,8 @@ import FAQPage from "./pages/FAQPage.tsx";
 import AIBookingPage from "./pages/AIBookingPage.tsx";
 import SignUpPage from "./pages/SignUpPage.tsx";
 import SignInPage from "./pages/SignInPage.tsx";
+import GuestBookingPage from "./pages/GuestBookingPage.tsx";
+import BookingConfirmedPage from "./pages/BookingConfirmedPage.tsx";
 
 const queryClient = new QueryClient();
 
