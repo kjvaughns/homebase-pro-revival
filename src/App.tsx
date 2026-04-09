@@ -9,6 +9,8 @@ import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
 import BookingPage from "./pages/BookingPage.tsx";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
+import TermsOfService from "./pages/TermsOfService.tsx";
+import FAQPage from "./pages/FAQPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -24,6 +26,8 @@ const App = () => (
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/book/:slug" element={<BookingPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/faq" element={<FAQPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
