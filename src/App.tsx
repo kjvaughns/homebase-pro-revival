@@ -14,6 +14,8 @@ import FAQPage from "./pages/FAQPage.tsx";
 import AIBookingPage from "./pages/AIBookingPage.tsx";
 import SignUpPage from "./pages/SignUpPage.tsx";
 import SignInPage from "./pages/SignInPage.tsx";
+import GuestBookingPage from "./pages/GuestBookingPage.tsx";
+import BookingConfirmedPage from "./pages/BookingConfirmedPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/book/:slug" element={<BookingPage />} />
+          <Route path="/book" element={<GuestBookingPage />} />
+          <Route path="/booking-confirmed" element={<BookingConfirmedPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
           <Route path="/terms" element={<TermsOfService />} />
           <Route path="/faq" element={<FAQPage />} />
