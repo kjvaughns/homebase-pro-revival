@@ -1,52 +1,49 @@
 
 
-## Redesign Booking Flow to Match iOS App
+## Fix Marketplace Flow & AI Intake
 
-Restyle the existing AI Booking page and Provider Profile page to closely match the iOS app screenshots. No new routes needed -- just visual and layout changes to existing pages.
+Two problems to solve:
+
+### Problem 1: Marketplace "Book Now" skips AI intake
+Currently: Marketplace → Provider Profile → `/book` (guest form). The user never describes their issue.
+
+**Fix**: Change Provider Profile's "Book Now" button to navigate to `/ai-booking?providerId=X&providerName=X&category=X` so the user goes through the describe → questions → quote → booking flow with that provider pre-selected. At step 4, skip the provider matching API call and just show the pre-selected provider.
+
+### Problem 2: AI intake calls broken external API
+The `apiCall` function hits `https://api.homebaseproapp.com/api/intake/analyze` which fails. Need to replace with a Supabase edge function using Lovable AI.
+
+**Fix**: Create a single edge function `ai-intake` that handles all 3 endpoints (analyze, refine, match-providers) using Lovable AI with tool calling for structured output.
+
+---
 
 ### Changes
 
-**1. Restyle `src/pages/AIBookingPage.tsx`**
+**1. Create `supabase/functions/ai-intake/index.ts`**
 
-Match the iOS app's visual design across all 4 steps:
+Edge function with 3 actions:
+- **analyze**: Takes `problemText`, uses Lovable AI to return `{ category, confidence, summary, severity, questions[], estimatedPriceRange }`
+- **refine**: Takes `originalAnalysis` + `answers`, returns `{ refinedSummary, severity, recommendedUrgency, scopeOfWork[], serviceOptions[], materialEstimate, timeEstimate, confidence }`
+- **match-providers**: Takes `category`, queries Supabase providers table for matching providers. Falls back to mock providers if none found.
 
-- **Step 1 (Describe):** Add a centered chat bubble icon (green circle with message icon) above the heading. Change heading to "What's the issue?" and subtitle to "Describe your problem and we'll ask a few quick questions to get you accurate quotes." Change chips label to "Try these:" and make them green-bordered pills. Button text: "Continue".
+Uses tool calling (structured output) to ensure valid JSON responses from the AI.
 
-- **Step 2 (Questions):** Show category card at top with icon, category name, and AI summary (like the Plumbing card in the screenshot). Change heading to "Help us understand better" with subtitle "Answer these questions to get accurate quotes." Number each question (1, 2, 3...) with green numbers. Yes/No buttons get checkmark/X icons. Button text: "Get My Quote".
+**2. Update `src/pages/AIBookingPage.tsx`**
 
-- **Step 3 (Options):** Change heading to "Your Service Quote". Show "Issue Summary" label above the refined summary card. Add time estimate and urgency badge ("Soon") row. Add "What's Included" section with green checkmarks for scope of work. Change "Service options" heading to "Choose Your Service Level". Restyle option cards: title left-aligned, price right-aligned in green, description below, included items with green checkmarks. "Recommended" badge on recommended option with green left border.
+- Remove `API_BASE` constant and the `apiCall` function
+- Replace with `supabase.functions.invoke('ai-intake', { body: { action, ... } })` calls
+- Read query params (`providerId`, `providerName`, `category`) on mount — if a provider was pre-selected from the marketplace, store it and skip the match-providers step at step 4
+- When a provider is pre-selected, step 4 shows just that provider with the date/time picker
 
-- **Step 4 (Providers):** Restyle to match the booking screen -- show service summary card at top, then provider card with avatar and category, then a horizontal scrollable date picker showing day cards (Fri 10 Apr, Sat 11 Apr, etc.) for the next 7 days, then time slot buttons. Change CTA to "Request Appointment". Remove "View Profile" button, keep just the book action.
+**3. Update `src/pages/ProviderProfilePage.tsx`**
 
-**2. Restyle `src/pages/ProviderProfilePage.tsx`**
-
-Match the iOS provider profile screenshot:
-
-- Add tab navigation: About | Services | Reviews (About active by default with green underline)
-- In About tab: show bio text, then a 3-column stat card row (Years Exp, Jobs Done, Miles Away) with icons, then "Usually responds in 1 hour" with chat icon
-- Move services/tags into Services tab
-- Add placeholder Reviews tab ("No reviews yet")
-- Bottom sticky bar with "Call" and "Text" outline buttons + green "Book Now" button
-- Larger avatar (96px), business name subtitle below provider name, verified badge as green pill "Verified Pro"
-- Heart/favorite icon in top-right of the hero card
-
-**3. Restyle `src/pages/GuestBookingPage.tsx`**
-
-Match the iOS booking screen (IMG_2556):
-
-- Show "Service Summary" card at top with clipboard icon, summary text, selected service level badge and price range
-- Show provider card below with avatar, business name, category
-- Replace the date input with a horizontal scrollable date picker showing the next 7 days as cards (day name, date number, month)
-- Replace the time dropdown with time slot pill buttons
-- Keep existing form fields (name, phone, email, address) below
-- Change CTA to "Request Appointment" with "Price to be confirmed" text on the left
+- Change `handleBook` to navigate to `/ai-booking?providerId=X&providerName=X&category=X` instead of `/book?...`
+- This sends the user through the full AI intake flow with that provider pre-attached
 
 ### Technical Details
 
-- All changes are purely visual/layout -- no new API calls or routes
-- Continue using the same Supabase insert for booking_requests
-- Use existing Tailwind classes and component library
-- Add Lucide icons: MessageCircle, Clock, Briefcase, Heart, Phone, MessageSquare
-- Date picker generates next 7 days dynamically using `Date()`
-- Files modified: `AIBookingPage.tsx`, `ProviderProfilePage.tsx`, `GuestBookingPage.tsx`
+- Edge function uses `LOVABLE_API_KEY` (already available) to call `https://ai.gateway.lovable.dev/v1/chat/completions`
+- Uses tool calling for structured JSON extraction (no raw JSON parsing needed)
+- Model: `google/gemini-3-flash-preview` (default, fast)
+- Provider matching queries `supabase.from('providers')` with category filter, falls back to mock data
+- The `/book` guest form route still works as-is for the final booking step
 
