@@ -1,25 +1,20 @@
 
 
-## Fix Build Errors + Add BookingPage
+## Create Terms of Service + FAQ Pages
 
-### Step 1 — Fix corrupted JSX in ProviderCard.tsx
-Rewrite `src/components/marketplace/ProviderCard.tsx` with identical logic but fix all corrupted closing tags (`</span>span>` → `</span>`, `</div>div>` → `</div>`, `</p>p>` → `</p>`, `</a>a>` → `</a>`).
+### 1. Create `src/pages/TermsOfService.tsx`
+Same layout as `PrivacyPolicy.tsx` (sticky navbar, green headings, max-w-3xl container, footer). Sections: Acceptance of Terms, Description of Service, User Accounts, Provider Obligations, Booking & Payments, Prohibited Conduct, Intellectual Property, Disclaimers, Limitation of Liability, Termination, Governing Law, Changes to Terms, Contact Us.
 
-### Step 2 — Fix corrupted JSX in MarketplacePage.tsx
-Rewrite `src/pages/MarketplacePage.tsx` with identical logic but fix all corrupted closing tags (`</div>div>` → `</div>`).
+### 2. Create `src/pages/FAQPage.tsx`
+Same layout shell (sticky navbar, max-w-3xl container, footer). Uses the existing `Accordion` component for expandable Q&A items. Categories covering: General (what is HomeBase, who is it for), Booking (how AI booking works, cancellations), Payments (pricing, fees, payouts), Account (setup, data deletion), and Technical (supported devices, security). Green accent headings, dark theme.
 
-### Step 3 — Create BookingPage.tsx
-Create `src/pages/BookingPage.tsx` with the exact code provided:
-- Fetches booking link + provider data by slug from `booking_links` table (joined with `providers`)
-- Shows provider card header with avatar, name, rating, verified badge, hourly rate, service area
-- Booking form with: full name, email, phone, service needed, description, date, time (Morning/Afternoon/Evening), notes
-- Inserts into `appointments` table on submit
-- Loading skeleton, not-found state with marketplace link, and success confirmation state
-- Dark theme styling consistent with the site (`bg-background`, `bg-card`, `border-border`, green accent)
+### 3. Update `src/App.tsx`
+- Import both new pages
+- Add routes: `/terms` → `TermsOfService`, `/faq` → `FAQPage`
 
-### Step 4 — Update App.tsx routing
-- Add `import BookingPage from "./pages/BookingPage.tsx"` after ProviderDetailPage import
-- Add `<Route path="/book/:slug" element={<BookingPage />} />` before the catch-all route
+### 4. Update `src/components/landing/Footer.tsx`
+- Change Terms link from `href="#"` to `<Link to="/terms">`
+- Add FAQ link to the Legal column: `<Link to="/faq">FAQ</Link>`
 
-### No other files touched.
+No other files touched.
 
