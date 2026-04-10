@@ -1,21 +1,24 @@
 
 
-## Fix AI Intake Question Types
+## Fix AI Question Type Selection
 
-**Problem**: The AI prompt in the edge function (line 104) only instructs the AI to use `yes_no`, `single_choice`, and `number` question types — it never mentions `text`. Additionally, `single_choice` questions sometimes come back without the required `options` array.
+**Problem**: The AI sometimes assigns `text` type to questions that clearly have a limited set of answers (e.g., "Is the water leaking constantly, or only when the sink is being used?" should be `single_choice` with options like "Constantly", "Only when in use", "Not sure"). The prompt needs stronger guidance on when to use each type.
 
 ### Change: Update `supabase/functions/ai-intake/index.ts`
 
-Update the system prompt on line 104 to include `text` as a valid question type and reinforce that `single_choice` must include options:
+Update the system prompt (lines 104-109) to give clearer rules about when to use each question type:
 
 ```
-- 3-5 diagnostic questions to better understand the problem. Use these types:
-  - yes_no: for yes/no questions
-  - single_choice: for multiple choice (MUST include options array)
-  - text: for open-ended questions where the user types a free response
-  - number: for numeric answers
-  Give each question a unique id like "q1", "q2", etc. Include at least one text question.
+- 3-5 diagnostic questions to better understand the problem. Choose the BEST type for each question:
+  - yes_no: ONLY for strict yes/no questions (e.g. "Is there visible damage?")
+  - single_choice: for questions with a finite set of answers. ALWAYS include an options array with 2-5 choices. Use this when the answer can be one of several specific options (e.g. "Where is the leak?" → ["Faucet", "Drain pipe", "Wall connection", "Not sure"])
+  - text: ONLY for truly open-ended questions where you cannot predict the answers (e.g. "Describe any unusual sounds you're hearing")
+  - number: for numeric answers (e.g. "How many drips per minute?")
+  Prefer single_choice over text whenever the possible answers can be listed. Give each question a unique id like "q1", "q2", etc.
 ```
 
-This ensures the AI generates a mix of question types including free-text input fields, matching what the iOS app shows.
+This tells the AI to default to `single_choice` when possible and only use `text` for genuinely open-ended questions, matching the iOS app behavior shown in the screenshot.
+
+### Deploy
+Re-deploy the `ai-intake` edge function.
 
