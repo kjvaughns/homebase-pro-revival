@@ -1,45 +1,31 @@
 
 
-## Consolidate Booking Flow & Add Specific Time Slots
+## Add Google Places Autocomplete to Address Field
 
-### Problem
-After the AI intake flow, clicking "Request Appointment" on the providers step navigates to a second booking page (`/book` → `GuestBookingPage`). This creates a redundant flow with two separate pages for date/time selection. Additionally, time slots are vague ranges instead of specific times.
+### Overview
+Add address autocomplete to the booking details step so typing an address shows Google Places suggestions.
 
-### Solution
-Merge the contact details collection into the AI booking page itself. The flow becomes:
-
-```text
-Describe → Questions → Quote → Provider + Date/Time → Contact Details → Confirmation + App Download CTA
-```
-
-No more navigating to `/book`. Everything stays on one page.
+### Prerequisites
+You'll need a **Google Maps API key** with the **Places API** enabled. I'll need to store it as a secret in your project so it can be used securely.
 
 ### Changes
 
-**1. Update `src/pages/AIBookingPage.tsx`**
+**1. Create `src/components/AddressAutocomplete.tsx`**
+- A reusable component that loads the Google Places Autocomplete (via the Maps JavaScript API `places` library)
+- Uses a plain `<Input>` with a `useEffect` that attaches `google.maps.places.Autocomplete` to the input ref
+- On place selection, extracts the formatted address and calls `onChange`
+- Loads the Google Maps script dynamically if not already present (using the API key from `import.meta.env.VITE_GOOGLE_MAPS_API_KEY`)
 
-- Add a new step `"details"` after `"providers"` for collecting name, phone, email, address
-- Replace `TIME_SLOTS` ranges with specific 30-min slots: `8:00 AM, 8:30 AM, 9:00 AM, ... 7:30 PM`
-- When user selects provider + date + time → "Continue" button goes to the details step
-- On details step, "Confirm Booking" inserts into `booking_requests` table directly (same as GuestBookingPage does now)
-- Add a final `"confirmed"` step that shows the green checkmark, booking summary, and an app download CTA (similar to `BookingConfirmedPage` but inline)
-- Remove the `handleBookNow` navigation to `/book`
+**2. Update `src/pages/AIBookingPage.tsx`**
+- Replace the plain `<Input>` for address (around line 793) with the new `<AddressAutocomplete>` component
+- Same styling, same `value`/`onChange` pattern
 
-**2. Update step indicator**
-- Change from `["Describe", "Questions", "Options", "Pros"]` to `["Describe", "Questions", "Quote", "Book"]`
-- The "Book" step covers provider selection, date/time, contact details, and confirmation
+**3. Store the API key**
+- Since the Google Maps API key is a **publishable client-side key** (it's loaded in the browser anyway), it will be stored as `VITE_GOOGLE_MAPS_API_KEY` in the codebase `.env` file
+- You'll need to provide a Google Maps API key with Places API enabled
 
-**3. No changes needed to the database**
-- `booking_requests` table already stores `customer_email`, `customer_phone`, `customer_address` — this is the data used for profile matching when users download the app
-- Multiple bookings with the same email/phone will naturally link in the DB
-
-**4. Files unchanged**
-- `GuestBookingPage.tsx` and `BookingConfirmedPage.tsx` remain for the `/book` route (used by booking links), but the marketplace AI flow no longer navigates there
-
-### Technical Details
-
-- New `StepKey` values: `"details"` and `"confirmed"`
-- Time slots generated programmatically: 8:00 AM to 8:00 PM in 30-min increments
-- The confirmed step includes `AppDownloadCTA` component (card variant) already built
-- Booking insert uses the same `booking_requests` table with `supabase.from("booking_requests").insert(...)` — same RLS policy (`allow_anon_insert_booking_requests`) allows unauthenticated inserts
+### Technical Notes
+- No npm packages needed — uses the Google Maps JavaScript API directly
+- The script is loaded once via a dynamic `<script>` tag injection
+- Autocomplete is restricted to addresses to improve relevance
 
