@@ -18,7 +18,7 @@ interface Provider {
   is_verified?: boolean | null;
   category?: string;
   price_range?: string;
-  booking_links?: { slug: string; is_active: boolean | null }[];
+  booking_links?: { slug: string; is_active: boolean | null }[] | { slug: string; is_active: boolean | null };
 }
 
 const MOCK_PROVIDERS: Provider[] = [
@@ -117,7 +117,7 @@ const MarketplacePage = () => {
         .order("rating", { ascending: false });
 
       if (!error && data && data.length > 0) {
-        setProviders(data as Provider[]);
+        setProviders(data as unknown as Provider[]);
       } else {
         setProviders(MOCK_PROVIDERS);
       }
