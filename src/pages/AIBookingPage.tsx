@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Check, Star, Loader2, ArrowLeft, ShieldCheck, MessageCircle, Clock, CheckCircle2, XCircle, Droplets, Zap, Wind, Sparkles, TreePine, Home, Bug, Hammer, ClipboardList, Tag, DollarSign } from "lucide-react";
+import { Check, Star, Loader2, ArrowLeft, ShieldCheck, MessageCircle, Clock, CheckCircle2, XCircle, Droplets, Zap, Wind, Sparkles, TreePine, Home, Bug, Hammer, ClipboardList, Tag, DollarSign, User, Mail, Phone, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import AppDownloadCTA from "@/components/marketplace/AppDownloadCTA";
 import logo from "@/assets/logo.png";
 
-type StepKey = "describe" | "loading-analyze" | "questions" | "loading-refine" | "options" | "loading-match" | "providers";
-const STEP_LABELS = ["Describe", "Questions", "Options", "Pros"] as const;
+type StepKey = "describe" | "loading-analyze" | "questions" | "loading-refine" | "options" | "loading-match" | "providers" | "details" | "confirmed";
+const STEP_LABELS = ["Describe", "Questions", "Quote", "Book"] as const;
 
 interface AnalysisQuestion {
   id: string;
@@ -79,11 +80,29 @@ const CATEGORY_ICONS: Record<string, React.ReactNode> = {
   Carpentry: <Hammer className="h-5 w-5 text-green-400" />,
 };
 
+// Generate 30-min time slots from 8:00 AM to 8:00 PM
+function generateTimeSlots(): string[] {
+  const slots: string[] = [];
+  for (let h = 8; h < 20; h++) {
+    for (const m of [0, 30]) {
+      const hour12 = h > 12 ? h - 12 : h === 0 ? 12 : h;
+      const ampm = h >= 12 ? "PM" : "AM";
+      const min = m === 0 ? "00" : "30";
+      slots.push(`${hour12}:${min} ${ampm}`);
+    }
+  }
+  // Add 8:00 PM
+  slots.push("8:00 PM");
+  return slots;
+}
+
+const TIME_SLOTS = generateTimeSlots();
+
 function stepIndex(step: StepKey): number {
   if (step === "describe" || step === "loading-analyze") return 0;
   if (step === "questions" || step === "loading-refine") return 1;
   if (step === "options" || step === "loading-match") return 2;
-  return 3;
+  return 3; // providers, details, confirmed
 }
 
 function StepIndicator({ step }: { step: StepKey }) {
@@ -141,10 +160,7 @@ function getNext7Days() {
   return days;
 }
 
-const TIME_SLOTS = ["Morning (8am-12pm)", "Afternoon (12pm-5pm)", "Evening (5pm-8pm)"];
-
 export default function AIBookingPage() {
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [step, setStep] = useState<StepKey>("describe");
   const [problemText, setProblemText] = useState("");
@@ -156,6 +172,14 @@ export default function AIBookingPage() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDate, setSelectedDate] = useState("");
   const [selectedTime, setSelectedTime] = useState("");
+  const [selectedProvider, setSelectedProvider] = useState<MatchedProvider | null>(null);
+
+  // Contact details
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
+  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerAddress, setCustomerAddress] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   // Pre-selected provider from marketplace
   const preSelectedProvider = searchParams.get("providerId")
@@ -223,7 +247,6 @@ export default function AIBookingPage() {
 
   const handleMatchProviders = async () => {
     if (!analysis) return;
-    // If provider was pre-selected from marketplace, skip the API call
     if (preSelectedProvider) {
       setProviders([preSelectedProvider as MatchedProvider]);
       setStep("providers");
@@ -240,6 +263,42 @@ export default function AIBookingPage() {
     }
   };
 
+  const handleContinueToDetails = (provider: MatchedProvider) => {
+    setSelectedProvider(provider);
+    setStep("details");
+  };
+
+  const handleConfirmBooking = async () => {
+    if (!selectedProvider) return;
+    setSubmitting(true);
+    try {
+      const summary = refined?.refinedSummary || analysis?.summary || "";
+      const { error: insertError } = await supabase.from("booking_requests").insert({
+        provider_id: selectedProvider.id,
+        provider_name: selectedProvider.business_name || selectedProvider.name,
+        provider_category: selectedProvider.category || analysis?.category || "",
+        customer_name: customerName.trim(),
+        customer_email: customerEmail.trim(),
+        customer_phone: customerPhone.trim(),
+        customer_address: customerAddress.trim(),
+        service_summary: summary,
+        preferred_date: selectedDate || null,
+        preferred_time: selectedTime || null,
+        notes: selectedOption !== null && refined?.serviceOptions[selectedOption]
+          ? `Service level: ${refined.serviceOptions[selectedOption].title} (${refined.serviceOptions[selectedOption].priceRange})`
+          : null,
+        status: "pending",
+      });
+      if (insertError) throw insertError;
+      setStep("confirmed");
+    } catch (err) {
+      console.error("Booking error:", err);
+      setError("Something went wrong submitting your booking. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const resetAll = () => {
     setStep("describe");
     setProblemText("");
@@ -251,6 +310,11 @@ export default function AIBookingPage() {
     setError(null);
     setSelectedDate("");
     setSelectedTime("");
+    setSelectedProvider(null);
+    setCustomerName("");
+    setCustomerEmail("");
+    setCustomerPhone("");
+    setCustomerAddress("");
   };
 
   const allAnswered = analysis?.questions.every((q) => {
@@ -260,12 +324,7 @@ export default function AIBookingPage() {
     return true;
   });
 
-  const handleBookNow = (provider: MatchedProvider) => {
-    const summary = refined?.refinedSummary || analysis?.summary || "";
-    navigate(
-      `/book?providerId=${provider.id}&providerName=${encodeURIComponent(provider.business_name || provider.name)}&category=${encodeURIComponent(provider.category || "")}&summary=${encodeURIComponent(summary)}`
-    );
-  };
+  const detailsValid = customerName.trim() && customerEmail.trim() && customerPhone.trim();
 
   const next7Days = getNext7Days();
 
@@ -293,7 +352,6 @@ export default function AIBookingPage() {
         {/* Step 1: Describe */}
         {step === "describe" && (
           <div className="space-y-6">
-            {/* Chat bubble icon */}
             <div className="flex justify-center">
               <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
                 <MessageCircle className="h-8 w-8 text-green-400" />
@@ -344,7 +402,6 @@ export default function AIBookingPage() {
         {/* Step 2: Questions */}
         {step === "questions" && analysis && (
           <div className="space-y-6">
-            {/* Category card */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-gray-800 flex items-center justify-center shrink-0">
                 {CATEGORY_ICONS[analysis.category] || <ClipboardList className="h-5 w-5 text-green-400" />}
@@ -471,7 +528,6 @@ export default function AIBookingPage() {
           <div className="space-y-6">
             <h2 className="text-2xl font-bold text-white">Your Service Quote</h2>
 
-            {/* Issue Summary card */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
               <p className="text-xs text-green-400 font-medium uppercase tracking-wide">Issue Summary</p>
               <p className="text-sm text-gray-300 leading-relaxed">{refined.refinedSummary}</p>
@@ -486,7 +542,6 @@ export default function AIBookingPage() {
               </div>
             </div>
 
-            {/* What's Included */}
             {refined.scopeOfWork.length > 0 && (
               <div className="space-y-3">
                 <p className="text-xs text-green-400 font-medium uppercase tracking-wide">What's Included</p>
@@ -501,7 +556,6 @@ export default function AIBookingPage() {
               </div>
             )}
 
-            {/* Choose Your Service Level */}
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-white">Choose Your Service Level</h3>
               {refined.serviceOptions.map((opt, i) => (
@@ -556,10 +610,9 @@ export default function AIBookingPage() {
 
         {step === "loading-match" && <LoadingState message="Finding the best pros near you..." />}
 
-        {/* Step 4: Providers / Request Appointment */}
+        {/* Step 4: Providers / Date & Time Selection */}
         {step === "providers" && (
           <div className="space-y-6">
-            {/* Service summary card */}
             {(refined || analysis) && (
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-3">
                 <div className="flex items-center gap-2">
@@ -637,12 +690,12 @@ export default function AIBookingPage() {
                     {/* Time slots */}
                     <div className="space-y-3">
                       <h3 className="text-base font-bold text-white">Select Time</h3>
-                      <div className="flex flex-wrap gap-2">
+                      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                         {TIME_SLOTS.map((slot) => (
                           <button
                             key={slot}
                             onClick={() => setSelectedTime(slot)}
-                            className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
+                            className={`px-3 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                               selectedTime === slot
                                 ? "border-green-500 bg-green-500/10 text-green-400"
                                 : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
@@ -655,15 +708,13 @@ export default function AIBookingPage() {
                     </div>
 
                     {/* CTA */}
-                    <div className="flex items-center gap-4">
-                      <p className="text-sm text-gray-500 shrink-0">Price to be confirmed</p>
-                      <Button
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base"
-                        onClick={() => handleBookNow(p)}
-                      >
-                        Request Appointment
-                      </Button>
-                    </div>
+                    <Button
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base disabled:opacity-40"
+                      disabled={!selectedDate || !selectedTime}
+                      onClick={() => handleContinueToDetails(p)}
+                    >
+                      Continue
+                    </Button>
                   </div>
                 ))}
               </div>
@@ -671,6 +722,168 @@ export default function AIBookingPage() {
 
             <button onClick={resetAll} className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors mx-auto">
               <ArrowLeft className="h-3 w-3" /> Start over
+            </button>
+          </div>
+        )}
+
+        {/* Step 5: Contact Details */}
+        {step === "details" && selectedProvider && (
+          <div className="space-y-6">
+            <div className="text-center">
+              <h2 className="text-2xl font-bold text-white">Your Details</h2>
+              <p className="text-gray-400 text-sm mt-2">
+                Almost there! Enter your info so {selectedProvider.business_name} can confirm your appointment.
+              </p>
+            </div>
+
+            {/* Booking summary mini-card */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-semibold text-white">{selectedProvider.business_name}</p>
+                <p className="text-xs text-gray-400">{selectedDate} · {selectedTime}</p>
+              </div>
+              {refined?.refinedSummary && (
+                <p className="text-xs text-gray-500 line-clamp-2">{refined.refinedSummary}</p>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <User className="h-4 w-4 text-gray-500" /> Full Name *
+                </label>
+                <Input
+                  value={customerName}
+                  onChange={(e) => setCustomerName(e.target.value)}
+                  placeholder="John Smith"
+                  className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-600 focus-visible:ring-green-500/50 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-gray-500" /> Email *
+                </label>
+                <Input
+                  type="email"
+                  value={customerEmail}
+                  onChange={(e) => setCustomerEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-600 focus-visible:ring-green-500/50 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <Phone className="h-4 w-4 text-gray-500" /> Phone *
+                </label>
+                <Input
+                  type="tel"
+                  value={customerPhone}
+                  onChange={(e) => setCustomerPhone(e.target.value)}
+                  placeholder="(555) 123-4567"
+                  className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-600 focus-visible:ring-green-500/50 rounded-xl"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-gray-500" /> Home Address
+                </label>
+                <Input
+                  value={customerAddress}
+                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  placeholder="123 Main St, City, ST 12345"
+                  className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-600 focus-visible:ring-green-500/50 rounded-xl"
+                />
+              </div>
+            </div>
+
+            <Button
+              onClick={handleConfirmBooking}
+              disabled={!detailsValid || submitting}
+              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full h-14 text-base disabled:opacity-40"
+            >
+              {submitting ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin" /> Confirming...
+                </span>
+              ) : (
+                "Confirm Booking"
+              )}
+            </Button>
+
+            <button
+              onClick={() => setStep("providers")}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors mx-auto"
+            >
+              <ArrowLeft className="h-3 w-3" /> Back
+            </button>
+          </div>
+        )}
+
+        {/* Step 6: Confirmed */}
+        {step === "confirmed" && selectedProvider && (
+          <div className="space-y-8">
+            <div className="flex flex-col items-center text-center space-y-4">
+              <div className="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center">
+                <CheckCircle2 className="h-10 w-10 text-green-400" />
+              </div>
+              <h2 className="text-2xl font-bold text-white">Booking Confirmed!</h2>
+              <p className="text-gray-400 text-sm max-w-md">
+                Your appointment request has been sent to {selectedProvider.business_name}. They'll confirm your booking shortly.
+              </p>
+            </div>
+
+            {/* Booking details card */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
+              <div className="flex items-center gap-3">
+                {selectedProvider.avatar_url ? (
+                  <img src={selectedProvider.avatar_url} alt={selectedProvider.business_name} className="w-10 h-10 rounded-full object-cover" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                    <span className="text-sm font-bold text-green-400">{selectedProvider.business_name.charAt(0)}</span>
+                  </div>
+                )}
+                <div>
+                  <p className="font-semibold text-white">{selectedProvider.business_name}</p>
+                  <p className="text-xs text-gray-400">{selectedProvider.category || analysis?.category}</p>
+                </div>
+              </div>
+
+              <div className="border-t border-gray-800 pt-4 space-y-2.5">
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Date</span>
+                  <span className="text-white font-medium">{selectedDate}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-400">Time</span>
+                  <span className="text-white font-medium">{selectedTime}</span>
+                </div>
+                {selectedOption !== null && refined?.serviceOptions[selectedOption] && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-400">Estimate</span>
+                    <span className="text-green-400 font-medium">{refined.serviceOptions[selectedOption].priceRange}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* App Download CTA */}
+            <div className="space-y-3">
+              <p className="text-xs text-gray-500 text-center uppercase tracking-wide">Track your bookings</p>
+              <AppDownloadCTA variant="card" message="Download HomeBase to manage all your home services" />
+            </div>
+
+            <p className="text-xs text-gray-600 text-center max-w-sm mx-auto">
+              All bookings made with your email are saved. When you download the app, your full service history and HouseFax will be ready.
+            </p>
+
+            <button
+              onClick={resetAll}
+              className="flex items-center gap-1 text-sm text-gray-500 hover:text-gray-300 transition-colors mx-auto"
+            >
+              Book another service
             </button>
           </div>
         )}
