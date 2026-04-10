@@ -13,7 +13,7 @@ function loadGoogleMapsScript(apiKey: string): Promise<void> {
     if (document.getElementById(GOOGLE_MAPS_SCRIPT_ID)) {
       // Script is loading, wait for it
       const check = setInterval(() => {
-        if (window.google?.maps?.places) {
+        if ((window as any).google?.maps?.places) {
           clearInterval(check);
           resolve();
         }
@@ -44,7 +44,7 @@ export function AddressAutocomplete({
   className,
 }: AddressAutocompleteProps) {
   const inputRef = React.useRef<HTMLInputElement>(null);
-  const autocompleteRef = React.useRef<google.maps.places.Autocomplete | null>(null);
+  const autocompleteRef = React.useRef<any>(null);
 
   React.useEffect(() => {
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
