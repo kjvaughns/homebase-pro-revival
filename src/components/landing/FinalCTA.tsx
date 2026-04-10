@@ -2,9 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
 const FinalCTA = () => (
-  <section className="w-full py-24 px-4">
+  <section className="w-full py-12 lg:py-24 px-4">
     <div className="max-w-3xl mx-auto text-center space-y-8">
-      <h2 className="text-3xl sm:text-5xl font-extrabold leading-tight">
+      <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold leading-tight">
         Let's Get You Your{" "}
         <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
           First Client

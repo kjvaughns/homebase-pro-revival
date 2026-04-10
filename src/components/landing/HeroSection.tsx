@@ -4,22 +4,22 @@ import { Link } from "react-router-dom";
 import appDashboard2 from "@/assets/app-dashboard-2.png";
 
 const HeroSection = () => (
-  <section className="w-full py-20 lg:py-28 px-4">
-    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-12 lg:gap-16">
+  <section className="w-full py-12 lg:py-28 px-4">
+    <div className="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
       {/* Left */}
-      <div className="flex-1 space-y-8">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+      <div className="flex-1 space-y-6 sm:space-y-8">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
           Get More Jobs. Close Faster.{" "}
           <span className="bg-gradient-to-r from-primary to-emerald-400 bg-clip-text text-transparent">
             Never Chase Clients Again.
           </span>
         </h1>
-        <p className="text-lg text-muted-foreground max-w-lg">
+        <p className="text-base sm:text-lg text-muted-foreground max-w-lg">
           HomeBase is the all-in-one platform built for home service pros — from booking to payment, powered by AI.
         </p>
         <ul className="space-y-3">
           {["AI books jobs while you work", "Automated follow-ups & reminders", "Get paid instantly after every job"].map((t) => (
-            <li key={t} className="flex items-center gap-3 text-muted-foreground">
+            <li key={t} className="flex items-center gap-3 text-sm sm:text-base text-muted-foreground">
               <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center flex-shrink-0">
                 <Check className="h-3 w-3 text-primary" />
               </div>
@@ -27,23 +27,23 @@ const HeroSection = () => (
             </li>
           ))}
         </ul>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3 sm:gap-4">
           <Link to="/marketplace">
-            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-8 text-base">
+            <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6 sm:px-8 text-sm sm:text-base">
               Get Your First Client Free
             </Button>
           </Link>
-          <Button size="lg" variant="outline" className="rounded-full px-8 text-base border-border text-foreground hover:bg-secondary">
+          <Button size="lg" variant="outline" className="rounded-full px-6 sm:px-8 text-sm sm:text-base border-border text-foreground hover:bg-secondary">
             See How It Works
           </Button>
         </div>
-        <div className="flex flex-wrap gap-6 pt-2">
+        <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
           {[
             { icon: Shield, text: "No contracts" },
             { icon: Clock, text: "Setup in 5 min" },
             { icon: CreditCard, text: "Secure payments" },
           ].map(({ icon: Icon, text }) => (
-            <span key={text} className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span key={text} className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
               <Icon className="h-4 w-4 text-primary" /> {text}
             </span>
           ))}
@@ -63,7 +63,7 @@ const HeroSection = () => (
 
       {/* Right — Phone Mockup */}
       <div className="flex-1 relative flex justify-center">
-        <div className="w-[280px] bg-card rounded-[2.5rem] border-2 border-border p-2 shadow-2xl shadow-primary/5 relative">
+        <div className="w-[260px] sm:w-[280px] bg-card rounded-[2.5rem] border-2 border-border p-2 shadow-2xl shadow-primary/5 relative">
           <div className="rounded-[2rem] overflow-hidden bg-background">
             <div className="flex justify-center pt-2 pb-1">
               <div className="w-24 h-5 bg-card rounded-full" />
@@ -75,8 +75,8 @@ const HeroSection = () => (
           </div>
         </div>
 
-        {/* Floating cards */}
-        <div className="absolute -left-4 top-16 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3 animate-pulse">
+        {/* Floating cards — hidden on mobile */}
+        <div className="absolute -left-4 top-16 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl hidden lg:flex items-center gap-3 animate-pulse">
           <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
             <Bell className="h-4 w-4 text-primary" />
           </div>
@@ -86,7 +86,7 @@ const HeroSection = () => (
           </div>
         </div>
 
-        <div className="absolute -right-4 top-48 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
+        <div className="absolute -right-4 top-48 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl hidden lg:flex items-center gap-3">
           <div className="w-8 h-8 bg-green-500/20 rounded-full flex items-center justify-center">
             <DollarSign className="h-4 w-4 text-primary" />
           </div>
@@ -96,7 +96,7 @@ const HeroSection = () => (
           </div>
         </div>
 
-        <div className="absolute -left-2 bottom-24 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl flex items-center gap-3">
+        <div className="absolute -left-2 bottom-24 bg-card border border-border rounded-2xl px-4 py-3 shadow-xl hidden lg:flex items-center gap-3">
           <div className="w-8 h-8 bg-blue-500/20 rounded-full flex items-center justify-center">
             <Calendar className="h-4 w-4 text-blue-400" />
           </div>

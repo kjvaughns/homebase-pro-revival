@@ -219,7 +219,7 @@ const AIDemoSection = () => {
   const activeStepIndex = step <= 1 ? 0 : step === 2 ? 1 : step === 3 ? 2 : 3;
 
   return (
-    <section className="w-full py-20 px-4">
+    <section className="w-full py-12 lg:py-20 px-4">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <span className="inline-block text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider mb-4">
