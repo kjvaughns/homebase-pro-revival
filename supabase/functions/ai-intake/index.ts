@@ -101,7 +101,12 @@ async function handleAnalyze(problemText: string) {
 - A confidence score
 - A brief summary
 - Severity level
-- 3-5 diagnostic questions to better understand the problem. Use yes_no, single_choice (provide options), or number types. Give each question a unique id like "q1", "q2", etc.
+- 3-5 diagnostic questions to better understand the problem. Use these types:
+  - yes_no: for yes/no questions
+  - single_choice: for multiple choice (MUST include options array)
+  - text: for open-ended questions where the user types a free response
+  - number: for numeric answers
+  Give each question a unique id like "q1", "q2", etc. Include at least one text question.
 - An estimated price range`,
     `Problem: ${problemText}`,
     tools,
