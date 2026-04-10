@@ -18,6 +18,7 @@ interface Provider {
   is_verified?: boolean | null;
   category?: string;
   price_range?: string;
+  booking_links?: { slug: string; is_active: boolean | null }[] | { slug: string; is_active: boolean | null };
 }
 
 const MOCK_PROVIDERS: Provider[] = [
@@ -111,13 +112,12 @@ const MarketplacePage = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("providers")
-        .select("*")
-        .eq("is_public", true)
+        .select("*, booking_links(slug, is_active)")
         .eq("is_active", true)
         .order("rating", { ascending: false });
 
       if (!error && data && data.length > 0) {
-        setProviders(data as Provider[]);
+        setProviders(data as unknown as Provider[]);
       } else {
         setProviders(MOCK_PROVIDERS);
       }
@@ -281,7 +281,13 @@ const MarketplacePage = () => {
                   )}
 
                   <button
-                    onClick={() => navigate(`/providers/${p.id}`)}
+                    onClick={() => {
+                      const bls = p.booking_links;
+                      const slug = Array.isArray(bls)
+                        ? bls.find(bl => bl.is_active)?.slug
+                        : bls?.is_active ? bls.slug : undefined;
+                      navigate(`/providers/${slug || p.id}`);
+                    }}
                     className="w-full mt-1 text-sm font-semibold py-2.5 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
                   >
                     View Profile

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, ArrowLeft, MapPin, Heart, Phone, MessageCircle, Briefcase, CheckCircle2, Clock } from "lucide-react";
+import { Star, ArrowLeft, MapPin, Heart, Phone, MessageCircle, Briefcase, CheckCircle2, Clock, Copy, Check, Share2 } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 interface Provider {
@@ -19,6 +19,15 @@ interface Provider {
   category?: string;
   price_range?: string;
   years_experience?: number | null;
+}
+
+interface BookingLink {
+  provider_id: string;
+  slug: string;
+  is_active: boolean | null;
+  instant_booking: boolean | null;
+  show_pricing: boolean | null;
+  custom_title: string | null;
 }
 
 const MOCK_PROVIDERS: Record<string, Provider> = {
@@ -97,25 +106,52 @@ const ProviderProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [provider, setProvider] = useState<Provider | null>(null);
+  const [bookingLink, setBookingLink] = useState<BookingLink | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("about");
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (!id) return;
-    if (MOCK_PROVIDERS[id]) {
+
+    // Mock provider fallback
+    if (id.startsWith("mock-") && MOCK_PROVIDERS[id]) {
       setProvider(MOCK_PROVIDERS[id]);
       setLoading(false);
       return;
     }
+
     const fetchProvider = async () => {
       setLoading(true);
-      const { data } = await supabase
-        .from("providers")
-        .select("*")
-        .eq("id", id)
-        .eq("is_public", true)
+
+      // Step 1: Try booking_links slug lookup
+      const { data: blData } = await supabase
+        .from("booking_links")
+        .select("provider_id, slug, is_active, instant_booking, show_pricing, custom_title")
+        .eq("slug", id)
+        .eq("is_active", true)
         .maybeSingle();
-      if (data) setProvider(data as Provider);
+
+      if (blData) {
+        setBookingLink(blData as BookingLink);
+        // Step 2a: Fetch provider by booking_link's provider_id
+        const { data: provData } = await supabase
+          .from("providers")
+          .select("*")
+          .eq("id", blData.provider_id)
+          .single();
+        if (provData) setProvider(provData as Provider);
+      } else {
+        // Step 2b: Fall back to direct provider ID lookup
+        const { data: provData } = await supabase
+          .from("providers")
+          .select("*")
+          .eq("id", id)
+          .eq("is_public", true)
+          .maybeSingle();
+        if (provData) setProvider(provData as Provider);
+      }
+
       setLoading(false);
     };
     fetchProvider();
@@ -133,6 +169,14 @@ const ProviderProfilePage = () => {
       category: provider.category || provider.capability_tags?.[0] || "",
     });
     navigate(`/ai-booking?${params.toString()}`);
+  };
+
+  const handleCopyLink = async () => {
+    if (!bookingLink) return;
+    const url = `homebaseproapp.com/providers/${bookingLink.slug}`;
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   const Navbar = () => (
@@ -209,7 +253,7 @@ const ProviderProfilePage = () => {
               </div>
             )}
             <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-white">{provider.business_name}</h1>
+              <h1 className="text-2xl font-bold text-white">{bookingLink?.custom_title || provider.business_name}</h1>
               {displayCategory && (
                 <p className="text-sm text-gray-400">{provider.business_name}'s {displayCategory} Pro</p>
               )}
@@ -230,6 +274,26 @@ const ProviderProfilePage = () => {
             </div>
           )}
         </div>
+
+        {/* Share booking link section */}
+        {bookingLink && (
+          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              <Share2 className="h-5 w-5 text-green-400 shrink-0" />
+              <div className="min-w-0">
+                <p className="text-xs text-gray-500 mb-0.5">Share booking link</p>
+                <p className="text-sm text-gray-300 truncate">homebaseproapp.com/providers/{bookingLink.slug}</p>
+              </div>
+            </div>
+            <button
+              onClick={handleCopyLink}
+              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
+            >
+              {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+              {copied ? "Copied" : "Copy"}
+            </button>
+          </div>
+        )}
 
         {/* Tabs */}
         <div className="flex border-b border-gray-800">
