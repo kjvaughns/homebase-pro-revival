@@ -205,8 +205,7 @@ const ProviderProfilePage = () => {
   };
 
   const getShareUrl = (slug: string) => {
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "yvedkmtjynhgsuxukxjj";
-    return `https://${projectId}.supabase.co/functions/v1/og-meta/${slug}`;
+    return `https://homebaseproapp.com/providers/${slug}`;
   };
 
   const handleCopyLink = async () => {
