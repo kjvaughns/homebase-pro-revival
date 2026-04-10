@@ -1,24 +1,45 @@
 
 
-## Fix AI Question Type Selection
+## Consolidate Booking Flow & Add Specific Time Slots
 
-**Problem**: The AI sometimes assigns `text` type to questions that clearly have a limited set of answers (e.g., "Is the water leaking constantly, or only when the sink is being used?" should be `single_choice` with options like "Constantly", "Only when in use", "Not sure"). The prompt needs stronger guidance on when to use each type.
+### Problem
+After the AI intake flow, clicking "Request Appointment" on the providers step navigates to a second booking page (`/book` → `GuestBookingPage`). This creates a redundant flow with two separate pages for date/time selection. Additionally, time slots are vague ranges instead of specific times.
 
-### Change: Update `supabase/functions/ai-intake/index.ts`
+### Solution
+Merge the contact details collection into the AI booking page itself. The flow becomes:
 
-Update the system prompt (lines 104-109) to give clearer rules about when to use each question type:
-
-```
-- 3-5 diagnostic questions to better understand the problem. Choose the BEST type for each question:
-  - yes_no: ONLY for strict yes/no questions (e.g. "Is there visible damage?")
-  - single_choice: for questions with a finite set of answers. ALWAYS include an options array with 2-5 choices. Use this when the answer can be one of several specific options (e.g. "Where is the leak?" → ["Faucet", "Drain pipe", "Wall connection", "Not sure"])
-  - text: ONLY for truly open-ended questions where you cannot predict the answers (e.g. "Describe any unusual sounds you're hearing")
-  - number: for numeric answers (e.g. "How many drips per minute?")
-  Prefer single_choice over text whenever the possible answers can be listed. Give each question a unique id like "q1", "q2", etc.
+```text
+Describe → Questions → Quote → Provider + Date/Time → Contact Details → Confirmation + App Download CTA
 ```
 
-This tells the AI to default to `single_choice` when possible and only use `text` for genuinely open-ended questions, matching the iOS app behavior shown in the screenshot.
+No more navigating to `/book`. Everything stays on one page.
 
-### Deploy
-Re-deploy the `ai-intake` edge function.
+### Changes
+
+**1. Update `src/pages/AIBookingPage.tsx`**
+
+- Add a new step `"details"` after `"providers"` for collecting name, phone, email, address
+- Replace `TIME_SLOTS` ranges with specific 30-min slots: `8:00 AM, 8:30 AM, 9:00 AM, ... 7:30 PM`
+- When user selects provider + date + time → "Continue" button goes to the details step
+- On details step, "Confirm Booking" inserts into `booking_requests` table directly (same as GuestBookingPage does now)
+- Add a final `"confirmed"` step that shows the green checkmark, booking summary, and an app download CTA (similar to `BookingConfirmedPage` but inline)
+- Remove the `handleBookNow` navigation to `/book`
+
+**2. Update step indicator**
+- Change from `["Describe", "Questions", "Options", "Pros"]` to `["Describe", "Questions", "Quote", "Book"]`
+- The "Book" step covers provider selection, date/time, contact details, and confirmation
+
+**3. No changes needed to the database**
+- `booking_requests` table already stores `customer_email`, `customer_phone`, `customer_address` — this is the data used for profile matching when users download the app
+- Multiple bookings with the same email/phone will naturally link in the DB
+
+**4. Files unchanged**
+- `GuestBookingPage.tsx` and `BookingConfirmedPage.tsx` remain for the `/book` route (used by booking links), but the marketplace AI flow no longer navigates there
+
+### Technical Details
+
+- New `StepKey` values: `"details"` and `"confirmed"`
+- Time slots generated programmatically: 8:00 AM to 8:00 PM in 30-min increments
+- The confirmed step includes `AppDownloadCTA` component (card variant) already built
+- Booking insert uses the same `booking_requests` table with `supabase.from("booking_requests").insert(...)` — same RLS policy (`allow_anon_insert_booking_requests`) allows unauthenticated inserts
 
