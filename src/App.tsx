@@ -8,7 +8,7 @@ import NotFound from "./pages/NotFound.tsx";
 import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
 import ProviderProfilePage from "./pages/ProviderProfilePage.tsx";
-import BookingPage from "./pages/BookingPage.tsx";
+import { Navigate, useParams } from "react-router-dom";
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import FAQPage from "./pages/FAQPage.tsx";
@@ -31,7 +31,7 @@ const App = () => (
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/providers/:id" element={<ProviderProfilePage />} />
-          <Route path="/book/:slug" element={<BookingPage />} />
+          <Route path="/book/:slug" element={<BookSlugRedirect />} />
           <Route path="/book" element={<GuestBookingPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmedPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
