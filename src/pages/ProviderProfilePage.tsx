@@ -158,7 +158,40 @@ const ProviderProfilePage = () => {
   }, [id]);
 
   useEffect(() => {
-    if (provider) document.title = `${provider.business_name} | HomeBase`;
+    if (!provider) return;
+    document.title = `${provider.business_name} | HomeBase`;
+
+    const setMeta = (property: string, content: string) => {
+      let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("property", property);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+
+    const setNameMeta = (name: string, content: string) => {
+      let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
+      if (!el) {
+        el = document.createElement("meta");
+        el.setAttribute("name", name);
+        document.head.appendChild(el);
+      }
+      el.setAttribute("content", content);
+    };
+
+    const desc = provider.description
+      ? provider.description.slice(0, 160)
+      : `Book ${provider.business_name} on HomeBase`;
+
+    setMeta("og:title", `${provider.business_name} | HomeBase`);
+    setMeta("og:description", desc);
+    setMeta("og:image", provider.avatar_url || "/placeholder.svg");
+    setMeta("og:url", window.location.href);
+    setNameMeta("description", desc);
+    setNameMeta("twitter:title", `${provider.business_name} | HomeBase`);
+    setNameMeta("twitter:description", desc);
   }, [provider]);
 
   const handleBook = () => {
