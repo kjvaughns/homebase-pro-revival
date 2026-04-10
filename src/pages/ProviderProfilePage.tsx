@@ -204,9 +204,14 @@ const ProviderProfilePage = () => {
     navigate(`/ai-booking?${params.toString()}`);
   };
 
+  const getShareUrl = (slug: string) => {
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID || "yvedkmtjynhgsuxukxjj";
+    return `https://${projectId}.supabase.co/functions/v1/og-meta/${slug}`;
+  };
+
   const handleCopyLink = async () => {
     if (!bookingLink) return;
-    const url = `homebaseproapp.com/providers/${bookingLink.slug}`;
+    const url = getShareUrl(bookingLink.slug);
     await navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -315,7 +320,7 @@ const ProviderProfilePage = () => {
               <Share2 className="h-5 w-5 text-green-400 shrink-0" />
               <div className="min-w-0">
                 <p className="text-xs text-gray-500 mb-0.5">Share booking link</p>
-                <p className="text-sm text-gray-300 truncate">homebaseproapp.com/providers/{bookingLink.slug}</p>
+                <p className="text-sm text-gray-300 truncate">{provider.business_name} booking link</p>
               </div>
             </div>
             <button
