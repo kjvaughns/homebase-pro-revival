@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, Search, Shield, Sparkles } from "lucide-react";
+import { Star, Search, Shield, Sparkles, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
 
 interface Provider {
@@ -102,6 +102,7 @@ const MarketplacePage = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     document.title = "Find a Pro | HomeBase";
@@ -161,13 +162,26 @@ const MarketplacePage = () => {
             <Link to="/marketplace" className="text-sm font-medium text-primary">Marketplace</Link>
             <Link to="/ai-booking" className="text-sm text-muted-foreground hover:text-foreground transition-colors">AI Booking</Link>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3">
             <Link to="/login" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Sign In</Link>
             <Link to="/signup" className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full hover:bg-primary/90 transition-colors">
               Sign Up
             </Link>
           </div>
+          <button onClick={() => setMenuOpen(!menuOpen)} className="md:hidden p-2 text-foreground" aria-label="Toggle menu">
+            {menuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+          </button>
         </div>
+        {menuOpen && (
+          <div className="md:hidden border-t border-border bg-background px-4 py-4 space-y-3 animate-fade-in">
+            <Link to="/marketplace" onClick={() => setMenuOpen(false)} className="block text-sm font-medium text-primary py-2">Marketplace</Link>
+            <Link to="/ai-booking" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">AI Booking</Link>
+            <Link to="/login" onClick={() => setMenuOpen(false)} className="block text-sm text-muted-foreground py-2">Sign In</Link>
+            <Link to="/signup" onClick={() => setMenuOpen(false)} className="block bg-primary text-primary-foreground text-sm font-semibold px-4 py-2.5 rounded-full text-center hover:bg-primary/90 transition-colors mt-2">
+              Sign Up
+            </Link>
+          </div>
+        )}
       </nav>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -194,7 +208,7 @@ const MarketplacePage = () => {
         </div>
 
         {/* Category chips */}
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-6 justify-center flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide mb-6 md:justify-center md:flex-wrap">
           {CATEGORIES.map((cat) => (
             <button
               key={cat}

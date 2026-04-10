@@ -13,7 +13,7 @@ const features = [
 ];
 
 const PricingSection = () => (
-  <section id="pricing" className="w-full py-20 px-4">
+  <section id="pricing" className="w-full py-12 lg:py-20 px-4">
     <div className="max-w-xl mx-auto text-center space-y-8">
       <div className="space-y-4">
         <span className="inline-block text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">

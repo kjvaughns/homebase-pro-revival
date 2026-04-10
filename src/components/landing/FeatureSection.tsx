@@ -11,7 +11,7 @@ interface FeatureSectionProps {
 }
 
 const FeatureSection = ({ badge, title, description, features, reversed, phoneImage, customPhone }: FeatureSectionProps) => (
-  <section className="w-full py-20 px-4">
+  <section className="w-full py-12 lg:py-20 px-4">
     <div className={`max-w-7xl mx-auto flex flex-col ${reversed ? "lg:flex-row-reverse" : "lg:flex-row"} items-center gap-12 lg:gap-16`}>
       <div className="flex-1 space-y-6">
         <span className="inline-block text-xs font-semibold text-primary bg-primary/10 px-3 py-1 rounded-full uppercase tracking-wider">
