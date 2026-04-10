@@ -53,7 +53,7 @@ export function AddressAutocomplete({
     loadGoogleMapsScript(apiKey).then(() => {
       if (!inputRef.current || autocompleteRef.current) return;
 
-      const ac = new window.google.maps.places.Autocomplete(inputRef.current, {
+      const ac = new (window as any).google.maps.places.Autocomplete(inputRef.current, {
         types: ["address"],
         componentRestrictions: { country: "us" },
       });
