@@ -1,37 +1,81 @@
 
 
-## Mobile Experience Fixes
+## Dynamic OG Meta Tags for Provider Links
 
 ### Problem
-The site has several mobile issues: no hamburger menu on either navbar, hero floating cards overflow off-screen on small devices, and various spacing/sizing issues on mobile viewports.
+When a provider shares their link (e.g. `homebaseproapp.com/providers/heritage`), link previews on iMessage, Facebook, Twitter, etc. all show generic "HomeBase Pro App" text. This is because the app is client-side rendered — crawlers see the static `index.html` meta tags and never execute JavaScript.
+
+### Solution
+Create a Supabase Edge Function that acts as a dynamic OG proxy. When a social crawler hits a provider URL, it returns an HTML page with the correct meta tags (business name, description). Real browsers get the normal SPA.
+
+### How It Works
+
+```text
+Browser/Crawler → Vercel → Edge Function (og-meta) → returns HTML with dynamic meta tags
+                        ↘ (non-provider routes) → normal SPA index.html
+```
 
 ### Changes
 
-**1. Landing Navbar (`src/components/landing/Navbar.tsx`)** — Add mobile hamburger menu
-- Add a hamburger icon button visible on `md:hidden`
-- When tapped, show a slide-down menu with links (Marketplace, Pricing, For Pros) and the "Start Free" CTA
-- Use local state to toggle open/closed
+**1. Create Edge Function `supabase/functions/og-meta/index.ts`**
+- Accepts a `slug` query parameter
+- Queries `booking_links` for the slug → gets `provider_id`, `custom_title`, `custom_description`
+- Queries `providers` for `business_name`, `description`, `avatar_url`, `capability_tags`
+- Returns a minimal HTML page with:
+  - `<title>` = `"{Business Name} | HomeBase"` (or custom_title if set)
+  - `og:title` = business name
+  - `og:description` = provider description (truncated to 160 chars)
+  - `og:image` = provider avatar_url or default HomeBase OG image
+  - A `<meta http-equiv="refresh">` redirect to the real SPA URL so real users land on the app
+  - A `<script>window.location.replace(...)</script>` as backup redirect
+- For non-matching slugs or direct provider IDs, falls back to default HomeBase meta tags
 
-**2. HeroSection (`src/components/landing/HeroSection.tsx`)** — Fix floating cards
-- Hide the 3 floating notification cards on mobile (`hidden lg:flex`) since they clip off-screen on small viewports
-- Reduce hero heading size on very small screens (`text-3xl` base)
-- Reduce vertical padding on mobile (`py-12 lg:py-28`)
+**2. Update `vercel.json`** — Add rewrite rule for provider routes
+- Add a rewrite that sends `/providers/:slug` requests to the edge function when the user-agent is a known crawler (Facebook, Twitter, iMessage, LinkedIn, Slack, Discord, WhatsApp bots)
+- Non-crawler requests continue to the SPA as normal
+- Vercel doesn't support user-agent rewrites natively, so instead we'll use a simpler approach: route ALL `/providers/:path` requests through a lightweight Vercel serverless function (or use the edge function directly) that checks the user-agent and either returns OG HTML or redirects to the SPA
 
-**3. Marketplace Navbar (`src/pages/MarketplacePage.tsx`)** — Add mobile menu
-- Add hamburger button for mobile with links to Marketplace, AI Booking, Sign In, Sign Up
-- Category chips: ensure horizontal scroll works smoothly on mobile (already `overflow-x-auto`, just remove `justify-center flex-wrap` and keep left-aligned scroll on mobile)
+**Alternative simpler approach — Vercel Edge Middleware:**
+Since the project is deployed on Vercel, the cleanest solution is a Vercel Edge Middleware that intercepts `/providers/:slug` requests, checks the user-agent, and if it's a crawler, fetches provider data from Supabase and returns a minimal HTML response with the right OG tags. Non-crawlers pass through to the SPA.
 
-**4. AIDemoSection (`src/components/landing/AIDemoSection.tsx`)** — Mobile polish
-- Ensure the phone frame and scenario card stack vertically and don't overflow
+**3. Create `api/og/[slug].ts`** (Vercel API route)
+- A simple Vercel serverless function at `/api/og/[slug]`
+- Fetches provider data from Supabase using the service role key
+- Returns HTML with proper OG meta tags + instant JS redirect for real users
+- Update `vercel.json` to rewrite `/providers/:slug` to `/api/og/:slug` for crawler user-agents
 
-**5. General spacing tweaks across landing sections**
-- Reduce `py-20` to `py-12` on mobile for tighter sections
-- Ensure all section headings use `text-2xl sm:text-3xl` minimum sizing
+Since Vercel rewrites can't filter by user-agent, the simplest reliable approach:
 
-### Files Modified
-- `src/components/landing/Navbar.tsx`
-- `src/components/landing/HeroSection.tsx`
-- `src/pages/MarketplacePage.tsx`
-- `src/components/landing/AIDemoSection.tsx`
-- Minor padding adjustments in `FeatureSection.tsx`, `CaseStudiesSection.tsx`, `TestimonialsSection.tsx`, `FAQSection.tsx`, `FinalCTA.tsx`, `HouseFaxSection.tsx`, `PricingSection.tsx`, `Footer.tsx`
+**Final approach:**
+
+**3a. `vercel.json`** — rewrite provider routes to the API function first
+```json
+{
+  "rewrites": [
+    { "source": "/providers/:slug", "destination": "/api/og?slug=:slug" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
+
+**3b. `api/og.ts`** — Vercel serverless function
+- Check `User-Agent` header for known crawlers (facebookexternalhit, Twitterbot, LinkedInBot, WhatsApp, Slackbot, Discordbot, Applebot, TelegramBot)
+- **If crawler**: fetch provider data from Supabase, return HTML with dynamic OG tags
+- **If real browser**: return a 302 redirect to the SPA (which Vercel will serve as `index.html`)
+  - Or serve `index.html` directly with a custom header
+
+**4. Update `src/pages/ProviderProfilePage.tsx`**
+- Keep the existing `document.title` update (already sets title to `"{name} | HomeBase"`)
+- Add `react-helmet-async` or manual `document.head` meta tag updates for client-side meta (helps Google's JS renderer)
+
+### Files
+- **New**: `api/og.ts` (Vercel serverless function)
+- **Modified**: `vercel.json` (add provider rewrite before catch-all)
+- **Modified**: `src/pages/ProviderProfilePage.tsx` (add client-side meta tag updates)
+
+### Technical Notes
+- The Supabase anon key is used in the serverless function (provider data is public via RLS)
+- Crawler detection covers: Facebook, Twitter/X, LinkedIn, Slack, Discord, WhatsApp, iMessage (Applebot), Telegram
+- Real users experience zero delay — they either get a 302 redirect or the SPA directly
+- Provider description is truncated to 160 characters for OG description best practices
 
