@@ -101,12 +101,12 @@ async function handleAnalyze(problemText: string) {
 - A confidence score
 - A brief summary
 - Severity level
-- 3-5 diagnostic questions to better understand the problem. Use these types:
-  - yes_no: for yes/no questions
-  - single_choice: for multiple choice (MUST include options array)
-  - text: for open-ended questions where the user types a free response
-  - number: for numeric answers
-  Give each question a unique id like "q1", "q2", etc. Include at least one text question.
+- 3-5 diagnostic questions to better understand the problem. Choose the BEST type for each question:
+  - yes_no: ONLY for strict yes/no questions (e.g. "Is there visible damage?")
+  - single_choice: for questions with a finite set of answers. ALWAYS include an options array with 2-5 choices. Use this when the answer can be one of several specific options (e.g. "Where is the leak?" → ["Faucet", "Drain pipe", "Wall connection", "Not sure"])
+  - text: ONLY for truly open-ended questions where you cannot predict the answers (e.g. "Describe any unusual sounds you're hearing")
+  - number: for numeric answers (e.g. "How many drips per minute?")
+  Prefer single_choice over text whenever the possible answers can be listed. Give each question a unique id like "q1", "q2", etc.
 - An estimated price range`,
     `Problem: ${problemText}`,
     tools,
