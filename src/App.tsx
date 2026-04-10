@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes, useParams } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +8,11 @@ import NotFound from "./pages/NotFound.tsx";
 import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
 import ProviderProfilePage from "./pages/ProviderProfilePage.tsx";
-import BookingPage from "./pages/BookingPage.tsx";
+
+const BookSlugRedirect = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/providers/${slug}`} replace />;
+};
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import FAQPage from "./pages/FAQPage.tsx";
@@ -31,7 +35,7 @@ const App = () => (
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/providers/:id" element={<ProviderProfilePage />} />
-          <Route path="/book/:slug" element={<BookingPage />} />
+          <Route path="/book/:slug" element={<BookSlugRedirect />} />
           <Route path="/book" element={<GuestBookingPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmedPage />} />
           <Route path="/privacy" element={<PrivacyPolicy />} />
