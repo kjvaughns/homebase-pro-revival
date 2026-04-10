@@ -18,6 +18,7 @@ interface Provider {
   is_verified?: boolean | null;
   category?: string;
   price_range?: string;
+  booking_links?: { slug: string; is_active: boolean | null }[];
 }
 
 const MOCK_PROVIDERS: Provider[] = [
@@ -111,8 +112,7 @@ const MarketplacePage = () => {
       setLoading(true);
       const { data, error } = await supabase
         .from("providers")
-        .select("*")
-        .eq("is_public", true)
+        .select("*, booking_links(slug, is_active)")
         .eq("is_active", true)
         .order("rating", { ascending: false });
 
@@ -281,7 +281,10 @@ const MarketplacePage = () => {
                   )}
 
                   <button
-                    onClick={() => navigate(`/providers/${p.id}`)}
+                    onClick={() => {
+                      const slug = p.booking_links?.find(bl => bl.is_active)?.slug;
+                      navigate(`/providers/${slug || p.id}`);
+                    }}
                     className="w-full mt-1 text-sm font-semibold py-2.5 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
                   >
                     View Profile
