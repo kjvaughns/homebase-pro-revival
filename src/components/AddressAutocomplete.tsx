@@ -1,6 +1,12 @@
 import * as React from "react";
 import { Input } from "@/components/ui/input";
 
+declare global {
+  interface Window {
+    google: typeof google;
+  }
+}
+
 const GOOGLE_MAPS_SCRIPT_ID = "google-maps-places-script";
 
 function loadGoogleMapsScript(apiKey: string): Promise<void> {

@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Loader2, ArrowLeft, ShieldCheck, MessageCircle, Clock, CheckCircle2, XCircle, Droplets, Zap, Wind, Sparkles, TreePine, Home, Bug, Hammer, ClipboardList, Tag, DollarSign, User, Mail, Phone, MapPin } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import AppDownloadCTA from "@/components/marketplace/AppDownloadCTA";
+import { AddressAutocomplete } from "@/components/AddressAutocomplete";
 import logo from "@/assets/logo.png";
 
 type StepKey = "describe" | "loading-analyze" | "questions" | "loading-refine" | "options" | "loading-match" | "providers" | "details" | "confirmed";
