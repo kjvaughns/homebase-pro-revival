@@ -1,48 +1,46 @@
 
 
-## Fix Dynamic OG Tags — Switch from Vercel to Supabase Edge Function
+## Use Vercel API Route for Dynamic OG Tags
 
-### Problem
-The `api/og.ts` and `vercel.json` we created only work on Vercel. Your app is hosted on **Lovable** (`.lovable.app`), which always serves the static `index.html` for every route. Crawlers (iMessage, Facebook, Twitter, etc.) never see dynamic meta tags — they always get "HomeBase Pro App".
+Since you're deployed on Vercel, we can use the clean approach — intercept `/providers/:slug` requests at the server level so the actual URL shows the correct preview. No need for the Supabase Edge Function proxy URL.
 
-### Solution
-Create a **Supabase Edge Function** called `og-meta` that serves as the OG proxy. Since we can't intercept requests on Lovable hosting, we change how share links work:
+### How It Works
 
-- The "Share" / "Copy Link" button on provider profiles will generate a link like:
-  `https://yvedkmtjynhgsuxukxjj.supabase.co/functions/v1/og-meta/heritage`
-- When a crawler hits that URL, it gets HTML with the correct OG tags (business name, description, avatar)
-- When a real user taps the link preview, the `<meta http-equiv="refresh">` instantly redirects them to `homebasepro-app.lovable.app/providers/heritage`
-
-The experience: provider shares link → preview shows "Vaughn Home Services | HomeBase" with their description → tapping opens the real app.
-
-### Data Confirmed
-The `heritage` slug maps to provider "Vaughn Home Services" with description "Full-service home maintenance and repair specialists serving the greater Austin area..."
+```text
+Someone shares homebaseproapp.com/providers/heritage
+  → Vercel rewrites to /api/og?slug=heritage
+  → API checks User-Agent
+  → Crawler? Return HTML with "Vaughn Home Services | HomeBase" OG tags
+  → Real browser? Serve index.html (SPA loads normally)
+```
 
 ### Changes
 
-**1. New: `supabase/functions/og-meta/index.ts`**
-- Parses the slug from the URL path
-- Queries `booking_links` for slug → `provider_id`
-- Queries `providers` for `business_name`, `description`, `avatar_url`, `service_area`, `capability_tags`
-- If crawler User-Agent: returns HTML with dynamic `og:title`, `og:description`, `og:image` + `<meta http-equiv="refresh">` redirect to the real app URL
-- If real browser: returns a 302 redirect directly to `homebasepro-app.lovable.app/providers/{slug}`
-- Falls back to default HomeBase OG tags if provider not found
+**1. Create `api/og.ts`** (Vercel serverless function)
+- Same crawler detection and Supabase query logic as the existing edge function
+- If crawler: return HTML with dynamic OG meta tags
+- If real browser: read and serve `dist/index.html` so the SPA loads at the same URL (no redirect needed)
 
-**2. Modified: `src/pages/ProviderProfilePage.tsx`**
-- Update the "Copy Link" / share functionality to generate the edge function URL instead of the direct app URL
-- The share URL becomes `https://yvedkmtjynhgsuxukxjj.supabase.co/functions/v1/og-meta/{slug}`
+**2. Create `vercel.json`**
+```json
+{
+  "rewrites": [
+    { "source": "/providers/:slug", "destination": "/api/og?slug=:slug" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+```
 
-**3. Cleanup**
-- Remove `api/og.ts` (Vercel-specific, not used)
-- Remove `vercel.json` (not used on Lovable hosting)
+**3. Update `src/pages/ProviderProfilePage.tsx`**
+- Change `getShareUrl()` to return the clean app URL (`homebaseproapp.com/providers/{slug}`) instead of the Supabase function URL
+- Share links will be clean, human-readable URLs
+
+**4. Update `SITE_URL`**
+- Use `https://homebaseproapp.com` (your Vercel domain) instead of `homebasepro-app.lovable.app`
 
 ### Files
-- **New**: `supabase/functions/og-meta/index.ts`
-- **Modified**: `src/pages/ProviderProfilePage.tsx` (share URL generation)
-- **Deleted**: `api/og.ts`, `vercel.json`
-
-### Notes
-- Edge functions deploy automatically — no manual deployment needed
-- The edge function URL is long, but link previews only show the OG title/description, not the URL
-- If you later add a custom domain, we can make the share URL cleaner
+- **New**: `api/og.ts`
+- **New**: `vercel.json`
+- **Modified**: `src/pages/ProviderProfilePage.tsx` (revert share URL to clean app URL)
+- The Supabase edge function stays as a backup but is no longer the primary share path
 
