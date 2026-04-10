@@ -282,7 +282,10 @@ const MarketplacePage = () => {
 
                   <button
                     onClick={() => {
-                      const slug = p.booking_links?.find(bl => bl.is_active)?.slug;
+                      const bls = p.booking_links;
+                      const slug = Array.isArray(bls)
+                        ? bls.find(bl => bl.is_active)?.slug
+                        : bls?.is_active ? bls.slug : undefined;
                       navigate(`/providers/${slug || p.id}`);
                     }}
                     className="w-full mt-1 text-sm font-semibold py-2.5 rounded-xl border border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-colors"
