@@ -9,6 +9,11 @@ import MarketplacePage from "./pages/MarketplacePage.tsx";
 import ProviderDetailPage from "./pages/ProviderDetailPage.tsx";
 import ProviderProfilePage from "./pages/ProviderProfilePage.tsx";
 import { Navigate, useParams } from "react-router-dom";
+
+const BookSlugRedirect = () => {
+  const { slug } = useParams();
+  return <Navigate to={`/providers/${slug}`} replace />;
+};
 import PrivacyPolicy from "./pages/PrivacyPolicy.tsx";
 import TermsOfService from "./pages/TermsOfService.tsx";
 import FAQPage from "./pages/FAQPage.tsx";
