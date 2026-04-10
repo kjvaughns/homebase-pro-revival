@@ -6,7 +6,7 @@ const GOOGLE_MAPS_SCRIPT_ID = "google-maps-places-script";
 
 function loadGoogleMapsScript(apiKey: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    if (window.google?.maps?.places) {
+    if ((window as any).google?.maps?.places) {
       resolve();
       return;
     }
