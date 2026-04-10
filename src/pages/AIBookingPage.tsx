@@ -790,9 +790,9 @@ export default function AIBookingPage() {
                 <label className="text-sm font-medium text-gray-300 flex items-center gap-2">
                   <MapPin className="h-4 w-4 text-gray-500" /> Home Address
                 </label>
-                <Input
+                <AddressAutocomplete
                   value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
+                  onChange={setCustomerAddress}
                   placeholder="123 Main St, City, ST 12345"
                   className="bg-gray-900 border-gray-800 text-white placeholder:text-gray-600 focus-visible:ring-green-500/50 rounded-xl"
                 />
