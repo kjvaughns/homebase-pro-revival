@@ -1,31 +1,32 @@
 
 
-## Add Google Places Autocomplete to Address Field
-
-### Overview
-Add address autocomplete to the booking details step so typing an address shows Google Places suggestions.
-
-### Prerequisites
-You'll need a **Google Maps API key** with the **Places API** enabled. I'll need to store it as a secret in your project so it can be used securely.
+## Align Web Routes with Booking Link Slugs
 
 ### Changes
 
-**1. Create `src/components/AddressAutocomplete.tsx`**
-- A reusable component that loads the Google Places Autocomplete (via the Maps JavaScript API `places` library)
-- Uses a plain `<Input>` with a `useEffect` that attaches `google.maps.places.Autocomplete` to the input ref
-- On place selection, extracts the formatted address and calls `onChange`
-- Loads the Google Maps script dynamically if not already present (using the API key from `import.meta.env.VITE_GOOGLE_MAPS_API_KEY`)
+**1. `src/pages/ProviderProfilePage.tsx`** — Slug-first lookup
 
-**2. Update `src/pages/AIBookingPage.tsx`**
-- Replace the plain `<Input>` for address (around line 793) with the new `<AddressAutocomplete>` component
-- Same styling, same `value`/`onChange` pattern
+- Add `bookingLink` state to store slug, instant_booking, show_pricing, custom_title
+- Change fetch logic:
+  1. If `id` starts with `mock-`, use mock data (unchanged)
+  2. First try: `supabase.from('booking_links').select('provider_id, slug, is_active, instant_booking, show_pricing, custom_title').eq('slug', id).eq('is_active', true).maybeSingle()`
+  3. If found → fetch provider by `bookingLink.provider_id`
+  4. If not found → fall back to `supabase.from('providers').select('*').eq('id', id).eq('is_public', true).maybeSingle()`
+- Keep `handleBook` navigating to `/ai-booking?providerId=UUID&providerName=...&category=...`
+- If bookingLink found, render a small "Share your booking link" section below the hero card showing `homebaseproapp.com/providers/{slug}` with a copy-to-clipboard button
 
-**3. Store the API key**
-- Since the Google Maps API key is a **publishable client-side key** (it's loaded in the browser anyway), it will be stored as `VITE_GOOGLE_MAPS_API_KEY` in the codebase `.env` file
-- You'll need to provide a Google Maps API key with Places API enabled
+**2. `src/pages/MarketplacePage.tsx`** — Join booking_links for slug URLs
+
+- Update Provider interface to add `booking_links?: { slug: string; is_active: boolean | null }[]`
+- Change fetch query to: `supabase.from('providers').select('*, booking_links(slug, is_active)').eq('is_active', true).order('rating', { ascending: false })`
+- Remove `.eq('is_public', true)` or keep it — the RLS policy already filters public providers
+- In the View Profile button, compute URL: `const slug = p.booking_links?.find(bl => bl.is_active)?.slug; navigate(/providers/${slug || p.id})`
+- Mock providers still link to `/providers/mock-1` etc.
+
+**3. `src/App.tsx`** — No changes needed. Route stays `/providers/:id`.
 
 ### Technical Notes
-- No npm packages needed — uses the Google Maps JavaScript API directly
-- The script is loaded once via a dynamic `<script>` tag injection
-- Autocomplete is restricted to addresses to improve relevance
+- The relationship `booking_links_provider_id_providers_id_fk` exists in the types, so the join query works with the Supabase SDK
+- `maybeSingle()` used instead of `single()` to avoid errors when slug doesn't match
+- The booking_links RLS policy already allows public SELECT on active links
 
