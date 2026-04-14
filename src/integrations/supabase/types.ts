@@ -465,6 +465,89 @@ export type Database = {
           },
         ]
       }
+      housefax_entries: {
+        Row: {
+          ai_summary: string | null
+          appointment_id: string | null
+          completed_at: string
+          cost_cents: number | null
+          created_at: string
+          home_id: string
+          id: string
+          job_id: string | null
+          notes: string | null
+          photos: Json | null
+          provider_id: string | null
+          provider_name: string | null
+          service_category: string
+          service_name: string
+          system_affected: string | null
+        }
+        Insert: {
+          ai_summary?: string | null
+          appointment_id?: string | null
+          completed_at: string
+          cost_cents?: number | null
+          created_at?: string
+          home_id: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          photos?: Json | null
+          provider_id?: string | null
+          provider_name?: string | null
+          service_category?: string
+          service_name: string
+          system_affected?: string | null
+        }
+        Update: {
+          ai_summary?: string | null
+          appointment_id?: string | null
+          completed_at?: string
+          cost_cents?: number | null
+          created_at?: string
+          home_id?: string
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          photos?: Json | null
+          provider_id?: string | null
+          provider_name?: string | null
+          service_category?: string
+          service_name?: string
+          system_affected?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "housefax_entries_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "housefax_entries_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "housefax_entries_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "housefax_entries_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       intake_submissions: {
         Row: {
           address: string | null
@@ -580,6 +663,13 @@ export type Database = {
             columns: ["converted_job_id"]
             isOneToOne: false
             referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "intake_submissions_deposit_payment_id_fkey"
+            columns: ["deposit_payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
             referencedColumns: ["id"]
           },
           {
@@ -1247,6 +1337,7 @@ export type Database = {
       payouts: {
         Row: {
           amount_cents: number
+          arrival_date: string | null
           created_at: string
           id: string
           provider_id: string
@@ -1256,6 +1347,7 @@ export type Database = {
         }
         Insert: {
           amount_cents: number
+          arrival_date?: string | null
           created_at?: string
           id?: string
           provider_id: string
@@ -1265,6 +1357,7 @@ export type Database = {
         }
         Update: {
           amount_cents?: number
+          arrival_date?: string | null
           created_at?: string
           id?: string
           provider_id?: string
@@ -1284,12 +1377,16 @@ export type Database = {
       }
       provider_custom_services: {
         Row: {
+          add_ons_json: string | null
+          ai_pricing_insight: string | null
           base_price: number | null
+          booking_mode: string | null
           category: string
           created_at: string
           description: string | null
           duration: number | null
           id: string
+          intake_questions_json: string | null
           is_addon: boolean
           is_published: boolean | null
           is_recurring: boolean
@@ -1304,12 +1401,16 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          add_ons_json?: string | null
+          ai_pricing_insight?: string | null
           base_price?: number | null
+          booking_mode?: string | null
           category?: string
           created_at?: string
           description?: string | null
           duration?: number | null
           id?: string
+          intake_questions_json?: string | null
           is_addon?: boolean
           is_published?: boolean | null
           is_recurring?: boolean
@@ -1324,12 +1425,16 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          add_ons_json?: string | null
+          ai_pricing_insight?: string | null
           base_price?: number | null
+          booking_mode?: string | null
           category?: string
           created_at?: string
           description?: string | null
           duration?: number | null
           id?: string
+          intake_questions_json?: string | null
           is_addon?: boolean
           is_published?: boolean | null
           is_recurring?: boolean
@@ -1960,6 +2065,7 @@ export type Database = {
           phone: string | null
           role: string | null
           stripe_customer_id: string | null
+          token_version: number
           updated_at: string
         }
         Insert: {
@@ -1975,6 +2081,7 @@ export type Database = {
           phone?: string | null
           role?: string | null
           stripe_customer_id?: string | null
+          token_version?: number
           updated_at?: string
         }
         Update: {
@@ -1990,6 +2097,7 @@ export type Database = {
           phone?: string | null
           role?: string | null
           stripe_customer_id?: string | null
+          token_version?: number
           updated_at?: string
         }
         Relationships: []
