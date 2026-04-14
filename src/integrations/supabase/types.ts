@@ -271,6 +271,8 @@ export type Database = {
           phone: string | null
           provider_id: string
           state: string | null
+          stripe_connect_customer_id: string | null
+          stripe_customer_id: string | null
           updated_at: string
           zip: string | null
         }
@@ -286,6 +288,8 @@ export type Database = {
           phone?: string | null
           provider_id: string
           state?: string | null
+          stripe_connect_customer_id?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           zip?: string | null
         }
@@ -301,6 +305,8 @@ export type Database = {
           phone?: string | null
           provider_id?: string
           state?: string | null
+          stripe_connect_customer_id?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
           zip?: string | null
         }
@@ -354,51 +360,99 @@ export type Database = {
           bathrooms: number | null
           bedrooms: number | null
           city: string
+          county_name: string | null
           created_at: string
+          estimated_value: number | null
+          formatted_address: string | null
+          housefax_data: string | null
+          housefax_enriched_at: string | null
+          housefax_score: number | null
           id: string
           is_default: boolean | null
           label: string
+          last_sold_date: string | null
+          last_sold_price: number | null
+          latitude: number | null
+          longitude: number | null
+          lot_size: number | null
+          neighborhood_name: string | null
+          place_id: string | null
           property_type: Database["public"]["Enums"]["property_type"] | null
           square_feet: number | null
           state: string
           street: string
+          tax_assessed_value: number | null
           updated_at: string
           user_id: string
           year_built: number | null
+          zillow_id: string | null
+          zillow_url: string | null
           zip: string
         }
         Insert: {
           bathrooms?: number | null
           bedrooms?: number | null
           city: string
+          county_name?: string | null
           created_at?: string
+          estimated_value?: number | null
+          formatted_address?: string | null
+          housefax_data?: string | null
+          housefax_enriched_at?: string | null
+          housefax_score?: number | null
           id?: string
           is_default?: boolean | null
           label: string
+          last_sold_date?: string | null
+          last_sold_price?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          lot_size?: number | null
+          neighborhood_name?: string | null
+          place_id?: string | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           square_feet?: number | null
           state: string
           street: string
+          tax_assessed_value?: number | null
           updated_at?: string
           user_id: string
           year_built?: number | null
+          zillow_id?: string | null
+          zillow_url?: string | null
           zip: string
         }
         Update: {
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string
+          county_name?: string | null
           created_at?: string
+          estimated_value?: number | null
+          formatted_address?: string | null
+          housefax_data?: string | null
+          housefax_enriched_at?: string | null
+          housefax_score?: number | null
           id?: string
           is_default?: boolean | null
           label?: string
+          last_sold_date?: string | null
+          last_sold_price?: number | null
+          latitude?: number | null
+          longitude?: number | null
+          lot_size?: number | null
+          neighborhood_name?: string | null
+          place_id?: string | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
           square_feet?: number | null
           state?: string
           street?: string
+          tax_assessed_value?: number | null
           updated_at?: string
           user_id?: string
           year_built?: number | null
+          zillow_id?: string | null
+          zillow_url?: string | null
           zip?: string
         }
         Relationships: [
@@ -593,70 +647,109 @@ export type Database = {
           amount: number
           client_id: string
           created_at: string
+          currency: string | null
           deposit_amount: number | null
           deposit_paid: boolean | null
           discount_amount: number | null
+          discount_cents: number | null
           due_date: string | null
           homeowner_user_id: string | null
+          hosted_invoice_url: string | null
           id: string
           invoice_number: string
           job_id: string | null
           line_items: string | null
           notes: string | null
           paid_at: string | null
+          payment_methods_allowed: string | null
+          platform_fee_cents: number | null
           provider_id: string
           sent_at: string | null
           status: Database["public"]["Enums"]["invoice_status"] | null
+          stripe_checkout_session_id: string | null
+          stripe_invoice_id: string | null
           stripe_payment_intent_id: string | null
+          stripe_payment_link_id: string | null
+          subtotal_cents: number
           tax: number | null
+          tax_cents: number | null
           tax_rate: number | null
           total: number
+          total_cents: number
+          updated_at: string
+          viewed_at: string | null
         }
         Insert: {
-          amount: number
+          amount?: number
           client_id: string
           created_at?: string
+          currency?: string | null
           deposit_amount?: number | null
           deposit_paid?: boolean | null
           discount_amount?: number | null
+          discount_cents?: number | null
           due_date?: string | null
           homeowner_user_id?: string | null
+          hosted_invoice_url?: string | null
           id?: string
           invoice_number: string
           job_id?: string | null
           line_items?: string | null
           notes?: string | null
           paid_at?: string | null
+          payment_methods_allowed?: string | null
+          platform_fee_cents?: number | null
           provider_id: string
           sent_at?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
+          stripe_checkout_session_id?: string | null
+          stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_payment_link_id?: string | null
+          subtotal_cents?: number
           tax?: number | null
+          tax_cents?: number | null
           tax_rate?: number | null
-          total: number
+          total?: number
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
         }
         Update: {
           amount?: number
           client_id?: string
           created_at?: string
+          currency?: string | null
           deposit_amount?: number | null
           deposit_paid?: boolean | null
           discount_amount?: number | null
+          discount_cents?: number | null
           due_date?: string | null
           homeowner_user_id?: string | null
+          hosted_invoice_url?: string | null
           id?: string
           invoice_number?: string
           job_id?: string | null
           line_items?: string | null
           notes?: string | null
           paid_at?: string | null
+          payment_methods_allowed?: string | null
+          platform_fee_cents?: number | null
           provider_id?: string
           sent_at?: string | null
           status?: Database["public"]["Enums"]["invoice_status"] | null
+          stripe_checkout_session_id?: string | null
+          stripe_invoice_id?: string | null
           stripe_payment_intent_id?: string | null
+          stripe_payment_link_id?: string | null
+          subtotal_cents?: number
           tax?: number | null
+          tax_cents?: number | null
           tax_rate?: number | null
           total?: number
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
         }
         Relationships: [
           {
@@ -894,6 +987,109 @@ export type Database = {
           },
         ]
       }
+      message_templates: {
+        Row: {
+          body: string
+          channel: Database["public"]["Enums"]["message_channel"]
+          created_at: string
+          id: string
+          name: string
+          provider_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          channel?: Database["public"]["Enums"]["message_channel"]
+          created_at?: string
+          id?: string
+          name: string
+          provider_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          channel?: Database["public"]["Enums"]["message_channel"]
+          created_at?: string
+          id?: string
+          name?: string
+          provider_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_templates_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_deliveries: {
+        Row: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at: string
+          error: string | null
+          event_type: string
+          external_message_id: string | null
+          id: string
+          metadata: string | null
+          recipient_email: string | null
+          recipient_user_id: string | null
+          related_record_id: string | null
+          related_record_type: string | null
+          status:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          updated_at: string
+        }
+        Insert: {
+          channel: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          error?: string | null
+          event_type: string
+          external_message_id?: string | null
+          id?: string
+          metadata?: string | null
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          status?:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          updated_at?: string
+        }
+        Update: {
+          channel?: Database["public"]["Enums"]["notification_channel"]
+          created_at?: string
+          error?: string | null
+          event_type?: string
+          external_message_id?: string | null
+          id?: string
+          metadata?: string | null
+          recipient_email?: string | null
+          recipient_user_id?: string | null
+          related_record_id?: string | null
+          related_record_type?: string | null
+          status?:
+            | Database["public"]["Enums"]["notification_delivery_status"]
+            | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_deliveries_recipient_user_id_fkey"
+            columns: ["recipient_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notification_preferences: {
         Row: {
           created_at: string
@@ -1004,6 +1200,8 @@ export type Database = {
           notes: string | null
           provider_id: string
           reference: string | null
+          stripe_charge_id: string | null
+          stripe_payment_intent_id: string | null
         }
         Insert: {
           amount: number
@@ -1014,6 +1212,8 @@ export type Database = {
           notes?: string | null
           provider_id: string
           reference?: string | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Update: {
           amount?: number
@@ -1024,6 +1224,8 @@ export type Database = {
           notes?: string | null
           provider_id?: string
           reference?: string | null
+          stripe_charge_id?: string | null
+          stripe_payment_intent_id?: string | null
         }
         Relationships: [
           {
@@ -1144,6 +1346,121 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_custom_services_provider_id_providers_id_fk"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_message_templates: {
+        Row: {
+          body: string
+          created_at: string
+          event_type: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          provider_id: string
+          subject: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          provider_id: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          event_type?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          provider_id?: string
+          subject?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_message_templates_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_messages: {
+        Row: {
+          body: string
+          channel: Database["public"]["Enums"]["message_channel"]
+          client_id: string
+          created_at: string
+          id: string
+          invoice_id: string | null
+          job_id: string | null
+          provider_id: string
+          resend_message_id: string | null
+          status: Database["public"]["Enums"]["message_status"]
+          subject: string | null
+        }
+        Insert: {
+          body: string
+          channel?: Database["public"]["Enums"]["message_channel"]
+          client_id: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          job_id?: string | null
+          provider_id: string
+          resend_message_id?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          subject?: string | null
+        }
+        Update: {
+          body?: string
+          channel?: Database["public"]["Enums"]["message_channel"]
+          client_id?: string
+          created_at?: string
+          id?: string
+          invoice_id?: string | null
+          job_id?: string | null
+          provider_id?: string
+          resend_message_id?: string | null
+          status?: Database["public"]["Enums"]["message_status"]
+          subject?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_messages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_messages_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_messages_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "provider_messages_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -1350,7 +1667,7 @@ export type Database = {
           created_at?: string
           id?: string
           is_active?: boolean | null
-          platform?: string
+          platform: string
           token: string
           updated_at?: string
           user_id: string
@@ -1556,6 +1873,50 @@ export type Database = {
         }
         Relationships: []
       }
+      support_tickets: {
+        Row: {
+          category: string
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          status: string
+          subject: string
+          user_id: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          status?: string
+          subject: string
+          user_id?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          status?: string
+          subject?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_credits: {
         Row: {
           balance_cents: number | null
@@ -1589,6 +1950,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          default_payment_method_id: string | null
           email: string
           first_name: string | null
           id: string
@@ -1597,11 +1959,13 @@ export type Database = {
           password: string
           phone: string | null
           role: string | null
+          stripe_customer_id: string | null
           updated_at: string
         }
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          default_payment_method_id?: string | null
           email: string
           first_name?: string | null
           id?: string
@@ -1610,11 +1974,13 @@ export type Database = {
           password: string
           phone?: string | null
           role?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
         }
         Update: {
           avatar_url?: string | null
           created_at?: string
+          default_payment_method_id?: string | null
           email?: string
           first_name?: string | null
           id?: string
@@ -1623,6 +1989,7 @@ export type Database = {
           password?: string
           phone?: string | null
           role?: string | null
+          stripe_customer_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -1659,6 +2026,15 @@ export type Database = {
         | "biannually"
         | "annually"
         | "custom"
+      message_channel: "email" | "sms"
+      message_status: "sent" | "failed" | "pending_sms"
+      notification_channel: "email" | "push" | "in_app" | "sms"
+      notification_delivery_status:
+        | "queued"
+        | "sent"
+        | "delivered"
+        | "failed"
+        | "pending_sms"
       payment_method: "cash" | "card" | "bank_transfer" | "check" | "other"
       payment_status:
         | "requires_payment"
@@ -1830,6 +2206,16 @@ export const Constants = {
         "biannually",
         "annually",
         "custom",
+      ],
+      message_channel: ["email", "sms"],
+      message_status: ["sent", "failed", "pending_sms"],
+      notification_channel: ["email", "push", "in_app", "sms"],
+      notification_delivery_status: [
+        "queued",
+        "sent",
+        "delivered",
+        "failed",
+        "pending_sms",
       ],
       payment_method: ["cash", "card", "bank_transfer", "check", "other"],
       payment_status: [

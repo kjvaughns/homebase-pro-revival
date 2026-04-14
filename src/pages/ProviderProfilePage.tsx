@@ -1,9 +1,12 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { Star, ArrowLeft, MapPin, Heart, Phone, MessageCircle, Briefcase, CheckCircle2, Clock, Copy, Check, Share2 } from "lucide-react";
-import logo from "@/assets/logo.png";
+import {
+  Star, ArrowLeft, Heart, Phone, MessageCircle,
+  Briefcase, CheckCircle2, MapPin, Clock, Copy, Check, Share2, Mail
+} from "lucide-react";
 
+/* ─── types ─── */
 interface Provider {
   id: string;
   business_name: string;
@@ -16,9 +19,12 @@ interface Provider {
   slug?: string | null;
   hourly_rate?: number | null;
   is_verified?: boolean | null;
-  category?: string;
-  price_range?: string;
   years_experience?: number | null;
+  phone?: string | null;
+  email?: string | null;
+  business_hours?: Record<string, { enabled: boolean; open: string; close: string }> | null;
+  service_cities?: string[] | null;
+  service_zip_codes?: string[] | null;
 }
 
 interface BookingLink {
@@ -30,65 +36,26 @@ interface BookingLink {
   custom_title: string | null;
 }
 
-const MOCK_PROVIDERS: Record<string, Provider> = {
-  "mock-1": {
-    id: "mock-1",
-    business_name: "Marcus Johnson",
-    description: "Licensed master plumber with 15 years of experience. We handle everything from leaky faucets to full bathroom remodels.",
-    average_rating: 4.9,
-    review_count: 127,
-    hourly_rate: 65,
-    is_verified: true,
-    category: "Plumbing",
-    price_range: "$65–$95/hr",
-    capability_tags: ["Plumbing", "Drain Cleaning", "Water Heaters", "Pipe Repair"],
-    service_area: "Austin, TX",
-    years_experience: 15,
-  },
-  "mock-2": {
-    id: "mock-2",
-    business_name: "Sarah Chen",
-    description: "Certified electrician specializing in residential rewiring and panel upgrades. 10+ years of experience with smart home installations, lighting design, and electrical safety inspections.",
-    average_rating: 4.7,
-    review_count: 89,
-    hourly_rate: 75,
-    is_verified: true,
-    category: "Electrical",
-    price_range: "$75–$110/hr",
-    capability_tags: ["Electrical", "Panel Upgrades", "Smart Home", "Rewiring"],
-    service_area: "Austin, TX",
-    years_experience: 10,
-  },
-  "mock-3": {
-    id: "mock-3",
-    business_name: "Mike Torres",
-    description: "HVAC technician. AC installs, repairs, and seasonal maintenance. EPA certified, specializing in energy-efficient systems and indoor air quality solutions.",
-    average_rating: 4.8,
-    review_count: 203,
-    hourly_rate: 80,
-    is_verified: true,
-    category: "HVAC",
-    price_range: "$80–$130/hr",
-    capability_tags: ["HVAC", "AC Repair", "Heating", "Maintenance"],
-    service_area: "Austin, TX",
-    years_experience: 8,
-  },
-  "mock-4": {
-    id: "mock-4",
-    business_name: "Priya Patel",
-    description: "Deep cleaning and recurring home maintenance. Eco-friendly products only. Serving residential and small commercial spaces with attention to detail and reliability.",
-    average_rating: 4.6,
-    review_count: 156,
-    hourly_rate: 45,
-    is_verified: false,
-    category: "Cleaning",
-    price_range: "$45–$65/hr",
-    capability_tags: ["Cleaning", "Deep Clean", "Eco-Friendly", "Recurring"],
-    service_area: "Austin, TX",
-    years_experience: 6,
-  },
-};
+interface CustomService {
+  id: string;
+  name: string;
+  category: string;
+  description: string | null;
+  pricing_type: string;
+  base_price: number | null;
+  price_from: number | null;
+  price_to: number | null;
+  duration: number | null;
+}
 
+interface Review {
+  id: string;
+  rating: number;
+  comment: string | null;
+  created_at: string;
+}
+
+/* ─── small components ─── */
 const RatingStars = ({ rating }: { rating: number }) => (
   <div className="flex items-center gap-0.5">
     {Array.from({ length: 5 }).map((_, i) => (
@@ -102,29 +69,34 @@ const RatingStars = ({ rating }: { rating: number }) => (
 
 type Tab = "about" | "services" | "reviews";
 
+const DAY_ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const DAY_LABELS: Record<string, string> = {
+  monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday",
+  thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday",
+};
+
+/* ─── main page ─── */
 const ProviderProfilePage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+
   const [provider, setProvider] = useState<Provider | null>(null);
   const [bookingLink, setBookingLink] = useState<BookingLink | null>(null);
+  const [services, setServices] = useState<CustomService[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("about");
   const [copied, setCopied] = useState(false);
 
+  /* fetch provider + booking link */
   useEffect(() => {
     if (!id) return;
 
-    // Mock provider fallback
-    if (id.startsWith("mock-") && MOCK_PROVIDERS[id]) {
-      setProvider(MOCK_PROVIDERS[id]);
-      setLoading(false);
-      return;
-    }
-
     const fetchProvider = async () => {
       setLoading(true);
+      let providerId: string | null = null;
 
-      // Step 1: Try booking_links slug lookup
+      // Try booking_links slug first
       const { data: blData } = await supabase
         .from("booking_links")
         .select("provider_id, slug, is_active, instant_booking, show_pricing, custom_title")
@@ -134,57 +106,78 @@ const ProviderProfilePage = () => {
 
       if (blData) {
         setBookingLink(blData as BookingLink);
-        // Step 2a: Fetch provider by booking_link's provider_id
+        providerId = blData.provider_id;
+      }
+
+      // Fetch provider
+      if (providerId) {
         const { data: provData } = await supabase
           .from("providers")
           .select("*")
-          .eq("id", blData.provider_id)
+          .eq("id", providerId)
           .single();
-        if (provData) setProvider(provData as Provider);
+        if (provData) setProvider(provData as unknown as Provider);
       } else {
-        // Step 2b: Fall back to direct provider ID lookup
         const { data: provData } = await supabase
           .from("providers")
           .select("*")
           .eq("id", id)
           .eq("is_public", true)
           .maybeSingle();
-        if (provData) setProvider(provData as Provider);
+        if (provData) {
+          setProvider(provData as unknown as Provider);
+          providerId = provData.id;
+        }
       }
 
       setLoading(false);
     };
+
     fetchProvider();
   }, [id]);
 
+  /* fetch services + reviews once provider loads */
+  useEffect(() => {
+    if (!provider) return;
+
+    const fetchExtra = async () => {
+      const [svcRes, revRes] = await Promise.all([
+        supabase
+          .from("provider_custom_services")
+          .select("id, name, category, description, pricing_type, base_price, price_from, price_to, duration")
+          .eq("provider_id", provider.id)
+          .eq("is_published", true),
+        supabase
+          .from("reviews")
+          .select("id, rating, comment, created_at")
+          .eq("provider_id", provider.id)
+          .order("created_at", { ascending: false })
+          .limit(50),
+      ]);
+
+      if (svcRes.data) setServices(svcRes.data as CustomService[]);
+      if (revRes.data) setReviews(revRes.data as Review[]);
+    };
+
+    fetchExtra();
+  }, [provider]);
+
+  /* OG meta tags */
   useEffect(() => {
     if (!provider) return;
     document.title = `${provider.business_name} | HomeBase`;
 
     const setMeta = (property: string, content: string) => {
       let el = document.querySelector(`meta[property="${property}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("property", property);
-        document.head.appendChild(el);
-      }
+      if (!el) { el = document.createElement("meta"); el.setAttribute("property", property); document.head.appendChild(el); }
       el.setAttribute("content", content);
     };
-
     const setNameMeta = (name: string, content: string) => {
       let el = document.querySelector(`meta[name="${name}"]`) as HTMLMetaElement | null;
-      if (!el) {
-        el = document.createElement("meta");
-        el.setAttribute("name", name);
-        document.head.appendChild(el);
-      }
+      if (!el) { el = document.createElement("meta"); el.setAttribute("name", name); document.head.appendChild(el); }
       el.setAttribute("content", content);
     };
-
-    const desc = provider.description
-      ? provider.description.slice(0, 160)
-      : `Book ${provider.business_name} on HomeBase`;
-
+    const desc = provider.description ? provider.description.slice(0, 160) : `Book ${provider.business_name} on HomeBase`;
     setMeta("og:title", `${provider.business_name} | HomeBase`);
     setMeta("og:description", desc);
     setMeta("og:image", provider.avatar_url || "/placeholder.svg");
@@ -194,42 +187,38 @@ const ProviderProfilePage = () => {
     setNameMeta("twitter:description", desc);
   }, [provider]);
 
+  /* handlers */
   const handleBook = () => {
     if (!provider) return;
     const params = new URLSearchParams({
       providerId: provider.id,
       providerName: provider.business_name,
-      category: provider.category || provider.capability_tags?.[0] || "",
+      category: provider.capability_tags?.[0] || "",
     });
     navigate(`/ai-booking?${params.toString()}`);
   };
 
-  const getShareUrl = (slug: string) => {
-    return `https://homebaseproapp.com/providers/${slug}`;
-  };
+  const getShareUrl = (slug: string) => `https://homebaseproapp.com/providers/${slug}`;
 
   const handleCopyLink = async () => {
     if (!bookingLink) return;
-    const url = getShareUrl(bookingLink.slug);
-    await navigator.clipboard.writeText(url);
+    await navigator.clipboard.writeText(getShareUrl(bookingLink.slug));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
+  /* nav */
   const Navbar = () => (
     <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-3xl mx-auto px-4 flex items-center h-14">
-        <button
-          onClick={() => navigate("/marketplace")}
-          className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span className="text-sm">Main</span>
+        <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
+          <ArrowLeft className="h-5 w-5" />
         </button>
       </div>
     </nav>
   );
 
+  /* loading */
   if (loading) {
     return (
       <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -243,6 +232,7 @@ const ProviderProfilePage = () => {
     );
   }
 
+  /* not found */
   if (!provider) {
     return (
       <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
@@ -258,10 +248,9 @@ const ProviderProfilePage = () => {
     );
   }
 
-  const displayCategory = provider.category || provider.capability_tags?.[0] || "";
-  const yearsExp = provider.years_experience || 5;
-  const jobsDone = provider.review_count ? provider.review_count * 3 : 342;
-  const milesAway = 2.3;
+  const yearsExp = provider.years_experience || 0;
+  const jobsDone = provider.review_count || 0;
+  const businessHours = provider.business_hours as Record<string, { enabled: boolean; open: string; close: string }> | null;
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "about", label: "About" },
@@ -269,30 +258,36 @@ const ProviderProfilePage = () => {
     { key: "reviews", label: "Reviews" },
   ];
 
+  const formatPrice = (svc: CustomService) => {
+    if (svc.pricing_type === "fixed" && svc.base_price != null) return `$${svc.base_price}`;
+    if (svc.pricing_type === "range" && svc.price_from != null && svc.price_to != null) return `$${svc.price_from}–$${svc.price_to}`;
+    if (svc.pricing_type === "hourly" && svc.base_price != null) return `$${svc.base_price}/hr`;
+    return "Quote";
+  };
+
   return (
     <div className="min-h-screen pb-36" style={{ background: "#0a0a0a" }}>
       <Navbar />
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        {/* Hero card */}
+        {/* ─── Hero Card ─── */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 relative">
-          {/* Favorite button */}
-          <button className="absolute top-5 right-5 text-gray-600 hover:text-gray-400 transition-colors">
-            <Heart className="h-6 w-6" />
-          </button>
-
           <div className="flex items-center gap-4">
             {provider.avatar_url ? (
-              <img src={provider.avatar_url} alt={provider.business_name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover" />
+              <img src={provider.avatar_url} alt={provider.business_name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-800" />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-green-500 flex items-center justify-center shrink-0">
-                <span className="text-3xl font-bold text-white">{provider.business_name.charAt(0)}{provider.business_name.split(" ")[1]?.charAt(0) || ""}</span>
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center shrink-0">
+                <Briefcase className="h-8 w-8 text-green-400" />
               </div>
             )}
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-white">{bookingLink?.custom_title || provider.business_name}</h1>
-              {displayCategory && (
-                <p className="text-sm text-gray-400">{provider.business_name}'s {displayCategory} Pro</p>
+            <div className="space-y-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-white truncate">
+                {bookingLink?.custom_title || provider.business_name}
+              </h1>
+              {provider.service_area && (
+                <p className="text-sm text-gray-400 flex items-center gap-1">
+                  <MapPin className="h-3.5 w-3.5 shrink-0" /> {provider.service_area}
+                </p>
               )}
               <div className="flex items-center gap-2">
                 <RatingStars rating={provider.average_rating || 0} />
@@ -312,27 +307,7 @@ const ProviderProfilePage = () => {
           )}
         </div>
 
-        {/* Share booking link section */}
-        {bookingLink && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3 min-w-0">
-              <Share2 className="h-5 w-5 text-green-400 shrink-0" />
-              <div className="min-w-0">
-                <p className="text-xs text-gray-500 mb-0.5">Share booking link</p>
-                <p className="text-sm text-gray-300 truncate">{provider.business_name} booking link</p>
-              </div>
-            </div>
-            <button
-              onClick={handleCopyLink}
-              className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
-            >
-              {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
-              {copied ? "Copied" : "Copy"}
-            </button>
-          </div>
-        )}
-
-        {/* Tabs */}
+        {/* ─── Tabs ─── */}
         <div className="flex border-b border-gray-800">
           {tabs.map((tab) => (
             <button
@@ -343,20 +318,20 @@ const ProviderProfilePage = () => {
               }`}
             >
               {tab.label}
-              {activeTab === tab.key && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500" />
-              )}
+              {activeTab === tab.key && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-green-500" />}
             </button>
           ))}
         </div>
 
-        {/* Tab content */}
+        {/* ─── About Tab ─── */}
         {activeTab === "about" && (
           <div className="space-y-6">
-            <div>
-              <h2 className="text-lg font-bold text-white mb-2">About</h2>
-              <p className="text-gray-400 leading-relaxed">{provider.description}</p>
-            </div>
+            {provider.description && (
+              <div>
+                <h2 className="text-lg font-bold text-white mb-2">About</h2>
+                <p className="text-gray-400 leading-relaxed">{provider.description}</p>
+              </div>
+            )}
 
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
@@ -371,8 +346,8 @@ const ProviderProfilePage = () => {
                 <p className="text-xs text-gray-500">Jobs Done</p>
               </div>
               <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
-                <Clock className="h-5 w-5 text-green-400 mx-auto mb-2" />
-                <p className="text-2xl font-bold text-white">{milesAway}</p>
+                <MapPin className="h-5 w-5 text-green-400 mx-auto mb-2" />
+                <p className="text-2xl font-bold text-white">N/A</p>
                 <p className="text-xs text-gray-500">Miles Away</p>
               </div>
             </div>
@@ -380,59 +355,171 @@ const ProviderProfilePage = () => {
             {/* Response time */}
             <div className="flex items-center gap-2 text-gray-400">
               <MessageCircle className="h-5 w-5" />
-              <span className="text-sm">Usually responds in 1 hour</span>
+              <span className="text-sm">Usually responds in &lt; 1 hour</span>
             </div>
           </div>
         )}
 
+        {/* ─── Services Tab ─── */}
         {activeTab === "services" && (
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-white">Services Offered</h2>
-            {provider.capability_tags && provider.capability_tags.length > 0 ? (
+            {services.length > 0 ? (
+              services.map((svc) => (
+                <div key={svc.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-white font-medium">{svc.name}</p>
+                    {svc.description && <p className="text-gray-500 text-sm mt-0.5 line-clamp-2">{svc.description}</p>}
+                    {svc.duration && <p className="text-gray-600 text-xs mt-1">{svc.duration} min</p>}
+                  </div>
+                  <span className="text-green-400 font-semibold text-sm whitespace-nowrap">{formatPrice(svc)}</span>
+                </div>
+              ))
+            ) : provider.capability_tags && provider.capability_tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {provider.capability_tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-sm font-medium px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-gray-300"
-                  >
+                  <span key={tag} className="text-sm font-medium px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
                     {tag}
                   </span>
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500 text-sm">No services listed yet.</p>
+              <p className="text-gray-500 text-sm text-center py-8">No services listed yet.</p>
             )}
-            {provider.price_range && (
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mt-4">
-                <p className="text-sm text-gray-400 mb-1">Pricing</p>
-                <p className="text-2xl font-bold text-green-400">{provider.price_range}</p>
+          </div>
+        )}
+
+        {/* ─── Reviews Tab ─── */}
+        {activeTab === "reviews" && (
+          <div className="space-y-4">
+            {reviews.length > 0 ? (
+              reviews.map((rev) => (
+                <div key={rev.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <RatingStars rating={rev.rating} />
+                    <span className="text-xs text-gray-600">{new Date(rev.created_at).toLocaleDateString()}</span>
+                  </div>
+                  {rev.comment && <p className="text-gray-400 text-sm">{rev.comment}</p>}
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-12">
+                <Star className="h-10 w-10 text-gray-700 mx-auto mb-3" />
+                <p className="text-gray-500 text-sm">No reviews yet</p>
               </div>
             )}
           </div>
         )}
 
-        {activeTab === "reviews" && (
-          <div className="text-center py-12">
-            <Star className="h-10 w-10 text-gray-700 mx-auto mb-3" />
-            <p className="text-gray-500 text-sm">No reviews yet</p>
+        {/* ─── Business Hours (always visible below tabs) ─── */}
+        {businessHours && Object.keys(businessHours).length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-white">Business Hours</h2>
+            <div className="space-y-0">
+              {DAY_ORDER.map((day) => {
+                const info = businessHours[day];
+                const isOpen = info?.enabled;
+                return (
+                  <div
+                    key={day}
+                    className={`flex items-center justify-between py-2.5 border-b border-gray-800/50 ${
+                      !isOpen ? "opacity-40" : ""
+                    }`}
+                  >
+                    <span className={`text-sm font-medium ${isOpen ? "text-white" : "text-gray-500"}`}>
+                      {DAY_LABELS[day]}
+                    </span>
+                    <span className={`text-sm ${isOpen ? "text-gray-300" : "text-gray-600"}`}>
+                      {isOpen && info ? `${info.open} — ${info.close}` : "Closed"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Service Area ─── */}
+        {((provider.service_cities && provider.service_cities.length > 0) ||
+          (provider.service_zip_codes && provider.service_zip_codes.length > 0)) && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-white">Service Area</h2>
+            <div className="flex flex-wrap gap-2">
+              {provider.service_cities?.map((city) => (
+                <span key={city} className="text-sm px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 bg-gray-900">
+                  {city}
+                </span>
+              ))}
+              {provider.service_zip_codes?.map((zip) => (
+                <span key={zip} className="text-sm px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 bg-gray-900">
+                  {zip}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ─── Contact ─── */}
+        {(provider.phone || provider.email) && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-white">Contact</h2>
+            {provider.phone && (
+              <a href={`tel:${provider.phone}`} className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <Phone className="h-4 w-4 text-green-400" />
+                <span className="text-sm">{provider.phone}</span>
+              </a>
+            )}
+            {provider.email && (
+              <a href={`mailto:${provider.email}`} className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors">
+                <Mail className="h-4 w-4 text-green-400" />
+                <span className="text-sm">{provider.email}</span>
+              </a>
+            )}
+          </div>
+        )}
+
+        {/* ─── Booking Link ─── */}
+        {bookingLink && (
+          <div className="space-y-3">
+            <h2 className="text-lg font-bold text-white">Booking Link</h2>
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <Share2 className="h-4 w-4 text-green-400 shrink-0" />
+                <p className="text-sm text-gray-300 truncate">{getShareUrl(bookingLink.slug)}</p>
+              </div>
+              <button
+                onClick={handleCopyLink}
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
+              >
+                {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copied" : "Copy"}
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* Sticky bottom bar */}
+      {/* ─── Sticky Bottom Bar ─── */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-gray-800 p-4 z-50">
-        <div className="max-w-3xl mx-auto flex gap-3">
-          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors">
-            <Phone className="h-4 w-4 text-green-400" />
-            Call
-          </button>
-          <button className="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors">
-            <MessageCircle className="h-4 w-4 text-green-400" />
-            Text
-          </button>
+        <div className="max-w-3xl mx-auto space-y-3">
+          <div className="flex gap-3">
+            <a
+              href={provider.phone ? `tel:${provider.phone}` : "#"}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors"
+            >
+              <Phone className="h-4 w-4 text-green-400" />
+              Call
+            </a>
+            <a
+              href={provider.phone ? `sms:${provider.phone}` : "#"}
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors"
+            >
+              <MessageCircle className="h-4 w-4 text-green-400" />
+              Text
+            </a>
+          </div>
           <button
             onClick={handleBook}
-            className="flex-[2] py-3.5 rounded-xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors text-base"
+            className="w-full py-3.5 rounded-xl bg-green-500 text-white font-semibold hover:bg-green-600 transition-colors text-base"
           >
             Book Now
           </button>
