@@ -1,46 +1,67 @@
 
 
-## Use Vercel API Route for Dynamic OG Tags
+## Redesign Provider Profile Page to Match App
 
-Since you're deployed on Vercel, we can use the clean approach — intercept `/providers/:slug` requests at the server level so the actual URL shows the correct preview. No need for the Supabase Edge Function proxy URL.
+### What changes
 
-### How It Works
+Rewrite `src/pages/ProviderProfilePage.tsx` to match the mobile app design shown in the screenshots, pulling all real data from the database.
 
-```text
-Someone shares homebaseproapp.com/providers/heritage
-  → Vercel rewrites to /api/og?slug=heritage
-  → API checks User-Agent
-  → Crawler? Return HTML with "Vaughn Home Services | HomeBase" OG tags
-  → Real browser? Serve index.html (SPA loads normally)
-```
+### Design (matching app screenshots)
 
-### Changes
+**Hero Card**: Avatar (rounded, with icon fallback), business name, location, star rating with count, "Verified Pro" badge
 
-**1. Create `api/og.ts`** (Vercel serverless function)
-- Same crawler detection and Supabase query logic as the existing edge function
-- If crawler: return HTML with dynamic OG meta tags
-- If real browser: read and serve `dist/index.html` so the SPA loads at the same URL (no redirect needed)
+**Tabs**: About | Services | Reviews (green underline on active)
 
-**2. Create `vercel.json`**
-```json
-{
-  "rewrites": [
-    { "source": "/providers/:slug", "destination": "/api/og?slug=:slug" },
-    { "source": "/(.*)", "destination": "/index.html" }
-  ]
-}
-```
+**About Tab**:
+- Description paragraph
+- Stats row: Years Exp (from `years_experience`), Jobs Done (from `review_count` or 0), Miles Away (show "N/A" since we don't have user location)
+- "Usually responds in < 1 hour" line
 
-**3. Update `src/pages/ProviderProfilePage.tsx`**
-- Change `getShareUrl()` to return the clean app URL (`homebaseproapp.com/providers/{slug}`) instead of the Supabase function URL
-- Share links will be clean, human-readable URLs
+**Services Tab** (new — currently only shows capability_tags):
+- Fetch `provider_custom_services` from DB for this provider
+- If none, fall back to showing capability_tags as chips
+- Show pricing if available
 
-**4. Update `SITE_URL`**
-- Use `https://homebaseproapp.com` (your Vercel domain) instead of `homebasepro-app.lovable.app`
+**Reviews Tab**:
+- Fetch `reviews` from DB for this provider
+- Show star rating + comment + date for each
+- "No reviews yet" empty state
 
-### Files
-- **New**: `api/og.ts`
-- **New**: `vercel.json`
-- **Modified**: `src/pages/ProviderProfilePage.tsx` (revert share URL to clean app URL)
-- The Supabase edge function stays as a backup but is no longer the primary share path
+**Business Hours section** (after tabs, always visible):
+- Parse `business_hours` JSONB from providers table
+- Show Mon–Sun with open/close times, "Closed" for disabled days
+- Dim closed days
+
+**Service Area section**:
+- Show `service_cities` array as chips
+- Show `service_zip_codes` array as chips
+
+**Contact section**:
+- Phone (with call link)
+- Email (with mailto link)
+
+**Booking Link section**:
+- Show the share URL with copy button
+
+**Sticky bottom bar**: Call | Text | Book Now (green) — matching app exactly
+
+### Data fetching changes
+
+Currently `ProviderProfilePage` does two queries (booking_links + providers). Add:
+- `provider_custom_services` query (for Services tab)
+- `reviews` query (for Reviews tab)
+- Select `business_hours`, `service_cities`, `service_zip_codes` from providers
+
+### Remove mock data
+
+Delete the `MOCK_PROVIDERS` object — all data comes from DB now.
+
+### Files modified
+- `src/pages/ProviderProfilePage.tsx` — full rewrite to match app design
+
+### Color scheme
+- Background: `#0a0a0a` (already used)
+- Cards: `bg-gray-900 border border-gray-800`
+- Accent: green-500 / green-400 (already used)
+- Matches current dark theme
 
