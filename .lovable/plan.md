@@ -1,67 +1,59 @@
 
 
-## Redesign Provider Profile Page to Match App
+## The Problem
 
-### What changes
+Your booking from the marketplace **was saved** to the database (I see it: KJ Vaughns → Heritage Home Cleaners, 2026-04-19 10:00 AM, status `pending`). But it's completely disconnected from your provider portal automations. Here's why:
 
-Rewrite `src/pages/ProviderProfilePage.tsx` to match the mobile app design shown in the screenshots, pulling all real data from the database.
+### What's happening today
 
-### Design (matching app screenshots)
+```text
+Web marketplace booking
+  → INSERT into `booking_requests` table  ✅ (saved)
+  → ❌ No email to customer
+  → ❌ No email/SMS to provider
+  → ❌ No row in `appointments` (what the provider portal reads)
+  → ❌ No row in `jobs`
+  → ❌ No notification record
+```
 
-**Hero Card**: Avatar (rounded, with icon fallback), business name, location, star rating with count, "Verified Pro" badge
+The marketplace writes to `booking_requests` — a standalone "lead inbox" table. Your provider portal/mobile app reads from `appointments` and `jobs`. Two different tables, no bridge between them, **no triggers, no edge functions, no email logic**.
 
-**Tabs**: About | Services | Reviews (green underline on active)
+### What needs to be built
 
-**About Tab**:
-- Description paragraph
-- Stats row: Years Exp (from `years_experience`), Jobs Done (from `review_count` or 0), Miles Away (show "N/A" since we don't have user location)
-- "Usually responds in < 1 hour" line
+**1. New edge function `process-booking-request`** (triggered after the insert from `GuestBookingPage.tsx` and `AIBookingPage.tsx`)
+- Looks up the provider by `provider_id`
+- Creates a row in `appointments` (so it shows up in the provider portal)
+  - Maps: customer info, scheduled_date (from preferred_date + preferred_time), service_name (from service_summary), status `pending`
+- Creates a `notifications` row for the provider's user_id
+- Sends confirmation email to the customer
+- Sends new-booking email to the provider (using their `providers.email`)
+- Updates `booking_requests.status` to `processed` and stores the linked `appointment_id`
 
-**Services Tab** (new — currently only shows capability_tags):
-- Fetch `provider_custom_services` from DB for this provider
-- If none, fall back to showing capability_tags as chips
-- Show pricing if available
+**2. Wire both booking pages to call it**
+- `GuestBookingPage.tsx` — after the insert, invoke `process-booking-request` with the new booking_request id
+- `AIBookingPage.tsx` — same hook
 
-**Reviews Tab**:
-- Fetch `reviews` from DB for this provider
-- Show star rating + comment + date for each
-- "No reviews yet" empty state
+**3. Email setup**
+- Use Lovable's built-in email infrastructure (requires an email domain). I'll check current status and walk you through the 1-step setup if needed.
+- Two templates: `booking-customer-confirmation` and `booking-provider-new-lead`
 
-**Business Hours section** (after tabs, always visible):
-- Parse `business_hours` JSONB from providers table
-- Show Mon–Sun with open/close times, "Closed" for disabled days
-- Dim closed days
+**4. Backfill your existing booking**
+- Run a one-time insert to create the `appointments` row for the KJ Vaughns / Heritage booking that's currently stranded, and send the emails so you can verify end-to-end.
 
-**Service Area section**:
-- Show `service_cities` array as chips
-- Show `service_zip_codes` array as chips
+### Files
 
-**Contact section**:
-- Phone (with call link)
-- Email (with mailto link)
+**New**
+- `supabase/functions/process-booking-request/index.ts`
+- Email templates (created by the email scaffolding tool)
 
-**Booking Link section**:
-- Show the share URL with copy button
+**Modified**
+- `src/pages/GuestBookingPage.tsx` — call the function after insert
+- `src/pages/AIBookingPage.tsx` — call the function after insert
 
-**Sticky bottom bar**: Call | Text | Book Now (green) — matching app exactly
+**Migration**
+- Add `appointment_id` column to `booking_requests` to track the link
+- Backfill the existing pending booking
 
-### Data fetching changes
-
-Currently `ProviderProfilePage` does two queries (booking_links + providers). Add:
-- `provider_custom_services` query (for Services tab)
-- `reviews` query (for Reviews tab)
-- Select `business_hours`, `service_cities`, `service_zip_codes` from providers
-
-### Remove mock data
-
-Delete the `MOCK_PROVIDERS` object — all data comes from DB now.
-
-### Files modified
-- `src/pages/ProviderProfilePage.tsx` — full rewrite to match app design
-
-### Color scheme
-- Background: `#0a0a0a` (already used)
-- Cards: `bg-gray-900 border border-gray-800`
-- Accent: green-500 / green-400 (already used)
-- Matches current dark theme
+### Open question
+The provider portal/mobile app — is that the **same Supabase project** (`yvedkmtjynhgsuxukxjj`) reading `appointments`, or a separate backend? I'm assuming same (the schema strongly suggests it). If it's a separate system, we'd also need to push to it via webhook/API — let me know.
 
