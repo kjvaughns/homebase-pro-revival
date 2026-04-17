@@ -206,6 +206,7 @@ export type Database = {
       }
       booking_requests: {
         Row: {
+          appointment_id: string | null
           created_at: string | null
           customer_address: string | null
           customer_email: string
@@ -223,6 +224,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          appointment_id?: string | null
           created_at?: string | null
           customer_address?: string | null
           customer_email: string
@@ -240,6 +242,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          appointment_id?: string | null
           created_at?: string | null
           customer_address?: string | null
           customer_email?: string
