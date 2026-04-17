@@ -274,23 +274,40 @@ export default function AIBookingPage() {
     setSubmitting(true);
     try {
       const summary = refined?.refinedSummary || analysis?.summary || "";
-      const { error: insertError } = await supabase.from("booking_requests").insert({
-        provider_id: selectedProvider.id,
-        provider_name: selectedProvider.business_name || selectedProvider.name,
-        provider_category: selectedProvider.category || analysis?.category || "",
-        customer_name: customerName.trim(),
-        customer_email: customerEmail.trim(),
-        customer_phone: customerPhone.trim(),
-        customer_address: customerAddress.trim(),
-        service_summary: summary,
-        preferred_date: selectedDate || null,
-        preferred_time: selectedTime || null,
-        notes: selectedOption !== null && refined?.serviceOptions[selectedOption]
-          ? `Service level: ${refined.serviceOptions[selectedOption].title} (${refined.serviceOptions[selectedOption].priceRange})`
-          : null,
-        status: "pending",
-      });
-      if (insertError) throw insertError;
+      const { data: inserted, error: insertError } = await supabase
+        .from("booking_requests")
+        .insert({
+          provider_id: selectedProvider.id,
+          provider_name: selectedProvider.business_name || selectedProvider.name,
+          provider_category: selectedProvider.category || analysis?.category || "",
+          customer_name: customerName.trim(),
+          customer_email: customerEmail.trim(),
+          customer_phone: customerPhone.trim(),
+          customer_address: customerAddress.trim(),
+          service_summary: summary,
+          preferred_date: selectedDate || null,
+          preferred_time: selectedTime || null,
+          notes: selectedOption !== null && refined?.serviceOptions[selectedOption]
+            ? `Service level: ${refined.serviceOptions[selectedOption].title} (${refined.serviceOptions[selectedOption].priceRange})`
+            : null,
+          status: "pending",
+        })
+        .select("id")
+        .single();
+      if (insertError || !inserted) throw insertError ?? new Error("Insert failed");
+
+      // Fan out to provider portal (creates appointment + notification).
+      // Non-blocking — booking still succeeds for the user even if this fails.
+      try {
+        const { error: fnError } = await supabase.functions.invoke(
+          "process-booking-request",
+          { body: { bookingRequestId: inserted.id } },
+        );
+        if (fnError) console.error("process-booking-request failed", fnError);
+      } catch (err) {
+        console.error("process-booking-request invoke threw", err);
+      }
+
       setStep("confirmed");
     } catch (err) {
       console.error("Booking error:", err);

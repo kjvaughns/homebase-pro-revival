@@ -206,6 +206,7 @@ export type Database = {
       }
       booking_requests: {
         Row: {
+          appointment_id: string | null
           created_at: string | null
           customer_address: string | null
           customer_email: string
@@ -223,6 +224,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          appointment_id?: string | null
           created_at?: string | null
           customer_address?: string | null
           customer_email: string
@@ -240,6 +242,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          appointment_id?: string | null
           created_at?: string | null
           customer_address?: string | null
           customer_email?: string
@@ -265,6 +268,8 @@ export type Database = {
           created_at: string
           email: string | null
           first_name: string
+          home_data: string | null
+          home_id: string | null
           id: string
           last_name: string | null
           notes: string | null
@@ -282,6 +287,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           first_name: string
+          home_data?: string | null
+          home_id?: string | null
           id?: string
           last_name?: string | null
           notes?: string | null
@@ -299,6 +306,8 @@ export type Database = {
           created_at?: string
           email?: string | null
           first_name?: string
+          home_data?: string | null
+          home_id?: string | null
           id?: string
           last_name?: string | null
           notes?: string | null
@@ -311,6 +320,13 @@ export type Database = {
           zip?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "clients_home_id_fkey"
+            columns: ["home_id"]
+            isOneToOne: false
+            referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "clients_provider_id_providers_id_fk"
             columns: ["provider_id"]
@@ -876,9 +892,11 @@ export type Database = {
         Row: {
           address: string | null
           appointment_id: string | null
+          checklist: Json | null
           client_id: string | null
           completed_at: string | null
           created_at: string
+          custom_service_id: string | null
           description: string | null
           estimated_duration: number | null
           estimated_price: number | null
@@ -896,9 +914,11 @@ export type Database = {
         Insert: {
           address?: string | null
           appointment_id?: string | null
+          checklist?: Json | null
           client_id?: string | null
           completed_at?: string | null
           created_at?: string
+          custom_service_id?: string | null
           description?: string | null
           estimated_duration?: number | null
           estimated_price?: number | null
@@ -916,9 +936,11 @@ export type Database = {
         Update: {
           address?: string | null
           appointment_id?: string | null
+          checklist?: Json | null
           client_id?: string | null
           completed_at?: string | null
           created_at?: string
+          custom_service_id?: string | null
           description?: string | null
           estimated_duration?: number | null
           estimated_price?: number | null
@@ -946,6 +968,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_custom_service_id_fkey"
+            columns: ["custom_service_id"]
+            isOneToOne: false
+            referencedRelation: "provider_custom_services"
             referencedColumns: ["id"]
           },
           {
@@ -1283,6 +1312,7 @@ export type Database = {
       payments: {
         Row: {
           amount: number
+          amount_cents: number
           created_at: string
           id: string
           invoice_id: string
@@ -1295,6 +1325,7 @@ export type Database = {
         }
         Insert: {
           amount: number
+          amount_cents?: number
           created_at?: string
           id?: string
           invoice_id: string
@@ -1307,6 +1338,7 @@ export type Database = {
         }
         Update: {
           amount?: number
+          amount_cents?: number
           created_at?: string
           id?: string
           invoice_id?: string
@@ -1796,6 +1828,57 @@ export type Database = {
           },
         ]
       }
+      refunds: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          id: string
+          payment_id: string | null
+          provider_id: string
+          reason: string | null
+          status: Database["public"]["Enums"]["refund_status"] | null
+          stripe_charge_id: string | null
+          stripe_refund_id: string | null
+        }
+        Insert: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          provider_id: string
+          reason?: string | null
+          status?: Database["public"]["Enums"]["refund_status"] | null
+          stripe_charge_id?: string | null
+          stripe_refund_id?: string | null
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          id?: string
+          payment_id?: string | null
+          provider_id?: string
+          reason?: string | null
+          status?: Database["public"]["Enums"]["refund_status"] | null
+          stripe_charge_id?: string | null
+          stripe_refund_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "refunds_payment_id_fkey"
+            columns: ["payment_id"]
+            isOneToOne: false
+            referencedRelation: "payments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "refunds_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           appointment_id: string
@@ -1878,6 +1961,7 @@ export type Database = {
           category_id: string
           description: string | null
           id: string
+          is_public: boolean | null
           name: string
         }
         Insert: {
@@ -1885,6 +1969,7 @@ export type Database = {
           category_id: string
           description?: string | null
           id?: string
+          is_public?: boolean | null
           name: string
         }
         Update: {
@@ -1892,6 +1977,7 @@ export type Database = {
           category_id?: string
           description?: string | null
           id?: string
+          is_public?: boolean | null
           name?: string
         }
         Relationships: [
@@ -1910,6 +1996,7 @@ export type Database = {
           created_at: string
           details_submitted: boolean | null
           id: string
+          livemode: boolean | null
           onboarding_status:
             | Database["public"]["Enums"]["connect_onboarding_status"]
             | null
@@ -1923,6 +2010,7 @@ export type Database = {
           created_at?: string
           details_submitted?: boolean | null
           id?: string
+          livemode?: boolean | null
           onboarding_status?:
             | Database["public"]["Enums"]["connect_onboarding_status"]
             | null
@@ -1936,6 +2024,7 @@ export type Database = {
           created_at?: string
           details_submitted?: boolean | null
           id?: string
+          livemode?: boolean | null
           onboarding_status?:
             | Database["public"]["Enums"]["connect_onboarding_status"]
             | null
@@ -2160,6 +2249,7 @@ export type Database = {
         | "multi_family"
       provider_plan_tier: "free" | "starter" | "professional" | "enterprise"
       quote_mode: "range" | "fixed" | "estimate_after_review"
+      refund_status: "pending" | "succeeded" | "failed" | "canceled"
       urgency: "flexible" | "soon" | "urgent"
     }
     CompositeTypes: {
@@ -2344,6 +2434,7 @@ export const Constants = {
       ],
       provider_plan_tier: ["free", "starter", "professional", "enterprise"],
       quote_mode: ["range", "fixed", "estimate_after_review"],
+      refund_status: ["pending", "succeeded", "failed", "canceled"],
       urgency: ["flexible", "soon", "urgent"],
     },
   },
