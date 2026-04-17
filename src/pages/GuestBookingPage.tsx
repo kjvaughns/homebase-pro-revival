@@ -62,27 +62,44 @@ export default function GuestBookingPage() {
     setLoading(true);
     setError(null);
 
-    const { error: insertError } = await supabase.from("booking_requests").insert({
-      provider_id: providerId || null,
-      provider_name: providerName || null,
-      provider_category: category || null,
-      customer_name: name.trim(),
-      customer_phone: phone.trim(),
-      customer_email: email.trim(),
-      customer_address: address.trim(),
-      service_summary: serviceDetails.trim(),
-      preferred_date: preferredDate,
-      preferred_time: preferredTime,
-      notes: notes.trim() || null,
-      status: "pending",
-    });
+    const { data: inserted, error: insertError } = await supabase
+      .from("booking_requests")
+      .insert({
+        provider_id: providerId || null,
+        provider_name: providerName || null,
+        provider_category: category || null,
+        customer_name: name.trim(),
+        customer_phone: phone.trim(),
+        customer_email: email.trim(),
+        customer_address: address.trim(),
+        service_summary: serviceDetails.trim(),
+        preferred_date: preferredDate,
+        preferred_time: preferredTime,
+        notes: notes.trim() || null,
+        status: "pending",
+      })
+      .select("id")
+      .single();
 
-    setLoading(false);
-
-    if (insertError) {
+    if (insertError || !inserted) {
+      setLoading(false);
       setError("Something went wrong. Please try again.");
       return;
     }
+
+    // Fan out to the provider portal: creates appointment + notification.
+    // Non-blocking for the user — log only if it fails.
+    try {
+      const { error: fnError } = await supabase.functions.invoke(
+        "process-booking-request",
+        { body: { bookingRequestId: inserted.id } },
+      );
+      if (fnError) console.error("process-booking-request failed", fnError);
+    } catch (err) {
+      console.error("process-booking-request invoke threw", err);
+    }
+
+    setLoading(false);
 
     navigate(
       `/booking-confirmed?providerName=${encodeURIComponent(providerName)}&customerName=${encodeURIComponent(name.trim())}&customerEmail=${encodeURIComponent(email.trim())}&preferredDate=${encodeURIComponent(preferredDate)}&preferredTime=${encodeURIComponent(preferredTime)}`
