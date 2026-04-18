@@ -22,6 +22,10 @@ import SignInPage from "./pages/SignInPage.tsx";
 import GuestBookingPage from "./pages/GuestBookingPage.tsx";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage.tsx";
 import BookAppointmentPage from "./pages/BookAppointmentPage.tsx";
+import PaymentSuccessPage from "./pages/PaymentSuccessPage.tsx";
+import PaymentCancelledPage from "./pages/PaymentCancelledPage.tsx";
+import BookingSuccessPage from "./pages/BookingSuccessPage.tsx";
+import OpenAppPage from "./pages/OpenAppPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -46,6 +50,10 @@ const App = () => (
           <Route path="/ai-booking" element={<AIBookingPage />} />
           <Route path="/signup" element={<SignUpPage />} />
           <Route path="/login" element={<SignInPage />} />
+          <Route path="/payment-success" element={<PaymentSuccessPage />} />
+          <Route path="/payment-cancelled" element={<PaymentCancelledPage />} />
+          <Route path="/booking-success" element={<BookingSuccessPage />} />
+          <Route path="/open-app" element={<OpenAppPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
