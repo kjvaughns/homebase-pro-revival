@@ -1,21 +1,69 @@
 
 
-## Fix header location to show city, not ZIP list
+## Stripe & app-deep-link redirect pages
 
-### Problem
-On the provider profile header, the line under the business name renders `provider.service_area`, which for this provider contains a comma-separated list of ZIP codes (`39211, 39206, ...`). It should show the city instead.
+Add 4 clean branded landing pages so external Stripe redirects and app deep links resolve to a polished web experience instead of raw URLs.
 
-### Fix
-In `src/pages/ProviderProfilePage.tsx` (line 282–286), change the header location source to prefer `service_cities`, with safe fallbacks:
+### New routes (added to `src/App.tsx`)
+- `/payment-success`
+- `/payment-cancelled`
+- `/booking-success`
+- `/open-app`
 
-1. If `provider.service_cities` has entries → show the first city (or first 1–2 joined, e.g. `"Jackson, MS"` style if only city names exist, just `service_cities[0]`).
-2. Else if `service_area` exists **and is not just a list of ZIPs** (detect: contains a non-digit/non-comma/space char) → show it as-is.
-3. Else → hide the line.
+### Files
+- `src/pages/PaymentSuccessPage.tsx` (new)
+- `src/pages/PaymentCancelledPage.tsx` (new)
+- `src/pages/BookingSuccessPage.tsx` (new)
+- `src/pages/OpenAppPage.tsx` (new)
+- `src/lib/deepLink.ts` (new) — shared mobile-detect + deep-link-with-fallback helper
+- `src/App.tsx` — register routes
 
-This keeps the dedicated **Service Area** section lower on the page (which already lists all cities and ZIPs as chips) untouched — that's the right place for the full ZIP list.
+### Shared design (matches existing booking pages)
+- Background `#0a0a0a`, cards `bg-neutral-900 border-neutral-800 rounded-2xl`
+- HomeBase logo nav, centered hero icon (success = green check, cancel = red X)
+- Primary CTA = green pill (`bg-green-500`), secondary = ghost link
+- Mobile-first, no flicker, all content rendered immediately (deep-link side-effect runs in `useEffect`)
 
-### File
-- `src/pages/ProviderProfilePage.tsx` (header location line only)
+### Page details
 
-No schema, routing, or other UI changes.
+**`/payment-success`** — `?jobId=` `?amount=` `?service=`
+- Green check, "Payment successful"
+- Optional job summary card (job id, service, amount) when params present
+- Mobile: auto-attempt `homebase://job/{jobId}` after 600ms; if user is still on page after 2s, show "Open in App" + "Continue on Web"
+- Desktop: "Download App" (TestFlight) + "Continue on Web" (→ `/marketplace`)
+- Primary CTA: "View Job" (deep links if mobile, else web)
+
+**`/payment-cancelled`**
+- Red X, "Payment not completed"
+- Subcopy: "No charge was made. You can try again any time."
+- CTAs: "Try Again" (uses `document.referrer` if same-origin → back, else `/marketplace`), "Back to Home"
+
+**`/booking-success`** — `?appointmentId=` `?service=` `?date=` `?time=` `?providerName=`
+- Green check, "Booking confirmed"
+- Summary card: provider, service, date, time
+- CTAs: "View Appointment" (deep link `homebase://appointment/{id}` on mobile), "Open in App"
+- Mirrors style of existing `BookingConfirmedPage` for consistency
+
+**`/open-app`** — generic deep-link handler. `?path=` `?jobId=` `?appointmentId=`
+- Builds target URL: `homebase://{path or derived}`
+- Mobile: immediate `window.location.href = deepLink`; fallback timer (1.5s) → App Store (`https://apps.apple.com/app/idXXXX` or TestFlight link)
+- Desktop: small countdown then redirect to `/`
+- Visible "Open App" + "Download" + "Continue to homepage" buttons so the page is never a dead end
+
+### `src/lib/deepLink.ts`
+- `isMobile()` — UA check (iOS/Android)
+- `isIOS()` / `isAndroid()`
+- `tryDeepLink(url, fallbackUrl, timeoutMs)` — sets `location.href` then `setTimeout` fallback; cancels fallback on `visibilitychange` (app opened)
+- `APP_STORE_URL` / `TESTFLIGHT_URL` constants
+
+### Stripe URL guidance (documentation only)
+The Stripe checkout session creation lives in the **mobile app's backend**, not in this web repo (no `stripe` edge function exists here). The plan delivers the web landing pages so when the mobile/backend team updates:
+- `success_url` → `https://homebaseproapp.com/payment-success?jobId={JOB_ID}`
+- `cancel_url` → `https://homebaseproapp.com/payment-cancelled`
+
+…both URLs resolve correctly. I'll note this in the final response so the backend change can be made on that side. No Replit URLs exist in this web codebase to remove.
+
+### Out of scope
+- No Supabase fetch on these pages (params alone drive content) — keeps pages instant, no auth or RLS friction. Can add later if needed.
+- No changes to existing `BookingConfirmedPage` (kept for the in-app guest booking flow).
 
