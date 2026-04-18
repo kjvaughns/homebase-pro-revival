@@ -424,7 +424,7 @@ const ProviderProfilePage = () => {
             <h2 className="text-lg font-bold text-white">Business Hours</h2>
             <div className="space-y-0">
               {DAY_ORDER.map((day) => {
-                const info = businessHours[day];
+                const info = businessHours[day] || businessHours[DAY_ALIASES[day]];
                 const isOpen = info?.enabled;
                 return (
                   <div
