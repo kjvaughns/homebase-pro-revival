@@ -204,7 +204,7 @@ const ProviderProfilePage = () => {
 
   /* nav */
   const Navbar = () => (
-    <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
+    <nav className="w-full border-b border-neutral-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
       <div className="max-w-3xl mx-auto px-4 flex items-center h-14">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="h-5 w-5" />
@@ -219,9 +219,9 @@ const ProviderProfilePage = () => {
       <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
         <Navbar />
         <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-          <div className="h-32 rounded-2xl bg-gray-900 animate-pulse" />
-          <div className="h-12 rounded-xl bg-gray-900 animate-pulse" />
-          <div className="h-48 rounded-2xl bg-gray-900 animate-pulse" />
+          <div className="h-32 rounded-2xl bg-neutral-900 animate-pulse" />
+          <div className="h-12 rounded-xl bg-neutral-900 animate-pulse" />
+          <div className="h-48 rounded-2xl bg-neutral-900 animate-pulse" />
         </div>
       </div>
     );
@@ -266,12 +266,12 @@ const ProviderProfilePage = () => {
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
         {/* ─── Hero Card ─── */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 relative">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 relative">
           <div className="flex items-center gap-4">
             {provider.avatar_url ? (
-              <img src={provider.avatar_url} alt={provider.business_name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-gray-800" />
+              <img src={provider.avatar_url} alt={provider.business_name} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover border-2 border-neutral-800" />
             ) : (
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-gray-800 border-2 border-gray-700 flex items-center justify-center shrink-0">
+              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-neutral-800 border-2 border-neutral-700 flex items-center justify-center shrink-0">
                 <Briefcase className="h-8 w-8 text-green-400" />
               </div>
             )}
@@ -303,7 +303,7 @@ const ProviderProfilePage = () => {
         </div>
 
         {/* ─── Tabs ─── */}
-        <div className="flex border-b border-gray-800">
+        <div className="flex border-b border-neutral-800">
           {tabs.map((tab) => (
             <button
               key={tab.key}
@@ -330,17 +330,17 @@ const ProviderProfilePage = () => {
 
             {/* Stats row */}
             <div className="grid grid-cols-3 gap-3">
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-center">
                 <Briefcase className="h-5 w-5 text-green-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-white">{yearsExp}</p>
                 <p className="text-xs text-gray-500">Years Exp.</p>
               </div>
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-center">
                 <CheckCircle2 className="h-5 w-5 text-green-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-white">{jobsDone}</p>
                 <p className="text-xs text-gray-500">Jobs Done</p>
               </div>
-              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 text-center">
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 text-center">
                 <MapPin className="h-5 w-5 text-green-400 mx-auto mb-2" />
                 <p className="text-2xl font-bold text-white">N/A</p>
                 <p className="text-xs text-gray-500">Miles Away</p>
@@ -360,7 +360,7 @@ const ProviderProfilePage = () => {
           <div className="space-y-4">
             {services.length > 0 ? (
               services.map((svc) => (
-                <div key={svc.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+                <div key={svc.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-white font-medium">{svc.name}</p>
                     {svc.description && <p className="text-gray-500 text-sm mt-0.5 line-clamp-2">{svc.description}</p>}
@@ -372,7 +372,7 @@ const ProviderProfilePage = () => {
             ) : provider.capability_tags && provider.capability_tags.length > 0 ? (
               <div className="flex flex-wrap gap-2">
                 {provider.capability_tags.map((tag) => (
-                  <span key={tag} className="text-sm font-medium px-4 py-2 rounded-xl bg-gray-900 border border-gray-800 text-gray-300">
+                  <span key={tag} className="text-sm font-medium px-4 py-2 rounded-xl bg-neutral-900 border border-neutral-800 text-gray-300">
                     {tag}
                   </span>
                 ))}
@@ -388,7 +388,7 @@ const ProviderProfilePage = () => {
           <div className="space-y-4">
             {reviews.length > 0 ? (
               reviews.map((rev) => (
-                <div key={rev.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-4 space-y-2">
+                <div key={rev.id} className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <RatingStars rating={rev.rating} />
                     <span className="text-xs text-gray-600">{new Date(rev.created_at).toLocaleDateString()}</span>
@@ -416,7 +416,7 @@ const ProviderProfilePage = () => {
                 return (
                   <div
                     key={day}
-                    className={`flex items-center justify-between py-2.5 border-b border-gray-800/50 ${
+                    className={`flex items-center justify-between py-2.5 border-b border-neutral-800/50 ${
                       !isOpen ? "opacity-40" : ""
                     }`}
                   >
@@ -440,12 +440,12 @@ const ProviderProfilePage = () => {
             <h2 className="text-lg font-bold text-white">Service Area</h2>
             <div className="flex flex-wrap gap-2">
               {provider.service_cities?.map((city) => (
-                <span key={city} className="text-sm px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 bg-gray-900">
+                <span key={city} className="text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-gray-300 bg-neutral-900">
                   {city}
                 </span>
               ))}
               {provider.service_zip_codes?.map((zip) => (
-                <span key={zip} className="text-sm px-3 py-1.5 rounded-lg border border-gray-700 text-gray-300 bg-gray-900">
+                <span key={zip} className="text-sm px-3 py-1.5 rounded-lg border border-neutral-700 text-gray-300 bg-neutral-900">
                   {zip}
                 </span>
               ))}
@@ -476,14 +476,14 @@ const ProviderProfilePage = () => {
         {bookingLink && (
           <div className="space-y-3">
             <h2 className="text-lg font-bold text-white">Booking Link</h2>
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between gap-3">
+            <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center justify-between gap-3">
               <div className="flex items-center gap-3 min-w-0">
                 <Share2 className="h-4 w-4 text-green-400 shrink-0" />
                 <p className="text-sm text-gray-300 truncate">{getShareUrl(bookingLink.slug)}</p>
               </div>
               <button
                 onClick={handleCopyLink}
-                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-sm text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
+                className="shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-800 border border-neutral-700 text-sm text-gray-300 hover:text-white hover:border-gray-600 transition-colors"
               >
                 {copied ? <Check className="h-3.5 w-3.5 text-green-400" /> : <Copy className="h-3.5 w-3.5" />}
                 {copied ? "Copied" : "Copy"}
@@ -494,19 +494,19 @@ const ProviderProfilePage = () => {
       </div>
 
       {/* ─── Sticky Bottom Bar ─── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-gray-800 p-4 z-50">
+      <div className="fixed bottom-0 left-0 right-0 bg-[#0a0a0a] border-t border-neutral-800 p-4 z-50">
         <div className="max-w-3xl mx-auto space-y-3">
           <div className="flex gap-3">
             <a
               href={provider.phone ? `tel:${provider.phone}` : "#"}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white font-medium hover:bg-neutral-700 transition-colors"
             >
               <Phone className="h-4 w-4 text-green-400" />
               Call
             </a>
             <a
               href={provider.phone ? `sms:${provider.phone}` : "#"}
-              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-gray-800 border border-gray-700 text-white font-medium hover:bg-gray-700 transition-colors"
+              className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-neutral-800 border border-neutral-700 text-white font-medium hover:bg-neutral-700 transition-colors"
             >
               <MessageCircle className="h-4 w-4 text-green-400" />
               Text
