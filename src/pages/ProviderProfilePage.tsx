@@ -69,10 +69,15 @@ const RatingStars = ({ rating }: { rating: number }) => (
 
 type Tab = "about" | "services" | "reviews";
 
-const DAY_ORDER = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+const DAY_ORDER = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 const DAY_LABELS: Record<string, string> = {
-  monday: "Monday", tuesday: "Tuesday", wednesday: "Wednesday",
-  thursday: "Thursday", friday: "Friday", saturday: "Saturday", sunday: "Sunday",
+  mon: "Monday", tue: "Tuesday", wed: "Wednesday",
+  thu: "Thursday", fri: "Friday", sat: "Saturday", sun: "Sunday",
+};
+// Aliases so older records using full day names still render
+const DAY_ALIASES: Record<string, string> = {
+  mon: "monday", tue: "tuesday", wed: "wednesday",
+  thu: "thursday", fri: "friday", sat: "saturday", sun: "sunday",
 };
 
 /* ─── main page ─── */
@@ -419,7 +424,7 @@ const ProviderProfilePage = () => {
             <h2 className="text-lg font-bold text-white">Business Hours</h2>
             <div className="space-y-0">
               {DAY_ORDER.map((day) => {
-                const info = businessHours[day];
+                const info = businessHours[day] || businessHours[DAY_ALIASES[day]];
                 const isOpen = info?.enabled;
                 return (
                   <div
