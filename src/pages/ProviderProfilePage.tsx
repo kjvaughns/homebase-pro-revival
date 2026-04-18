@@ -279,11 +279,19 @@ const ProviderProfilePage = () => {
               <h1 className="text-xl sm:text-2xl font-bold text-white truncate">
                 {bookingLink?.custom_title || provider.business_name}
               </h1>
-              {provider.service_area && (
-                <p className="text-sm text-gray-400 flex items-center gap-1">
-                  <MapPin className="h-3.5 w-3.5 shrink-0" /> {provider.service_area}
-                </p>
-              )}
+              {(() => {
+                const cityFromList = provider.service_cities?.[0];
+                const areaIsZipsOnly =
+                  !!provider.service_area && /^[\d,\s]+$/.test(provider.service_area);
+                const locationLabel =
+                  cityFromList ||
+                  (provider.service_area && !areaIsZipsOnly ? provider.service_area : null);
+                return locationLabel ? (
+                  <p className="text-sm text-gray-400 flex items-center gap-1">
+                    <MapPin className="h-3.5 w-3.5 shrink-0" /> {locationLabel}
+                  </p>
+                ) : null;
+              })()}
               <div className="flex items-center gap-2">
                 <RatingStars rating={provider.average_rating || 0} />
                 <span className="text-sm text-green-400 font-medium">
