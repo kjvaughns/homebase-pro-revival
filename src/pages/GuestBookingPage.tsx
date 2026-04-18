@@ -106,11 +106,11 @@ export default function GuestBookingPage() {
     );
   };
 
-  const inputClass = "bg-gray-900 border-gray-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50 rounded-xl";
+  const inputClass = "bg-neutral-900 border-neutral-800 text-white placeholder:text-gray-500 focus-visible:ring-green-500/50 rounded-xl";
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full border-b border-neutral-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 flex items-center h-14 gap-3">
           <Link to="/ai-booking" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
             <span className="text-sm">← Get Help</span>
@@ -122,7 +122,7 @@ export default function GuestBookingPage() {
       <div className="max-w-md mx-auto px-4 py-8">
         {/* Service Summary card */}
         {summary && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-4 space-y-3">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 mb-4 space-y-3">
             <div className="flex items-center gap-2">
               <ClipboardList className="h-5 w-5 text-green-400" />
               <h3 className="font-bold text-white">Service Summary</h3>
@@ -141,7 +141,7 @@ export default function GuestBookingPage() {
 
         {/* Provider card */}
         {providerName && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5 mb-6 flex items-center gap-4">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 mb-6 flex items-center gap-4">
             <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center shrink-0">
               <span className="text-lg font-bold text-green-400">{providerName.charAt(0)}</span>
             </div>
@@ -165,7 +165,7 @@ export default function GuestBookingPage() {
                   className={`flex flex-col items-center min-w-[72px] py-3 px-3 rounded-xl border transition-colors shrink-0 ${
                     preferredDate === day.full
                       ? "border-green-500 bg-green-500/10 text-green-400"
-                      : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                      : "border-neutral-700 bg-neutral-800 text-gray-300 hover:border-gray-600"
                   }`}
                 >
                   <span className="text-xs">{day.dayName}</span>
@@ -188,7 +188,7 @@ export default function GuestBookingPage() {
                   className={`px-4 py-2.5 rounded-xl text-sm font-medium border transition-colors ${
                     preferredTime === slot
                       ? "border-green-500 bg-green-500/10 text-green-400"
-                      : "border-gray-700 bg-gray-800 text-gray-300 hover:border-gray-600"
+                      : "border-neutral-700 bg-neutral-800 text-gray-300 hover:border-gray-600"
                   }`}
                 >
                   {slot}

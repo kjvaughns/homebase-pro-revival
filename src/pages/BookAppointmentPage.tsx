@@ -237,7 +237,7 @@ const BookAppointmentPage = () => {
   return (
     <div className="min-h-screen pb-32" style={{ background: "#0a0a0a" }}>
       {/* Top nav */}
-      <nav className="sticky top-0 z-40 border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md">
+      <nav className="sticky top-0 z-40 border-b border-neutral-800 bg-[#0a0a0a]/80 backdrop-blur-md">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
           <button
             onClick={() => navigate(-1)}
@@ -252,15 +252,15 @@ const BookAppointmentPage = () => {
 
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-8">
         {/* Provider header */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-4">
+        <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-4 flex items-center gap-4">
           {provider.avatar_url ? (
             <img
               src={provider.avatar_url}
               alt={provider.business_name}
-              className="w-14 h-14 rounded-full object-cover border border-gray-800"
+              className="w-14 h-14 rounded-full object-cover border border-neutral-800"
             />
           ) : (
-            <div className="w-14 h-14 rounded-full bg-gray-800 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-full bg-neutral-800 flex items-center justify-center">
               <Briefcase className="h-6 w-6 text-green-400" />
             </div>
           )}
@@ -286,8 +286,8 @@ const BookAppointmentPage = () => {
                       setSelectedServiceId(svc.id);
                       setAnswers({});
                     }}
-                    className={`w-full text-left bg-gray-900 border rounded-2xl p-4 transition-all ${
-                      selected ? "border-green-500" : "border-gray-800 hover:border-gray-700"
+                    className={`w-full text-left bg-neutral-900 border rounded-2xl p-4 transition-all ${
+                      selected ? "border-green-500" : "border-neutral-800 hover:border-neutral-700"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
@@ -324,8 +324,8 @@ const BookAppointmentPage = () => {
                   <button
                     key={svc.id}
                     onClick={() => toggleAddOn(svc.id)}
-                    className={`w-full flex items-center justify-between gap-3 bg-gray-900 border rounded-2xl p-4 transition-all ${
-                      selected ? "border-green-500" : "border-gray-800"
+                    className={`w-full flex items-center justify-between gap-3 bg-neutral-900 border rounded-2xl p-4 transition-all ${
+                      selected ? "border-green-500" : "border-neutral-800"
                     }`}
                   >
                     <div className="flex items-center gap-3 min-w-0">
@@ -363,7 +363,7 @@ const BookAppointmentPage = () => {
                     value={answers[q.id] || ""}
                     onChange={(e) => setAnswers((p) => ({ ...p, [q.id]: e.target.value }))}
                     rows={3}
-                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none resize-none"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none resize-none"
                     placeholder="Type your answer…"
                   />
                 )}
@@ -372,7 +372,7 @@ const BookAppointmentPage = () => {
                     type="number"
                     value={answers[q.id] || ""}
                     onChange={(e) => setAnswers((p) => ({ ...p, [q.id]: e.target.value }))}
-                    className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+                    className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
                     placeholder="0"
                   />
                 )}
@@ -387,7 +387,7 @@ const BookAppointmentPage = () => {
                           className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                             selected
                               ? "bg-green-500 text-black"
-                              : "bg-gray-900 border border-gray-800 text-gray-300 hover:border-gray-700"
+                              : "bg-neutral-900 border border-neutral-800 text-gray-300 hover:border-neutral-700"
                           }`}
                         >
                           {opt}
@@ -407,7 +407,7 @@ const BookAppointmentPage = () => {
                           className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                             selected
                               ? "bg-green-500 text-black"
-                              : "bg-gray-900 border border-gray-800 text-gray-300 hover:border-gray-700"
+                              : "bg-neutral-900 border border-neutral-800 text-gray-300 hover:border-neutral-700"
                           }`}
                         >
                           {opt}
@@ -434,7 +434,7 @@ const BookAppointmentPage = () => {
                   className={`shrink-0 w-16 py-3 rounded-2xl text-center transition-all ${
                     selected
                       ? "bg-green-500 text-black"
-                      : "bg-gray-900 border border-gray-800 text-gray-300 hover:border-gray-700"
+                      : "bg-neutral-900 border border-neutral-800 text-gray-300 hover:border-neutral-700"
                   }`}
                 >
                   <div className="text-[11px] uppercase font-medium opacity-80">{d.weekday}</div>
@@ -459,7 +459,7 @@ const BookAppointmentPage = () => {
                   className={`px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
                     selected
                       ? "bg-green-500 text-black"
-                      : "bg-gray-900 border border-gray-800 text-gray-300 hover:border-gray-700"
+                      : "bg-neutral-900 border border-neutral-800 text-gray-300 hover:border-neutral-700"
                   }`}
                 >
                   {slot}
@@ -473,8 +473,8 @@ const BookAppointmentPage = () => {
         <section>
           <button
             onClick={() => setRecurring((v) => !v)}
-            className={`w-full flex items-center justify-between gap-3 bg-gray-900 border rounded-2xl p-4 transition-all ${
-              recurring ? "border-green-500" : "border-gray-800"
+            className={`w-full flex items-center justify-between gap-3 bg-neutral-900 border rounded-2xl p-4 transition-all ${
+              recurring ? "border-green-500" : "border-neutral-800"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -483,7 +483,7 @@ const BookAppointmentPage = () => {
             </div>
             <div
               className={`relative w-11 h-6 rounded-full transition-colors ${
-                recurring ? "bg-green-500" : "bg-gray-700"
+                recurring ? "bg-green-500" : "bg-neutral-700"
               }`}
             >
               <div
@@ -503,41 +503,41 @@ const BookAppointmentPage = () => {
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Full name *"
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
           />
           <input
             type="tel"
             value={phone}
             onChange={(e) => setPhone(e.target.value)}
             placeholder="Phone *"
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email *"
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
           />
           <input
             type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
             placeholder="Service address"
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none"
           />
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
             rows={3}
             placeholder="Anything else the pro should know? (optional)"
-            className="w-full bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none resize-none"
+            className="w-full bg-neutral-900 border border-neutral-800 rounded-xl px-4 py-3 text-white text-sm placeholder:text-gray-600 focus:border-green-500 focus:outline-none resize-none"
           />
         </section>
       </div>
 
       {/* Sticky bottom bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-gray-800">
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-[#0a0a0a]/95 backdrop-blur-md border-t border-neutral-800">
         <div className="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between gap-3">
           <div>
             <p className="text-xs text-gray-500">Est. price</p>

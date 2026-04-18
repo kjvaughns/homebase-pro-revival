@@ -23,7 +23,7 @@ export default function BookingConfirmedPage() {
 
   return (
     <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      <nav className="w-full border-b border-gray-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="w-full border-b border-neutral-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-2xl mx-auto px-4 flex items-center h-14">
           <Link to="/" className="flex items-center gap-2">
             <img src={logo} alt="HomeBase logo" className="w-7 h-7" />
@@ -45,7 +45,7 @@ export default function BookingConfirmedPage() {
 
         {/* Summary card */}
         {(customerName || formattedDate || preferredTime) && (
-          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 text-left space-y-2 mb-8">
+          <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 text-left space-y-2 mb-8">
             {customerName && (
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Name</span>
@@ -68,7 +68,7 @@ export default function BookingConfirmedPage() {
         )}
 
         {/* Account creation CTA */}
-        <div className="bg-gray-900/60 border border-gray-800 rounded-xl p-6 space-y-3">
+        <div className="bg-neutral-900/60 border border-neutral-800 rounded-xl p-6 space-y-3">
           <h3 className="text-base font-semibold text-white">Save your booking history</h3>
           <p className="text-gray-400 text-sm">
             Create a free account to track this job, rebook easily, and get updates. Takes 10 seconds.
