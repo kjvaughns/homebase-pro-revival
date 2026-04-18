@@ -1,69 +1,38 @@
 
+## Add /blog with 8 provider resource posts
 
-## Stripe & app-deep-link redirect pages
-
-Add 4 clean branded landing pages so external Stripe redirects and app deep links resolve to a polished web experience instead of raw URLs.
-
-### New routes (added to `src/App.tsx`)
-- `/payment-success`
-- `/payment-cancelled`
-- `/booking-success`
-- `/open-app`
+### Goal
+New `/blog` index + `/blog/:slug` detail routes seeded with the 8 provider posts already drafted, styled to match the existing HomeBase dark marketing site, and linked from the Provider Resources cards.
 
 ### Files
-- `src/pages/PaymentSuccessPage.tsx` (new)
-- `src/pages/PaymentCancelledPage.tsx` (new)
-- `src/pages/BookingSuccessPage.tsx` (new)
-- `src/pages/OpenAppPage.tsx` (new)
-- `src/lib/deepLink.ts` (new) — shared mobile-detect + deep-link-with-fallback helper
-- `src/App.tsx` — register routes
 
-### Shared design (matches existing booking pages)
-- Background `#0a0a0a`, cards `bg-neutral-900 border-neutral-800 rounded-2xl`
-- HomeBase logo nav, centered hero icon (success = green check, cancel = red X)
-- Primary CTA = green pill (`bg-green-500`), secondary = ghost link
-- Mobile-first, no flicker, all content rendered immediately (deep-link side-effect runs in `useEffect`)
+**New**
+- `src/data/blogPosts.ts` — typed `BlogPost[]` seeded with all 8 posts (slug, title, category, excerpt, heroImageDescription, body markdown, cta, publishedAt, readMinutes).
+- `src/pages/BlogIndexPage.tsx` — header, category chips (All/Guide/Article/Tool) with client-side filter, responsive 3/2/1 grid of post cards, footer CTA banner.
+- `src/pages/BlogPostPage.tsx` — back link, category + title + read time, hero, markdown body (sanitized), end-of-post CTA card, related posts (3 from same category).
+- `src/components/blog/BlogCard.tsx` — reused card (hero placeholder, tag, title, excerpt, "Read more →").
+- `src/components/blog/BlogHeroPlaceholder.tsx` — branded gradient + icon placeholder used until real `heroImage` URLs are added (uses category to pick an icon).
 
-### Page details
+**Edited**
+- `src/App.tsx` — register `/blog` and `/blog/:slug`.
+- `src/pages/Index.tsx` (or wherever the Provider Resources section / cards live — I'll grep `landing/` for the component) — point each card's "Read More" to `/blog/{slug}` matching the seed slugs.
 
-**`/payment-success`** — `?jobId=` `?amount=` `?service=`
-- Green check, "Payment successful"
-- Optional job summary card (job id, service, amount) when params present
-- Mobile: auto-attempt `homebase://job/{jobId}` after 600ms; if user is still on page after 2s, show "Open in App" + "Continue on Web"
-- Desktop: "Download App" (TestFlight) + "Continue on Web" (→ `/marketplace`)
-- Primary CTA: "View Job" (deep links if mobile, else web)
+### Design (reuse existing tokens, no new theme)
+- Background `bg-background` (true black), cards `bg-neutral-900 border-neutral-800 rounded-2xl`, primary CTA = existing green `bg-primary`.
+- Reuses `Navbar` + `Footer` from `src/components/landing/`.
+- Body prose: `max-w-[680px]`, `prose prose-invert` styling via Tailwind utility classes (h2/h3 hierarchy, lists, blockquote left-border, code), line-height generous.
+- Mobile-first, semantic `<article>` / `<nav>` / `<main>`, alt text from `heroImageDescription`, focus styles preserved.
 
-**`/payment-cancelled`**
-- Red X, "Payment not completed"
-- Subcopy: "No charge was made. You can try again any time."
-- CTAs: "Try Again" (uses `document.referrer` if same-origin → back, else `/marketplace`), "Back to Home"
+### Markdown rendering
+- Add `react-markdown` + `rehype-sanitize` (well-known, safe). Render bodies with sanitize plugin enabled. No raw HTML allowed.
 
-**`/booking-success`** — `?appointmentId=` `?service=` `?date=` `?time=` `?providerName=`
-- Green check, "Booking confirmed"
-- Summary card: provider, service, date, time
-- CTAs: "View Appointment" (deep link `homebase://appointment/{id}` on mobile), "Open in App"
-- Mirrors style of existing `BookingConfirmedPage` for consistency
+### SEO
+- Lightweight inline `useEffect` that sets `document.title` and the `<meta name="description">` content per page (no new dep). Index → "Blog — HomeBase". Post → "{title} — HomeBase Blog" + excerpt as description.
 
-**`/open-app`** — generic deep-link handler. `?path=` `?jobId=` `?appointmentId=`
-- Builds target URL: `homebase://{path or derived}`
-- Mobile: immediate `window.location.href = deepLink`; fallback timer (1.5s) → App Store (`https://apps.apple.com/app/idXXXX` or TestFlight link)
-- Desktop: small countdown then redirect to `/`
-- Visible "Open App" + "Download" + "Continue to homepage" buttons so the page is never a dead end
+### Provider Resources link wiring
+- I'll locate the existing Resources section (likely in `src/pages/Index.tsx` or a dedicated landing component) and map each of its 8 cards to its matching slug from `blogPosts.ts`. If a card's text doesn't 1:1 match a post, I'll match on closest topic and note it.
 
-### `src/lib/deepLink.ts`
-- `isMobile()` — UA check (iOS/Android)
-- `isIOS()` / `isAndroid()`
-- `tryDeepLink(url, fallbackUrl, timeoutMs)` — sets `location.href` then `setTimeout` fallback; cancels fallback on `visibilitychange` (app opened)
-- `APP_STORE_URL` / `TESTFLIGHT_URL` constants
-
-### Stripe URL guidance (documentation only)
-The Stripe checkout session creation lives in the **mobile app's backend**, not in this web repo (no `stripe` edge function exists here). The plan delivers the web landing pages so when the mobile/backend team updates:
-- `success_url` → `https://homebaseproapp.com/payment-success?jobId={JOB_ID}`
-- `cancel_url` → `https://homebaseproapp.com/payment-cancelled`
-
-…both URLs resolve correctly. I'll note this in the final response so the backend change can be made on that side. No Replit URLs exist in this web codebase to remove.
-
-### Out of scope
-- No Supabase fetch on these pages (params alone drive content) — keeps pages instant, no auth or RLS friction. Can add later if needed.
-- No changes to existing `BookingConfirmedPage` (kept for the in-app guest booking flow).
-
+### Out of scope (per spec)
+- Real hero images (placeholders only — descriptions stored for later upload).
+- Supabase / CMS — content is a typed TS array.
+- Publish date display optional; will render the ISO date in a humanized format.
