@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_reviews: {
+        Row: {
+          comment: string
+          created_at: string
+          email: string | null
+          id: string
+          is_published: boolean
+          name: string
+          rating: number
+          role: string | null
+          title: string | null
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_published?: boolean
+          name: string
+          rating: number
+          role?: string | null
+          title?: string | null
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          is_published?: boolean
+          name?: string
+          rating?: number
+          role?: string | null
+          title?: string | null
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           cancelled_at: string | null
