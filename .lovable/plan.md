@@ -1,59 +1,48 @@
 
 
-## Mobile-app-matching booking flow for chosen providers
+The user reports navy blue instead of black on the booking screens. Let me investigate.
+<lov-tool-use id="toolu_vrtx_01UfetGLguS7rkV6oEeoX2SY" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/BookAppointmentPage.tsx\", \"lines\": \"1-60\"}">
+</lov-tool-use>
 
-### What the screenshots show
-1. **Provider profile** with About / Services / Reviews tabs and a sticky bottom bar (Call, Text, Book Now). The current page already matches this closely — minor polish only.
-2. **Book Appointment page** — single scrollable page with:
-   - Provider header card (avatar, name, "Service Provider")
-   - **Select Service** — list of cards with primary services (price + duration), tap to highlight green
-   - **Booking Questions** — dynamic questions from the service's `intake_questions_json` (number / text / yes-no / select chips), required fields marked with `*`
-   - **Select Date** — horizontal scroll of next 30 days as date chips
-   - **Select Time** — wrapping grid of hourly time slots (8 AM–4 PM)
-   - **Repeat this service** toggle (recurring)
-   - Sticky bottom bar: "Est. price $X" on left, green "Request Appointment" button on right
+<lov-tool-use id="toolu_vrtx_01HEMKNZrrW5DqQgHw3Hr4xH" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/BookAppointmentPage.tsx\"}">
+</lov-tool-use>
 
-### What changes
+<lov-tool-use id="toolu_vrtx_01EMNhxrqHyuQRuQCx5ikbjX" name="code--view" integration-id="code" data="{\"file_path\": \"src/pages/BookingConfirmedPage.tsx\"}">
+</lov-tool-use>
+The user is seeing navy blue instead of black. The page itself uses `#0a0a0a` (true black) inline, but the `bg-gray-900` cards are Tailwind's default `#111827` which has a slight blue tint — that's likely the "navy blue" they're noticing. Same for `border-gray-800` (#1f2937, also blueish).
 
-**New page**: `src/pages/BookAppointmentPage.tsx` at route `/book/appointment/:providerId`
-- Replaces the redirect to `/ai-booking` when the user clicks "Book Now" on a provider profile (because the provider is already chosen — no AI matching needed)
-- Pulls services from `provider_custom_services` filtered by `provider_id` and `is_published=true`
-- Splits primary services (`is_addon=false`) from add-ons (`is_addon=true`)
-- Parses the selected service's `intake_questions_json` (text-encoded JSON) and renders dynamic questions
-- Date strip = next 30 days; time slots = 8 AM–4 PM hourly chips
-- Recurring toggle (visual only; stored in `notes` for now since `booking_requests` has no recurring field)
+Let me also check GuestBookingPage since it has same pattern.
+<lov-tool-use id="toolu_vrtx_01FiPv2tZGjFmh6wYP4uFWpK" name="code--search_files" integration-id="code" data="{\"query\": \"bg-gray-900|border-gray-800|bg-gray-800|border-gray-700\", \"include_patterns\": \"src/pages/BookAppointmentPage.tsx,src/pages/BookingConfirmedPage.tsx,src/pages/GuestBookingPage.tsx\"}">
+</lov-tool-use>
+I have what I need. The user is seeing Tailwind's `gray-900` (#111827) and `gray-800` (#1f2937) which are bluish slate tones. I'll swap them to true neutral blacks (zinc/neutral palette or custom hex).
 
-**On submit** (no auth required — guest booking, same as today):
-- Insert into `booking_requests` with:
-  - `provider_id`, `provider_name`, `provider_category`
-  - `customer_name/phone/email/address` (collected in a "Your Details" section at bottom — required)
-  - `service_summary` = `<service name> + intake answers JSON`
-  - `preferred_date`, `preferred_time` (e.g. "10 AM")
-  - `notes` = recurring info + add-ons list
-- Then invoke `process-booking-request` (already wired) → creates appointment in mobile-app DB, sends provider notification
-- Navigate to `/booking-confirmed`
+<lov-plan>
 
-**Wire the entry point**:
-- `ProviderProfilePage.handleBook` → navigate to `/book/appointment/${provider.id}` instead of `/ai-booking`
+## Fix: navy-tinted booking screens → true neutral black
 
-**Routing**: add `/book/appointment/:providerId` to `App.tsx`
+### Root cause
+Tailwind's default `gray-*` palette is **slate-based** (cool/blue-tinted). On a `#0a0a0a` page background, cards using `bg-gray-900` (`#111827`) and borders using `border-gray-800` (`#1f2937`) read visibly **navy blue**.
 
-### Out of scope (deferred)
-- **Auth + saved homes** — current marketplace is fully guest-based; we keep that and collect details on the form. Adding sign-in for web is a separate effort.
-- **Real availability** (`/availability` endpoint doesn't exist in this DB) — show generic slots like the screenshot
-- **Stripe payment** — none of the screenshots show payment; this stays as the "request appointment" flow that flows through `process-booking-request`
-- **Add-ons UI** — the schema supports it but the screenshot doesn't show one; we'll render a checkbox list only if `is_addon=true` services exist for the provider
-- **AI flow** — keep `/ai-booking` as the standalone "describe a problem" entry point from `Index`. Only the provider-profile "Book Now" CTA changes.
+### Fix
+Replace the cool `gray-*` shades with neutral charcoals on the booking-related screens, matching the iOS app's pure-black look. Two options behind the same change:
+- Use Tailwind's **`neutral-*` / `zinc-*`** palette (true neutrals, no blue), or
+- Use **custom hex** values like `#141414` / `#1f1f1f` for exact match.
 
-### Files
-- **New**: `src/pages/BookAppointmentPage.tsx`
-- **Modified**: `src/App.tsx` (add route), `src/pages/ProviderProfilePage.tsx` (change `handleBook` target)
+I'll go with **`neutral-*`** — it's a clean swap and stays consistent with Tailwind conventions.
 
-### Design specifics (matching screenshots)
-- Background `#0a0a0a`, cards `bg-gray-900 border-gray-800 rounded-2xl`
-- Selected card: `border-green-500` + green-tinted name text
-- Date chip selected: solid `bg-green-500` with white text; unselected: dark gray
-- Time chip selected: solid `bg-green-500`; unselected: dark gray pill
-- Sticky bottom bar: dark with "Est. price" + bold green price on left, full-height green pill button on right
-- Required fields shown with `*` after the question
+### Mapping
+| Old (bluish slate) | New (true neutral) |
+|---|---|
+| `bg-gray-900` (#111827) | `bg-neutral-900` (#171717) |
+| `bg-gray-800` (#1f2937) | `bg-neutral-800` (#262626) |
+| `border-gray-800` | `border-neutral-800` |
+| `border-gray-700` | `border-neutral-700` |
+| `text-gray-*` (kept — only affects backgrounds) | unchanged |
+
+### Files to update
+1. **`src/pages/BookAppointmentPage.tsx`** — every `bg-gray-900`, `bg-gray-800`, `border-gray-800`, `border-gray-700`, `bg-[#0a0a0a]/80` (kept — already true black)
+2. **`src/pages/BookingConfirmedPage.tsx`** — same swap (cards + nav border)
+3. **`src/pages/GuestBookingPage.tsx`** — same swap (the older guest booking screen also has this issue)
+
+No layout, copy, or behavior changes. Pure color refresh so all booking screens read as solid black/charcoal instead of navy.
 
