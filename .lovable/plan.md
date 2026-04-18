@@ -1,59 +1,59 @@
 
 
-## The Problem
+## Mobile-app-matching booking flow for chosen providers
 
-Your booking from the marketplace **was saved** to the database (I see it: KJ Vaughns → Heritage Home Cleaners, 2026-04-19 10:00 AM, status `pending`). But it's completely disconnected from your provider portal automations. Here's why:
+### What the screenshots show
+1. **Provider profile** with About / Services / Reviews tabs and a sticky bottom bar (Call, Text, Book Now). The current page already matches this closely — minor polish only.
+2. **Book Appointment page** — single scrollable page with:
+   - Provider header card (avatar, name, "Service Provider")
+   - **Select Service** — list of cards with primary services (price + duration), tap to highlight green
+   - **Booking Questions** — dynamic questions from the service's `intake_questions_json` (number / text / yes-no / select chips), required fields marked with `*`
+   - **Select Date** — horizontal scroll of next 30 days as date chips
+   - **Select Time** — wrapping grid of hourly time slots (8 AM–4 PM)
+   - **Repeat this service** toggle (recurring)
+   - Sticky bottom bar: "Est. price $X" on left, green "Request Appointment" button on right
 
-### What's happening today
+### What changes
 
-```text
-Web marketplace booking
-  → INSERT into `booking_requests` table  ✅ (saved)
-  → ❌ No email to customer
-  → ❌ No email/SMS to provider
-  → ❌ No row in `appointments` (what the provider portal reads)
-  → ❌ No row in `jobs`
-  → ❌ No notification record
-```
+**New page**: `src/pages/BookAppointmentPage.tsx` at route `/book/appointment/:providerId`
+- Replaces the redirect to `/ai-booking` when the user clicks "Book Now" on a provider profile (because the provider is already chosen — no AI matching needed)
+- Pulls services from `provider_custom_services` filtered by `provider_id` and `is_published=true`
+- Splits primary services (`is_addon=false`) from add-ons (`is_addon=true`)
+- Parses the selected service's `intake_questions_json` (text-encoded JSON) and renders dynamic questions
+- Date strip = next 30 days; time slots = 8 AM–4 PM hourly chips
+- Recurring toggle (visual only; stored in `notes` for now since `booking_requests` has no recurring field)
 
-The marketplace writes to `booking_requests` — a standalone "lead inbox" table. Your provider portal/mobile app reads from `appointments` and `jobs`. Two different tables, no bridge between them, **no triggers, no edge functions, no email logic**.
+**On submit** (no auth required — guest booking, same as today):
+- Insert into `booking_requests` with:
+  - `provider_id`, `provider_name`, `provider_category`
+  - `customer_name/phone/email/address` (collected in a "Your Details" section at bottom — required)
+  - `service_summary` = `<service name> + intake answers JSON`
+  - `preferred_date`, `preferred_time` (e.g. "10 AM")
+  - `notes` = recurring info + add-ons list
+- Then invoke `process-booking-request` (already wired) → creates appointment in mobile-app DB, sends provider notification
+- Navigate to `/booking-confirmed`
 
-### What needs to be built
+**Wire the entry point**:
+- `ProviderProfilePage.handleBook` → navigate to `/book/appointment/${provider.id}` instead of `/ai-booking`
 
-**1. New edge function `process-booking-request`** (triggered after the insert from `GuestBookingPage.tsx` and `AIBookingPage.tsx`)
-- Looks up the provider by `provider_id`
-- Creates a row in `appointments` (so it shows up in the provider portal)
-  - Maps: customer info, scheduled_date (from preferred_date + preferred_time), service_name (from service_summary), status `pending`
-- Creates a `notifications` row for the provider's user_id
-- Sends confirmation email to the customer
-- Sends new-booking email to the provider (using their `providers.email`)
-- Updates `booking_requests.status` to `processed` and stores the linked `appointment_id`
+**Routing**: add `/book/appointment/:providerId` to `App.tsx`
 
-**2. Wire both booking pages to call it**
-- `GuestBookingPage.tsx` — after the insert, invoke `process-booking-request` with the new booking_request id
-- `AIBookingPage.tsx` — same hook
-
-**3. Email setup**
-- Use Lovable's built-in email infrastructure (requires an email domain). I'll check current status and walk you through the 1-step setup if needed.
-- Two templates: `booking-customer-confirmation` and `booking-provider-new-lead`
-
-**4. Backfill your existing booking**
-- Run a one-time insert to create the `appointments` row for the KJ Vaughns / Heritage booking that's currently stranded, and send the emails so you can verify end-to-end.
+### Out of scope (deferred)
+- **Auth + saved homes** — current marketplace is fully guest-based; we keep that and collect details on the form. Adding sign-in for web is a separate effort.
+- **Real availability** (`/availability` endpoint doesn't exist in this DB) — show generic slots like the screenshot
+- **Stripe payment** — none of the screenshots show payment; this stays as the "request appointment" flow that flows through `process-booking-request`
+- **Add-ons UI** — the schema supports it but the screenshot doesn't show one; we'll render a checkbox list only if `is_addon=true` services exist for the provider
+- **AI flow** — keep `/ai-booking` as the standalone "describe a problem" entry point from `Index`. Only the provider-profile "Book Now" CTA changes.
 
 ### Files
+- **New**: `src/pages/BookAppointmentPage.tsx`
+- **Modified**: `src/App.tsx` (add route), `src/pages/ProviderProfilePage.tsx` (change `handleBook` target)
 
-**New**
-- `supabase/functions/process-booking-request/index.ts`
-- Email templates (created by the email scaffolding tool)
-
-**Modified**
-- `src/pages/GuestBookingPage.tsx` — call the function after insert
-- `src/pages/AIBookingPage.tsx` — call the function after insert
-
-**Migration**
-- Add `appointment_id` column to `booking_requests` to track the link
-- Backfill the existing pending booking
-
-### Open question
-The provider portal/mobile app — is that the **same Supabase project** (`yvedkmtjynhgsuxukxjj`) reading `appointments`, or a separate backend? I'm assuming same (the schema strongly suggests it). If it's a separate system, we'd also need to push to it via webhook/API — let me know.
+### Design specifics (matching screenshots)
+- Background `#0a0a0a`, cards `bg-gray-900 border-gray-800 rounded-2xl`
+- Selected card: `border-green-500` + green-tinted name text
+- Date chip selected: solid `bg-green-500` with white text; unselected: dark gray
+- Time chip selected: solid `bg-green-500`; unselected: dark gray pill
+- Sticky bottom bar: dark with "Est. price" + bold green price on left, full-height green pill button on right
+- Required fields shown with `*` after the question
 
