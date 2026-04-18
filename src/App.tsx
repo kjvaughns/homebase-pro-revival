@@ -21,6 +21,7 @@ import SignUpPage from "./pages/SignUpPage.tsx";
 import SignInPage from "./pages/SignInPage.tsx";
 import GuestBookingPage from "./pages/GuestBookingPage.tsx";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage.tsx";
+import BookAppointmentPage from "./pages/BookAppointmentPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -35,6 +36,7 @@ const App = () => (
           <Route path="/marketplace" element={<MarketplacePage />} />
           <Route path="/marketplace/:id" element={<ProviderDetailPage />} />
           <Route path="/providers/:id" element={<ProviderProfilePage />} />
+          <Route path="/book/appointment/:providerId" element={<BookAppointmentPage />} />
           <Route path="/book/:slug" element={<BookSlugRedirect />} />
           <Route path="/book" element={<GuestBookingPage />} />
           <Route path="/booking-confirmed" element={<BookingConfirmedPage />} />

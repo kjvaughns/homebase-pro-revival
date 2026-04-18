@@ -190,12 +190,7 @@ const ProviderProfilePage = () => {
   /* handlers */
   const handleBook = () => {
     if (!provider) return;
-    const params = new URLSearchParams({
-      providerId: provider.id,
-      providerName: provider.business_name,
-      category: provider.capability_tags?.[0] || "",
-    });
-    navigate(`/ai-booking?${params.toString()}`);
+    navigate(`/book/appointment/${provider.id}`);
   };
 
   const getShareUrl = (slug: string) => `https://homebaseproapp.com/providers/${slug}`;
