@@ -26,6 +26,8 @@ import PaymentSuccessPage from "./pages/PaymentSuccessPage.tsx";
 import PaymentCancelledPage from "./pages/PaymentCancelledPage.tsx";
 import BookingSuccessPage from "./pages/BookingSuccessPage.tsx";
 import OpenAppPage from "./pages/OpenAppPage.tsx";
+import BlogIndexPage from "./pages/BlogIndexPage.tsx";
+import BlogPostPage from "./pages/BlogPostPage.tsx";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +56,8 @@ const App = () => (
           <Route path="/payment-cancelled" element={<PaymentCancelledPage />} />
           <Route path="/booking-success" element={<BookingSuccessPage />} />
           <Route path="/open-app" element={<OpenAppPage />} />
+          <Route path="/blog" element={<BlogIndexPage />} />
+          <Route path="/blog/:slug" element={<BlogPostPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
