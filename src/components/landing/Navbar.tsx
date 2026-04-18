@@ -17,7 +17,7 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-8">
           <Link to="/marketplace" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Marketplace</Link>
           <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
-          <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">For Pros</a>
+          <Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
         </div>
         <Link to="/marketplace" className="hidden md:block">
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
@@ -32,7 +32,7 @@ const Navbar = () => {
         <div className="md:hidden border-t border-border bg-background px-4 py-4 space-y-3 animate-fade-in">
           <Link to="/marketplace" onClick={() => setOpen(false)} className="block text-sm font-medium text-foreground py-2">Marketplace</Link>
           <a href="#pricing" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Pricing</a>
-          <a href="#" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">For Pros</a>
+          <Link to="/blog" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Blog</Link>
           <Link to="/marketplace" onClick={() => setOpen(false)}>
             <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full mt-2">
               Start Free
