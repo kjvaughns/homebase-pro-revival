@@ -1608,29 +1608,59 @@ export type Database = {
       provider_plans: {
         Row: {
           created_at: string
+          current_period_end: string | null
+          first_paid_booking_at: string | null
+          grace_period_ends_at: string | null
           id: string
+          is_subscribed: boolean
           plan_tier: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents: number | null
           platform_fee_percent: number | null
           provider_id: string
+          revenuecat_product_id: string | null
+          stripe_subscription_id: string | null
+          subscription_ended_at: string | null
+          subscription_source: string | null
+          subscription_started_at: string | null
+          subscription_status: string | null
           updated_at: string
         }
         Insert: {
           created_at?: string
+          current_period_end?: string | null
+          first_paid_booking_at?: string | null
+          grace_period_ends_at?: string | null
           id?: string
+          is_subscribed?: boolean
           plan_tier?: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents?: number | null
           platform_fee_percent?: number | null
           provider_id: string
+          revenuecat_product_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ended_at?: string | null
+          subscription_source?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Update: {
           created_at?: string
+          current_period_end?: string | null
+          first_paid_booking_at?: string | null
+          grace_period_ends_at?: string | null
           id?: string
+          is_subscribed?: boolean
           plan_tier?: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents?: number | null
           platform_fee_percent?: number | null
           provider_id?: string
+          revenuecat_product_id?: string | null
+          stripe_subscription_id?: string | null
+          subscription_ended_at?: string | null
+          subscription_source?: string | null
+          subscription_started_at?: string | null
+          subscription_status?: string | null
           updated_at?: string
         }
         Relationships: [
