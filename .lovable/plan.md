@@ -1,26 +1,21 @@
 
 
-## Fix navy tint on Provider Profile page
+## Fix header location to show city, not ZIP list
 
-The previous fix only updated booking pages. The user is on `/providers/heritage` (ProviderProfilePage), which still uses Tailwind's slate-tinted `gray-900`/`gray-800` — that's the navy they're seeing on the hero card, stats tiles, services list, reviews, business hours, service area, and the bottom sticky bar (Call/Text).
+### Problem
+On the provider profile header, the line under the business name renders `provider.service_area`, which for this provider contains a comma-separated list of ZIP codes (`39211, 39206, ...`). It should show the city instead.
 
-### Change
-Same swap applied to `src/pages/ProviderProfilePage.tsx`:
-- `bg-gray-900` → `bg-neutral-900`
-- `bg-gray-800` → `bg-neutral-800`
-- `border-gray-800` → `border-neutral-800` (incl. `/50` variants)
-- `border-gray-700` → `border-neutral-700`
+### Fix
+In `src/pages/ProviderProfilePage.tsx` (line 282–286), change the header location source to prefer `service_cities`, with safe fallbacks:
 
-I'll also sweep any sibling pages still on the old palette to keep the marketplace consistent:
-- `src/pages/ProviderDetailPage.tsx`
-- `src/pages/MarketplacePage.tsx`
-- `src/components/marketplace/*` (only the `bg-gray-*`/`border-gray-*` occurrences)
+1. If `provider.service_cities` has entries → show the first city (or first 1–2 joined, e.g. `"Jackson, MS"` style if only city names exist, just `service_cities[0]`).
+2. Else if `service_area` exists **and is not just a list of ZIPs** (detect: contains a non-digit/non-comma/space char) → show it as-is.
+3. Else → hide the line.
 
-Text colors (`text-gray-400`, etc.) stay — only background/border tones cause the navy cast.
+This keeps the dedicated **Service Area** section lower on the page (which already lists all cities and ZIPs as chips) untouched — that's the right place for the full ZIP list.
 
-### Files
-- `src/pages/ProviderProfilePage.tsx` (primary fix)
-- `src/pages/ProviderDetailPage.tsx`, `src/pages/MarketplacePage.tsx`, `src/components/marketplace/*` (consistency sweep)
+### File
+- `src/pages/ProviderProfilePage.tsx` (header location line only)
 
-No layout, copy, or behavior changes.
+No schema, routing, or other UI changes.
 
