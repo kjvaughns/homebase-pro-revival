@@ -495,6 +495,164 @@ export type Database = {
           },
         ]
       }
+      estimate_line_items: {
+        Row: {
+          amount_cents: number
+          created_at: string
+          description: string | null
+          estimate_id: string
+          id: string
+          metadata: string | null
+          name: string
+          quantity: number | null
+          unit_price_cents: number
+        }
+        Insert: {
+          amount_cents: number
+          created_at?: string
+          description?: string | null
+          estimate_id: string
+          id?: string
+          metadata?: string | null
+          name: string
+          quantity?: number | null
+          unit_price_cents: number
+        }
+        Update: {
+          amount_cents?: number
+          created_at?: string
+          description?: string | null
+          estimate_id?: string
+          id?: string
+          metadata?: string | null
+          name?: string
+          quantity?: number | null
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimate_line_items_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      estimates: {
+        Row: {
+          accepted_snapshot: string | null
+          client_id: string | null
+          converted_at: string | null
+          converted_invoice_id: string | null
+          created_at: string
+          currency: string | null
+          decided_at: string | null
+          discount_cents: number | null
+          estimate_number: string
+          expires_at: string | null
+          homeowner_user_id: string | null
+          id: string
+          job_id: string | null
+          notes: string | null
+          provider_id: string
+          public_token: string
+          sent_at: string | null
+          status: Database["public"]["Enums"]["estimate_status"] | null
+          subtotal_cents: number
+          tax_cents: number | null
+          total_cents: number
+          updated_at: string
+          viewed_at: string | null
+        }
+        Insert: {
+          accepted_snapshot?: string | null
+          client_id?: string | null
+          converted_at?: string | null
+          converted_invoice_id?: string | null
+          created_at?: string
+          currency?: string | null
+          decided_at?: string | null
+          discount_cents?: number | null
+          estimate_number: string
+          expires_at?: string | null
+          homeowner_user_id?: string | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          provider_id: string
+          public_token: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["estimate_status"] | null
+          subtotal_cents?: number
+          tax_cents?: number | null
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Update: {
+          accepted_snapshot?: string | null
+          client_id?: string | null
+          converted_at?: string | null
+          converted_invoice_id?: string | null
+          created_at?: string
+          currency?: string | null
+          decided_at?: string | null
+          discount_cents?: number | null
+          estimate_number?: string
+          expires_at?: string | null
+          homeowner_user_id?: string | null
+          id?: string
+          job_id?: string | null
+          notes?: string | null
+          provider_id?: string
+          public_token?: string
+          sent_at?: string | null
+          status?: Database["public"]["Enums"]["estimate_status"] | null
+          subtotal_cents?: number
+          tax_cents?: number | null
+          total_cents?: number
+          updated_at?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "estimates_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_converted_invoice_id_fkey"
+            columns: ["converted_invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_homeowner_user_id_fkey"
+            columns: ["homeowner_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "estimates_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homes: {
         Row: {
           amenities: Json | null
@@ -961,6 +1119,7 @@ export type Database = {
           discount_amount: number | null
           discount_cents: number | null
           due_date: string | null
+          estimate_id: string | null
           homeowner_user_id: string | null
           hosted_invoice_url: string | null
           id: string
@@ -997,6 +1156,7 @@ export type Database = {
           discount_amount?: number | null
           discount_cents?: number | null
           due_date?: string | null
+          estimate_id?: string | null
           homeowner_user_id?: string | null
           hosted_invoice_url?: string | null
           id?: string
@@ -1033,6 +1193,7 @@ export type Database = {
           discount_amount?: number | null
           discount_cents?: number | null
           due_date?: string | null
+          estimate_id?: string | null
           homeowner_user_id?: string | null
           hosted_invoice_url?: string | null
           id?: string
@@ -1065,6 +1226,13 @@ export type Database = {
             columns: ["client_id"]
             isOneToOne: false
             referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_estimate_id_fkey"
+            columns: ["estimate_id"]
+            isOneToOne: false
+            referencedRelation: "estimates"
             referencedColumns: ["id"]
           },
           {
@@ -2786,6 +2954,14 @@ export type Database = {
         | "cancelled"
       booking_link_status: "active" | "paused" | "disabled"
       connect_onboarding_status: "not_started" | "pending" | "complete"
+      estimate_status:
+        | "draft"
+        | "sent"
+        | "viewed"
+        | "accepted"
+        | "declined"
+        | "expired"
+        | "converted"
       intake_status:
         | "submitted"
         | "confirmed"
@@ -2978,6 +3154,15 @@ export const Constants = {
       ],
       booking_link_status: ["active", "paused", "disabled"],
       connect_onboarding_status: ["not_started", "pending", "complete"],
+      estimate_status: [
+        "draft",
+        "sent",
+        "viewed",
+        "accepted",
+        "declined",
+        "expired",
+        "converted",
+      ],
       intake_status: [
         "submitted",
         "confirmed",
