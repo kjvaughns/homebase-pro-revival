@@ -52,9 +52,17 @@ export type Database = {
       }
       appointments: {
         Row: {
+          cancellation_fee_cents: number | null
+          cancellation_fee_checkout_session_id: string | null
+          cancellation_fee_payment_intent_id: string | null
+          cancellation_fee_status: string | null
           cancelled_at: string | null
           completed_at: string | null
           created_at: string
+          deposit_amount_cents: number | null
+          deposit_checkout_session_id: string | null
+          deposit_payment_intent_id: string | null
+          deposit_status: string | null
           description: string | null
           estimated_price: number | null
           final_price: number | null
@@ -67,6 +75,7 @@ export type Database = {
           provider_diagnosis: string | null
           provider_id: string
           recurring_frequency: string | null
+          reschedule_count: number
           scheduled_date: string
           scheduled_time: string | null
           service_id: string | null
@@ -78,9 +87,17 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          cancellation_fee_cents?: number | null
+          cancellation_fee_checkout_session_id?: string | null
+          cancellation_fee_payment_intent_id?: string | null
+          cancellation_fee_status?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
+          deposit_amount_cents?: number | null
+          deposit_checkout_session_id?: string | null
+          deposit_payment_intent_id?: string | null
+          deposit_status?: string | null
           description?: string | null
           estimated_price?: number | null
           final_price?: number | null
@@ -93,6 +110,7 @@ export type Database = {
           provider_diagnosis?: string | null
           provider_id: string
           recurring_frequency?: string | null
+          reschedule_count?: number
           scheduled_date: string
           scheduled_time?: string | null
           service_id?: string | null
@@ -104,9 +122,17 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          cancellation_fee_cents?: number | null
+          cancellation_fee_checkout_session_id?: string | null
+          cancellation_fee_payment_intent_id?: string | null
+          cancellation_fee_status?: string | null
           cancelled_at?: string | null
           completed_at?: string | null
           created_at?: string
+          deposit_amount_cents?: number | null
+          deposit_checkout_session_id?: string | null
+          deposit_payment_intent_id?: string | null
+          deposit_status?: string | null
           description?: string | null
           estimated_price?: number | null
           final_price?: number | null
@@ -119,6 +145,7 @@ export type Database = {
           provider_diagnosis?: string | null
           provider_id?: string
           recurring_frequency?: string | null
+          reschedule_count?: number
           scheduled_date?: string
           scheduled_time?: string | null
           service_id?: string | null
@@ -306,6 +333,7 @@ export type Database = {
           first_name: string
           home_data: string | null
           home_id: string | null
+          homeowner_user_id: string | null
           id: string
           last_name: string | null
           notes: string | null
@@ -325,6 +353,7 @@ export type Database = {
           first_name: string
           home_data?: string | null
           home_id?: string | null
+          homeowner_user_id?: string | null
           id?: string
           last_name?: string | null
           notes?: string | null
@@ -344,6 +373,7 @@ export type Database = {
           first_name?: string
           home_data?: string | null
           home_id?: string | null
+          homeowner_user_id?: string | null
           id?: string
           last_name?: string | null
           notes?: string | null
@@ -361,6 +391,13 @@ export type Database = {
             columns: ["home_id"]
             isOneToOne: false
             referencedRelation: "homes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clients_homeowner_user_id_fkey"
+            columns: ["homeowner_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
             referencedColumns: ["id"]
           },
           {
@@ -407,20 +444,88 @@ export type Database = {
           },
         ]
       }
+      crew_members: {
+        Row: {
+          color: string
+          created_at: string
+          email: string | null
+          id: string
+          invited_user_id: string | null
+          is_active: boolean
+          name: string
+          phone: string | null
+          provider_id: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          invited_user_id?: string | null
+          is_active?: boolean
+          name: string
+          phone?: string | null
+          provider_id: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          email?: string | null
+          id?: string
+          invited_user_id?: string | null
+          is_active?: boolean
+          name?: string
+          phone?: string | null
+          provider_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crew_members_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crew_members_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homes: {
         Row: {
+          amenities: Json | null
           bathrooms: number | null
           bedrooms: number | null
           city: string
+          cooling_type: string | null
           county_name: string | null
           created_at: string
+          details_updated_at: string | null
+          details_updated_by: string | null
+          electrical_panel_amps: number | null
+          electrical_panel_type: string | null
           estimated_value: number | null
           formatted_address: string | null
+          foundation_type: string | null
+          has_basement: boolean | null
+          has_deck: boolean | null
+          has_garage: boolean | null
+          has_pool: boolean | null
+          has_sprinklers: boolean | null
+          has_trees_near_roof: boolean | null
           housefax_data: string | null
           housefax_enriched_at: string | null
           housefax_score: number | null
+          hvac_installed_year: number | null
+          hvac_last_serviced_at: string | null
+          hvac_type: string | null
           id: string
           is_default: boolean | null
+          known_issues: string | null
           label: string
           last_sold_date: string | null
           last_sold_price: number | null
@@ -429,31 +534,57 @@ export type Database = {
           lot_size: number | null
           neighborhood_name: string | null
           place_id: string | null
+          plumbing_material: string | null
           property_type: Database["public"]["Enums"]["property_type"] | null
+          roof_installed_year: number | null
+          roof_material: string | null
+          sewer_type: string | null
+          siding_material: string | null
           square_feet: number | null
           state: string
+          stories: number | null
           street: string
           tax_assessed_value: number | null
           updated_at: string
           user_id: string
+          water_heater_installed_year: number | null
+          water_heater_type: string | null
+          yard_size_sqft: number | null
           year_built: number | null
           zillow_id: string | null
           zillow_url: string | null
           zip: string
         }
         Insert: {
+          amenities?: Json | null
           bathrooms?: number | null
           bedrooms?: number | null
           city: string
+          cooling_type?: string | null
           county_name?: string | null
           created_at?: string
+          details_updated_at?: string | null
+          details_updated_by?: string | null
+          electrical_panel_amps?: number | null
+          electrical_panel_type?: string | null
           estimated_value?: number | null
           formatted_address?: string | null
+          foundation_type?: string | null
+          has_basement?: boolean | null
+          has_deck?: boolean | null
+          has_garage?: boolean | null
+          has_pool?: boolean | null
+          has_sprinklers?: boolean | null
+          has_trees_near_roof?: boolean | null
           housefax_data?: string | null
           housefax_enriched_at?: string | null
           housefax_score?: number | null
+          hvac_installed_year?: number | null
+          hvac_last_serviced_at?: string | null
+          hvac_type?: string | null
           id?: string
           is_default?: boolean | null
+          known_issues?: string | null
           label: string
           last_sold_date?: string | null
           last_sold_price?: number | null
@@ -462,31 +593,57 @@ export type Database = {
           lot_size?: number | null
           neighborhood_name?: string | null
           place_id?: string | null
+          plumbing_material?: string | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
+          roof_installed_year?: number | null
+          roof_material?: string | null
+          sewer_type?: string | null
+          siding_material?: string | null
           square_feet?: number | null
           state: string
+          stories?: number | null
           street: string
           tax_assessed_value?: number | null
           updated_at?: string
           user_id: string
+          water_heater_installed_year?: number | null
+          water_heater_type?: string | null
+          yard_size_sqft?: number | null
           year_built?: number | null
           zillow_id?: string | null
           zillow_url?: string | null
           zip: string
         }
         Update: {
+          amenities?: Json | null
           bathrooms?: number | null
           bedrooms?: number | null
           city?: string
+          cooling_type?: string | null
           county_name?: string | null
           created_at?: string
+          details_updated_at?: string | null
+          details_updated_by?: string | null
+          electrical_panel_amps?: number | null
+          electrical_panel_type?: string | null
           estimated_value?: number | null
           formatted_address?: string | null
+          foundation_type?: string | null
+          has_basement?: boolean | null
+          has_deck?: boolean | null
+          has_garage?: boolean | null
+          has_pool?: boolean | null
+          has_sprinklers?: boolean | null
+          has_trees_near_roof?: boolean | null
           housefax_data?: string | null
           housefax_enriched_at?: string | null
           housefax_score?: number | null
+          hvac_installed_year?: number | null
+          hvac_last_serviced_at?: string | null
+          hvac_type?: string | null
           id?: string
           is_default?: boolean | null
+          known_issues?: string | null
           label?: string
           last_sold_date?: string | null
           last_sold_price?: number | null
@@ -495,13 +652,22 @@ export type Database = {
           lot_size?: number | null
           neighborhood_name?: string | null
           place_id?: string | null
+          plumbing_material?: string | null
           property_type?: Database["public"]["Enums"]["property_type"] | null
+          roof_installed_year?: number | null
+          roof_material?: string | null
+          sewer_type?: string | null
+          siding_material?: string | null
           square_feet?: number | null
           state?: string
+          stories?: number | null
           street?: string
           tax_assessed_value?: number | null
           updated_at?: string
           user_id?: string
+          water_heater_installed_year?: number | null
+          water_heater_type?: string | null
+          yard_size_sqft?: number | null
           year_built?: number | null
           zillow_id?: string | null
           zillow_url?: string | null
@@ -924,10 +1090,96 @@ export type Database = {
           },
         ]
       }
+      job_series: {
+        Row: {
+          address: string | null
+          anchor_date: string
+          cancelled_at: string | null
+          client_id: string | null
+          created_at: string
+          custom_service_id: string | null
+          description: string | null
+          estimated_duration: number | null
+          estimated_price: number | null
+          frequency: string
+          generated_through: string | null
+          id: string
+          notes: string | null
+          provider_id: string
+          scheduled_time: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          address?: string | null
+          anchor_date: string
+          cancelled_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          custom_service_id?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          estimated_price?: number | null
+          frequency: string
+          generated_through?: string | null
+          id?: string
+          notes?: string | null
+          provider_id: string
+          scheduled_time?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string | null
+          anchor_date?: string
+          cancelled_at?: string | null
+          client_id?: string | null
+          created_at?: string
+          custom_service_id?: string | null
+          description?: string | null
+          estimated_duration?: number | null
+          estimated_price?: number | null
+          frequency?: string
+          generated_through?: string | null
+          id?: string
+          notes?: string | null
+          provider_id?: string
+          scheduled_time?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_series_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_series_custom_service_id_fkey"
+            columns: ["custom_service_id"]
+            isOneToOne: false
+            referencedRelation: "provider_custom_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_series_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       jobs: {
         Row: {
           address: string | null
           appointment_id: string | null
+          assigned_crew_member_id: string | null
           checklist: Json | null
           client_id: string | null
           completed_at: string | null
@@ -939,17 +1191,21 @@ export type Database = {
           final_price: number | null
           id: string
           notes: string | null
+          original_scheduled_at: string | null
           provider_id: string
           scheduled_date: string
           scheduled_time: string | null
+          series_id: string | null
           service_id: string | null
           status: Database["public"]["Enums"]["job_status"] | null
           title: string
           updated_at: string
+          weather_held_at: string | null
         }
         Insert: {
           address?: string | null
           appointment_id?: string | null
+          assigned_crew_member_id?: string | null
           checklist?: Json | null
           client_id?: string | null
           completed_at?: string | null
@@ -961,17 +1217,21 @@ export type Database = {
           final_price?: number | null
           id?: string
           notes?: string | null
+          original_scheduled_at?: string | null
           provider_id: string
           scheduled_date: string
           scheduled_time?: string | null
+          series_id?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           title: string
           updated_at?: string
+          weather_held_at?: string | null
         }
         Update: {
           address?: string | null
           appointment_id?: string | null
+          assigned_crew_member_id?: string | null
           checklist?: Json | null
           client_id?: string | null
           completed_at?: string | null
@@ -983,13 +1243,16 @@ export type Database = {
           final_price?: number | null
           id?: string
           notes?: string | null
+          original_scheduled_at?: string | null
           provider_id?: string
           scheduled_date?: string
           scheduled_time?: string | null
+          series_id?: string | null
           service_id?: string | null
           status?: Database["public"]["Enums"]["job_status"] | null
           title?: string
           updated_at?: string
+          weather_held_at?: string | null
         }
         Relationships: [
           {
@@ -997,6 +1260,13 @@ export type Database = {
             columns: ["appointment_id"]
             isOneToOne: false
             referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_assigned_crew_member_id_fkey"
+            columns: ["assigned_crew_member_id"]
+            isOneToOne: false
+            referencedRelation: "crew_members"
             referencedColumns: ["id"]
           },
           {
@@ -1018,6 +1288,13 @@ export type Database = {
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "jobs_series_id_fkey"
+            columns: ["series_id"]
+            isOneToOne: false
+            referencedRelation: "job_series"
             referencedColumns: ["id"]
           },
           {
@@ -1182,6 +1459,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_dedup_claims: {
+        Row: {
+          channel: string
+          created_at: string
+          dedup_key: string
+          event_type: string
+        }
+        Insert: {
+          channel: string
+          created_at?: string
+          dedup_key: string
+          event_type: string
+        }
+        Update: {
+          channel?: string
+          created_at?: string
+          dedup_key?: string
+          event_type?: string
+        }
+        Relationships: []
       }
       notification_deliveries: {
         Row: {
@@ -1350,42 +1648,67 @@ export type Database = {
           amount: number
           amount_cents: number
           created_at: string
+          created_by: string | null
           id: string
           invoice_id: string
           method: Database["public"]["Enums"]["payment_method"] | null
           notes: string | null
+          photo_url: string | null
           provider_id: string
+          received_at: string | null
           reference: string | null
+          status: Database["public"]["Enums"]["payment_status"] | null
           stripe_charge_id: string | null
           stripe_payment_intent_id: string | null
+          voided_at: string | null
+          voided_by: string | null
         }
         Insert: {
           amount: number
           amount_cents?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_id: string
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
+          photo_url?: string | null
           provider_id: string
+          received_at?: string | null
           reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
           stripe_charge_id?: string | null
           stripe_payment_intent_id?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Update: {
           amount?: number
           amount_cents?: number
           created_at?: string
+          created_by?: string | null
           id?: string
           invoice_id?: string
           method?: Database["public"]["Enums"]["payment_method"] | null
           notes?: string | null
+          photo_url?: string | null
           provider_id?: string
+          received_at?: string | null
           reference?: string | null
+          status?: Database["public"]["Enums"]["payment_status"] | null
           stripe_charge_id?: string | null
           stripe_payment_intent_id?: string | null
+          voided_at?: string | null
+          voided_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "payments_invoice_id_invoices_id_fk"
             columns: ["invoice_id"]
@@ -1400,6 +1723,13 @@ export type Database = {
             referencedRelation: "providers"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "payments_voided_by_fkey"
+            columns: ["voided_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
       payouts: {
@@ -1407,6 +1737,7 @@ export type Database = {
           amount_cents: number
           arrival_date: string | null
           created_at: string
+          description: string | null
           id: string
           provider_id: string
           status: Database["public"]["Enums"]["payout_status"] | null
@@ -1417,6 +1748,7 @@ export type Database = {
           amount_cents: number
           arrival_date?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           provider_id: string
           status?: Database["public"]["Enums"]["payout_status"] | null
@@ -1427,6 +1759,7 @@ export type Database = {
           amount_cents?: number
           arrival_date?: string | null
           created_at?: string
+          description?: string | null
           id?: string
           provider_id?: string
           status?: Database["public"]["Enums"]["payout_status"] | null
@@ -1450,6 +1783,7 @@ export type Database = {
           base_price: number | null
           booking_mode: string | null
           category: string
+          checklist_template_json: string | null
           created_at: string
           description: string | null
           duration: number | null
@@ -1474,6 +1808,7 @@ export type Database = {
           base_price?: number | null
           booking_mode?: string | null
           category?: string
+          checklist_template_json?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -1498,6 +1833,7 @@ export type Database = {
           base_price?: number | null
           booking_mode?: string | null
           category?: string
+          checklist_template_json?: string | null
           created_at?: string
           description?: string | null
           duration?: number | null
@@ -1519,50 +1855,6 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_custom_services_provider_id_providers_id_fk"
-            columns: ["provider_id"]
-            isOneToOne: false
-            referencedRelation: "providers"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      provider_message_templates: {
-        Row: {
-          body: string
-          created_at: string
-          event_type: string | null
-          id: string
-          is_default: boolean | null
-          name: string
-          provider_id: string
-          subject: string | null
-          updated_at: string
-        }
-        Insert: {
-          body: string
-          created_at?: string
-          event_type?: string | null
-          id?: string
-          is_default?: boolean | null
-          name: string
-          provider_id: string
-          subject?: string | null
-          updated_at?: string
-        }
-        Update: {
-          body?: string
-          created_at?: string
-          event_type?: string | null
-          id?: string
-          is_default?: boolean | null
-          name?: string
-          provider_id?: string
-          subject?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "provider_message_templates_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -1648,7 +1940,9 @@ export type Database = {
           first_paid_booking_at: string | null
           grace_period_ends_at: string | null
           id: string
+          is_partner: boolean
           is_subscribed: boolean
+          partner_since: string | null
           plan_tier: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents: number | null
           platform_fee_percent: number | null
@@ -1667,7 +1961,9 @@ export type Database = {
           first_paid_booking_at?: string | null
           grace_period_ends_at?: string | null
           id?: string
+          is_partner?: boolean
           is_subscribed?: boolean
+          partner_since?: string | null
           plan_tier?: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents?: number | null
           platform_fee_percent?: number | null
@@ -1686,7 +1982,9 @@ export type Database = {
           first_paid_booking_at?: string | null
           grace_period_ends_at?: string | null
           id?: string
+          is_partner?: boolean
           is_subscribed?: boolean
+          partner_since?: string | null
           plan_tier?: Database["public"]["Enums"]["provider_plan_tier"] | null
           platform_fee_fixed_cents?: number | null
           platform_fee_percent?: number | null
@@ -1702,6 +2000,35 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "provider_plans_provider_id_providers_id_fk"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      provider_route_orders: {
+        Row: {
+          order_json: Json
+          provider_id: string
+          route_date: string
+          updated_at: string
+        }
+        Insert: {
+          order_json: Json
+          provider_id: string
+          route_date: string
+          updated_at?: string
+        }
+        Update: {
+          order_json?: Json
+          provider_id?: string
+          route_date?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "provider_route_orders_provider_id_fkey"
             columns: ["provider_id"]
             isOneToOne: false
             referencedRelation: "providers"
@@ -1894,6 +2221,93 @@ export type Database = {
           },
         ]
       }
+      quick_quotes: {
+        Row: {
+          address: string
+          ai_insight: string | null
+          created_at: string
+          custom_service_id: string | null
+          final_price: number
+          formatted_address: string | null
+          high_price: number
+          id: string
+          latitude: number | null
+          longitude: number | null
+          lot_size: number | null
+          low_price: number
+          mid_price: number
+          notes: string | null
+          place_id: string | null
+          pricing_basis: string | null
+          provider_id: string
+          sent_via: string | null
+          service_name: string
+          square_feet: number | null
+          status: string
+        }
+        Insert: {
+          address: string
+          ai_insight?: string | null
+          created_at?: string
+          custom_service_id?: string | null
+          final_price: number
+          formatted_address?: string | null
+          high_price: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          lot_size?: number | null
+          low_price: number
+          mid_price: number
+          notes?: string | null
+          place_id?: string | null
+          pricing_basis?: string | null
+          provider_id: string
+          sent_via?: string | null
+          service_name: string
+          square_feet?: number | null
+          status?: string
+        }
+        Update: {
+          address?: string
+          ai_insight?: string | null
+          created_at?: string
+          custom_service_id?: string | null
+          final_price?: number
+          formatted_address?: string | null
+          high_price?: number
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          lot_size?: number | null
+          low_price?: number
+          mid_price?: number
+          notes?: string | null
+          place_id?: string | null
+          pricing_basis?: string | null
+          provider_id?: string
+          sent_via?: string | null
+          service_name?: string
+          square_feet?: number | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quick_quotes_custom_service_id_fkey"
+            columns: ["custom_service_id"]
+            isOneToOne: false
+            referencedRelation: "provider_custom_services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quick_quotes_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       refunds: {
         Row: {
           amount_cents: number
@@ -1945,6 +2359,51 @@ export type Database = {
           },
         ]
       }
+      review_reports: {
+        Row: {
+          created_at: string
+          details: string | null
+          id: string
+          reason: string
+          reporter_user_id: string
+          review_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason: string
+          reporter_user_id: string
+          review_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          details?: string | null
+          id?: string
+          reason?: string
+          reporter_user_id?: string
+          review_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_reports_reporter_user_id_fkey"
+            columns: ["reporter_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "review_reports_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reviews: {
         Row: {
           appointment_id: string
@@ -1952,6 +2411,9 @@ export type Database = {
           created_at: string
           id: string
           provider_id: string
+          provider_reply: string | null
+          provider_reply_at: string | null
+          provider_reply_updated_at: string | null
           rating: number
           user_id: string
         }
@@ -1961,6 +2423,9 @@ export type Database = {
           created_at?: string
           id?: string
           provider_id: string
+          provider_reply?: string | null
+          provider_reply_at?: string | null
+          provider_reply_updated_at?: string | null
           rating: number
           user_id: string
         }
@@ -1970,6 +2435,9 @@ export type Database = {
           created_at?: string
           id?: string
           provider_id?: string
+          provider_reply?: string | null
+          provider_reply_at?: string | null
+          provider_reply_updated_at?: string | null
           rating?: number
           user_id?: string
         }
@@ -1990,6 +2458,42 @@ export type Database = {
           },
           {
             foreignKeyName: "reviews_user_id_users_id_fk"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      saved_providers: {
+        Row: {
+          created_at: string
+          id: string
+          provider_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          provider_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          provider_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_providers_provider_id_fkey"
+            columns: ["provider_id"]
+            isOneToOne: false
+            referencedRelation: "providers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_providers_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "users"
@@ -2111,24 +2615,30 @@ export type Database = {
       }
       stripe_webhook_events: {
         Row: {
+          endpoint: string | null
           event_type: string
           id: string
           payload: string | null
-          processed_at: string
+          processed_at: string | null
+          stripe_account_id: string | null
           stripe_event_id: string
         }
         Insert: {
+          endpoint?: string | null
           event_type: string
           id?: string
           payload?: string | null
-          processed_at?: string
+          processed_at?: string | null
+          stripe_account_id?: string | null
           stripe_event_id: string
         }
         Update: {
+          endpoint?: string | null
           event_type?: string
           id?: string
           payload?: string | null
-          processed_at?: string
+          processed_at?: string | null
+          stripe_account_id?: string | null
           stripe_event_id?: string
         }
         Relationships: []
@@ -2214,6 +2724,7 @@ export type Database = {
           email: string
           first_name: string | null
           id: string
+          is_admin: boolean
           is_provider: boolean | null
           last_name: string | null
           password: string
@@ -2230,6 +2741,7 @@ export type Database = {
           email: string
           first_name?: string | null
           id?: string
+          is_admin?: boolean
           is_provider?: boolean | null
           last_name?: string | null
           password: string
@@ -2246,6 +2758,7 @@ export type Database = {
           email?: string
           first_name?: string | null
           id?: string
+          is_admin?: boolean
           is_provider?: boolean | null
           last_name?: string | null
           password?: string
@@ -2282,7 +2795,12 @@ export type Database = {
         | "expired"
       invoice_status: "draft" | "sent" | "paid" | "overdue" | "cancelled"
       job_size: "small" | "medium" | "large"
-      job_status: "scheduled" | "in_progress" | "completed" | "cancelled"
+      job_status:
+        | "scheduled"
+        | "in_progress"
+        | "completed"
+        | "cancelled"
+        | "weather_held"
       maintenance_reminder_frequency:
         | "monthly"
         | "quarterly"
@@ -2298,7 +2816,14 @@ export type Database = {
         | "delivered"
         | "failed"
         | "pending_sms"
-      payment_method: "cash" | "card" | "bank_transfer" | "check" | "other"
+      payment_method:
+        | "cash"
+        | "card"
+        | "bank_transfer"
+        | "check"
+        | "other"
+        | "stripe"
+        | "credits"
       payment_status:
         | "requires_payment"
         | "processing"
@@ -2463,7 +2988,13 @@ export const Constants = {
       ],
       invoice_status: ["draft", "sent", "paid", "overdue", "cancelled"],
       job_size: ["small", "medium", "large"],
-      job_status: ["scheduled", "in_progress", "completed", "cancelled"],
+      job_status: [
+        "scheduled",
+        "in_progress",
+        "completed",
+        "cancelled",
+        "weather_held",
+      ],
       maintenance_reminder_frequency: [
         "monthly",
         "quarterly",
@@ -2481,7 +3012,15 @@ export const Constants = {
         "failed",
         "pending_sms",
       ],
-      payment_method: ["cash", "card", "bank_transfer", "check", "other"],
+      payment_method: [
+        "cash",
+        "card",
+        "bank_transfer",
+        "check",
+        "other",
+        "stripe",
+        "credits",
+      ],
       payment_status: [
         "requires_payment",
         "processing",
