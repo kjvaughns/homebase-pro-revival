@@ -19,7 +19,7 @@ export default function TermsOfService() {
 
       <main className="flex-1 max-w-3xl mx-auto px-6 py-16">
         <h1 className="text-4xl font-bold mb-2">Terms of Use & End-User License Agreement</h1>
-        <p className="text-muted-foreground mb-12">Effective Date: [EFFECTIVE DATE]</p>
+        <p className="text-muted-foreground mb-12">Effective Date: May 3, 2026</p>
 
         <div className="space-y-10 text-muted-foreground leading-relaxed">
           <section>
@@ -29,7 +29,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold text-[#22c55e] mb-3">2. Effective Date</h2>
-            <p>These Terms are effective as of [EFFECTIVE DATE] and replace all prior versions.</p>
+            <p>These Terms are effective as of May 3, 2026 and replace all prior versions.</p>
           </section>
 
           <section>
@@ -153,7 +153,7 @@ export default function TermsOfService() {
 
           <section>
             <h2 className="text-xl font-semibold text-[#22c55e] mb-3">23. Governing Law</h2>
-            <p>These Terms are governed by the laws of the United States and the State of [STATE], without regard to its conflict-of-laws rules. Subject to Section 22, the state and federal courts located in [STATE] will have exclusive jurisdiction over any claim not subject to arbitration.</p>
+            <p>These Terms are governed by the laws of the United States and the State of Mississippi, without regard to its conflict-of-laws rules. Subject to Section 22, the state and federal courts located in Mississippi will have exclusive jurisdiction over any claim not subject to arbitration.</p>
           </section>
 
           <section>
@@ -188,7 +188,7 @@ export default function TermsOfService() {
 
             <h3 className="text-base font-semibold text-foreground mb-1 mt-4">25.8 Developer Name and Address</h3>
             <p>Any questions, complaints, or claims regarding the App should be directed to:</p>
-            <p className="mt-2">HomeBase<br />[COMPANY ADDRESS]<br />Email: <a href="mailto:support@homebaseproapp.com" className="text-[#22c55e] hover:underline">support@homebaseproapp.com</a><br />Phone: [PHONE NUMBER]</p>
+            <p className="mt-2">HomeBase<br />120 District Blvd, Jackson, MS 39211<br />Email: <a href="mailto:support@homebaseproapp.com" className="text-[#22c55e] hover:underline">support@homebaseproapp.com</a></p>
 
             <h3 className="text-base font-semibold text-foreground mb-1 mt-4">25.9 Third-Party Terms</h3>
             <p>You must comply with applicable third-party terms of agreement when using the App. Such third-party terms include, without limitation, Stripe's Terms of Service, the Apple Media Services Terms and Conditions, the Google Play Terms of Service, and any wireless data service agreement with your carrier.</p>
@@ -205,7 +205,7 @@ export default function TermsOfService() {
           <section>
             <h2 className="text-xl font-semibold text-[#22c55e] mb-3">27. Contact Us</h2>
             <p>If you have any questions about these Terms, please contact us:</p>
-            <p className="mt-2">HomeBase<br />[COMPANY ADDRESS]<br />Email: <a href="mailto:support@homebaseproapp.com" className="text-[#22c55e] hover:underline">support@homebaseproapp.com</a><br />Phone: [PHONE NUMBER]</p>
+            <p className="mt-2">HomeBase<br />120 District Blvd, Jackson, MS 39211<br />Email: <a href="mailto:support@homebaseproapp.com" className="text-[#22c55e] hover:underline">support@homebaseproapp.com</a></p>
           </section>
         </div>
       </main>
