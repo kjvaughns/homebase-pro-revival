@@ -19,11 +19,11 @@ const Navbar = () => {
           <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
           <Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
         </div>
-        <Link to="/marketplace" className="hidden md:block">
+        <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" className="hidden md:block">
           <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
             Start Free
           </Button>
-        </Link>
+        </a>
         <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-foreground" aria-label="Toggle menu">
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
@@ -33,11 +33,11 @@ const Navbar = () => {
           <Link to="/marketplace" onClick={() => setOpen(false)} className="block text-sm font-medium text-foreground py-2">Marketplace</Link>
           <a href="#pricing" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Pricing</a>
           <Link to="/blog" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Blog</Link>
-          <Link to="/marketplace" onClick={() => setOpen(false)}>
+          <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="block">
             <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full mt-2">
               Start Free
             </Button>
-          </Link>
+          </a>
         </div>
       )}
     </nav>

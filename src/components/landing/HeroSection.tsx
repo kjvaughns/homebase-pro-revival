@@ -28,11 +28,11 @@ const HeroSection = () => (
           ))}
         </ul>
         <div className="flex flex-wrap gap-3 sm:gap-4">
-          <Link to="/marketplace">
+          <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer">
             <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6 sm:px-8 text-sm sm:text-base">
               Get Your First Client Free
             </Button>
-          </Link>
+          </a>
           <Button size="lg" variant="outline" className="rounded-full px-6 sm:px-8 text-sm sm:text-base border-border text-foreground hover:bg-secondary">
             See How It Works
           </Button>
