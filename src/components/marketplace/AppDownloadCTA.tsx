@@ -19,7 +19,7 @@ const AppDownloadCTA = ({
             <p className="text-xs text-muted-foreground">Book & manage home services</p>
           </div>
           <a 
-            href="https://testflight.apple.com/join/P1v4ZReq" 
+            href="https://apps.apple.com/app/homebase-pro-app/id6760936703" 
             target="_blank" 
             rel="noopener noreferrer"
             className="bg-primary text-primary-foreground text-sm font-semibold px-4 py-2 rounded-full whitespace-nowrap"
@@ -43,7 +43,7 @@ const AppDownloadCTA = ({
         </div>
         <div className="flex items-center justify-center gap-3">
           <a 
-            href="https://testflight.apple.com/join/P1v4ZReq"
+            href="https://apps.apple.com/app/homebase-pro-app/id6760936703"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2.5 hover:bg-card/80 transition-colors"
@@ -67,7 +67,7 @@ const AppDownloadCTA = ({
       <img src={logo} alt="HomeBase" className="w-8 h-8 rounded-lg" />
       <p className="text-sm text-foreground flex-1">{message}</p>
       <a 
-        href="https://testflight.apple.com/join/P1v4ZReq" 
+        href="https://apps.apple.com/app/homebase-pro-app/id6760936703" 
         target="_blank" 
         rel="noopener noreferrer"
         className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1.5 rounded-full whitespace-nowrap"

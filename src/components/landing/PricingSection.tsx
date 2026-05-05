@@ -40,9 +40,11 @@ const PricingSection = () => (
             </li>
           ))}
         </ul>
-        <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full text-base">
-          Start Free
-        </Button>
+        <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" className="block">
+          <Button size="lg" className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full text-base">
+            Start Free
+          </Button>
+        </a>
       </div>
     </div>
   </section>

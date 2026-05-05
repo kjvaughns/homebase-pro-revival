@@ -1,5 +1,5 @@
-export const TESTFLIGHT_URL = "https://testflight.apple.com/join/P1v4ZReq";
-export const APP_STORE_URL = TESTFLIGHT_URL;
+export const APP_STORE_URL = "https://apps.apple.com/app/homebase-pro-app/id6760936703";
+export const TESTFLIGHT_URL = APP_STORE_URL;
 
 export function isIOS(): boolean {
   if (typeof navigator === "undefined") return false;

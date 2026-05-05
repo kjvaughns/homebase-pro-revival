@@ -270,9 +270,11 @@ const AIDemoSection = () => {
                     The AI set proper expectations with a diagnosis and estimate. The provider received a full job summary — no phone tag, no guesswork, no wasted time.
                   </p>
                 </div>
-                <Button className="w-full rounded-xl font-semibold" size="lg">
-                  Start Free →
-                </Button>
+                <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" className="block">
+                  <Button className="w-full rounded-xl font-semibold" size="lg">
+                    Start Free →
+                  </Button>
+                </a>
               </div>
             )}
           </div>
