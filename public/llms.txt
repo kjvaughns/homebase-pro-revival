@@ -1,0 +1,24 @@
+# HomeBase Pro
+
+> All-in-one platform for home service professionals: AI-powered booking, scheduling, invoicing, and payments. Also a marketplace where homeowners book vetted local pros.
+
+## Pages
+
+- [Home](/): Product overview — AI booking, payments, automation, and growth tools for home service pros.
+- [Marketplace](/marketplace): Browse verified home service professionals.
+- [AI Booking](/ai-booking): Let AI match you with the right pro and book instantly.
+- [Blog](/blog): Practical guides for independent home-service providers.
+- [FAQ](/faq): Common questions about HomeBase, pricing, payments, and accounts.
+- [Privacy Policy](/privacy): How HomeBase collects and uses data.
+- [Terms of Service](/terms): Terms governing use of HomeBase.
+
+## Blog posts
+
+- [Getting Started on HomeBase](/blog/getting-started-on-homebase): Step-by-step guide to launching your HomeBase business profile.
+- [Setting Your Rates](/blog/setting-your-rates): Pricing framework for independent providers.
+- [Winning 5-Star Reviews](/blog/winning-5-star-reviews): How to earn reviews that close future bookings.
+- [Photographing Your Work](/blog/photographing-your-work): Capture portfolio photos that convert.
+- [Business Insurance Guide](/blog/business-insurance-guide): What coverage independent pros actually need.
+- [Understanding Your Stats](/blog/understanding-your-stats): Read your HomeBase analytics like a pro.
+- [Managing Your Schedule](/blog/managing-your-schedule): Build a calendar that protects your time.
+- [Getting Paid Faster](/blog/getting-paid-faster): Reduce invoice lag with HomeBase Pay.
