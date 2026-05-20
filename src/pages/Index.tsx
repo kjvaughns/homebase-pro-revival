@@ -22,11 +22,36 @@ import {
   CalendarDays, FileText, Users, Settings,
   Link2, Star, Store,
 } from "lucide-react";
+import Seo from "@/components/Seo";
+
+const homeFaqs = [
+  { q: "What is HomeBase?", a: "HomeBase is an all-in-one platform for home service professionals with AI-powered booking, scheduling, invoicing, and payments." },
+  { q: "How much does HomeBase cost?", a: "HomeBase is $29.99/month plus a 3% transaction fee on payments processed through HomeBase Pay. You don't pay anything until you get your first paid booking." },
+  { q: "How does AI booking work?", a: "When a client reaches out, our AI responds instantly, answers questions, sends quotes based on your pricing, and books the job on your calendar — 24/7." },
+  { q: "Can I cancel anytime?", a: "Yes. There are no contracts. You can cancel your subscription anytime from your account settings." },
+];
+
+const homeFaqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: homeFaqs.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
 
 const Index = () => (
   <div className="min-h-screen bg-background text-foreground">
+    <Seo
+      title="HomeBase Pro — AI Booking & Payments for Home Service Pros"
+      description="HomeBase is the all-in-one platform built for home service pros — from booking to payment, powered by AI."
+      path="/"
+      jsonLd={homeFaqJsonLd}
+    />
     <TopBanner />
     <Navbar />
+    <main>
     <HeroSection />
 
     <div id="features">
@@ -111,6 +136,7 @@ const Index = () => (
     <TestimonialsSection />
     <FAQSection />
     <FinalCTA />
+    </main>
     <Footer />
   </div>
 );

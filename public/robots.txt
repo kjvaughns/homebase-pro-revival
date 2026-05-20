@@ -12,3 +12,5 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+Sitemap: https://homebasepro-app.lovable.app/sitemap.xml

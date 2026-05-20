@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import rehypeSanitize from "rehype-sanitize";
@@ -9,6 +8,7 @@ import BlogHeroPlaceholder from "@/components/blog/BlogHeroPlaceholder";
 import BlogCard from "@/components/blog/BlogCard";
 import { Button } from "@/components/ui/button";
 import { getPostBySlug, getRelatedPosts } from "@/data/blogPosts";
+import Seo from "@/components/Seo";
 
 const formatDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
@@ -17,24 +17,16 @@ const BlogPostPage = () => {
   const { slug } = useParams<{ slug: string }>();
   const post = slug ? getPostBySlug(slug) : undefined;
 
-  useEffect(() => {
-    if (!post) {
-      document.title = "Post not found — HomeBase Blog";
-      return;
-    }
-    document.title = `${post.title} — HomeBase Blog`;
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "description");
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", post.excerpt);
-  }, [post]);
+  // SEO handled via <Seo />
 
   if (!post) {
     return (
       <div className="min-h-screen bg-background text-foreground flex flex-col">
+        <Seo
+          title="Post not found — HomeBase Blog"
+          description="The blog post you're looking for doesn't exist."
+          path={`/blog/${slug ?? ""}`}
+        />
         <Navbar />
         <main className="flex-1 flex items-center justify-center px-4">
           <div className="text-center">
@@ -51,8 +43,34 @@ const BlogPostPage = () => {
 
   const related = getRelatedPosts(post.slug, post.category);
 
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.publishedAt,
+    author: { "@type": "Organization", name: "HomeBase Pro" },
+    publisher: {
+      "@type": "Organization",
+      name: "HomeBase Pro",
+      logo: {
+        "@type": "ImageObject",
+        url: "https://homebasepro-app.lovable.app/homebase-logo.png",
+      },
+    },
+    mainEntityOfPage: `https://homebasepro-app.lovable.app/blog/${post.slug}`,
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Seo
+        title={`${post.title} — HomeBase Blog`}
+        description={post.excerpt}
+        path={`/blog/${post.slug}`}
+        ogType="article"
+        image={post.heroImage}
+        jsonLd={articleJsonLd}
+      />
       <Navbar />
       <main className="flex-1">
         <article className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

@@ -1,28 +1,17 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import Navbar from "@/components/landing/Navbar";
 import Footer from "@/components/landing/Footer";
 import BlogCard from "@/components/blog/BlogCard";
 import { Button } from "@/components/ui/button";
 import { blogPosts, type BlogCategory } from "@/data/blogPosts";
+import Seo from "@/components/Seo";
 
 type Filter = "All" | BlogCategory;
 const FILTERS: Filter[] = ["All", "Guide", "Article", "Tool"];
 
 const BlogIndexPage = () => {
   const [filter, setFilter] = useState<Filter>("All");
-
-  useEffect(() => {
-    document.title = "Blog — HomeBase";
-    const desc = "Practical guides for independent home-service providers.";
-    let meta = document.querySelector('meta[name="description"]');
-    if (!meta) {
-      meta = document.createElement("meta");
-      meta.setAttribute("name", "description");
-      document.head.appendChild(meta);
-    }
-    meta.setAttribute("content", desc);
-  }, []);
 
   const filtered = useMemo(
     () => (filter === "All" ? blogPosts : blogPosts.filter((p) => p.category === filter)),
@@ -31,6 +20,11 @@ const BlogIndexPage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Seo
+        title="HomeBase Blog — Guides for Home Service Pros"
+        description="Practical guides, articles, and tools for independent home-service providers — pricing, scheduling, reviews, payments, and more."
+        path="/blog"
+      />
       <Navbar />
       <main className="flex-1">
         <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 text-center">
