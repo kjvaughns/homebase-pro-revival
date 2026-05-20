@@ -14,6 +14,164 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_logs: {
+        Row: {
+          action: string
+          admin_user_id: string | null
+          after_value: Json | null
+          before_value: Json | null
+          created_at: string
+          id: string
+          ip_address: string | null
+          metadata: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          admin_user_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          admin_user_id?: string | null
+          after_value?: Json | null
+          before_value?: Json | null
+          created_at?: string
+          id?: string
+          ip_address?: string | null
+          metadata?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_audit_logs_admin_user_id_fkey"
+            columns: ["admin_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_broadcast_recipients: {
+        Row: {
+          broadcast_id: string
+          channel: string
+          created_at: string
+          delivered_at: string | null
+          error: string | null
+          id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          broadcast_id: string
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          broadcast_id?: string
+          channel?: string
+          created_at?: string
+          delivered_at?: string | null
+          error?: string | null
+          id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_broadcast_recipients_broadcast_id_fkey"
+            columns: ["broadcast_id"]
+            isOneToOne: false
+            referencedRelation: "admin_broadcasts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_broadcast_recipients_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      admin_broadcasts: {
+        Row: {
+          audience: string
+          body: string
+          channel: string
+          created_at: string
+          created_by: string | null
+          id: string
+          recipient_count: number
+          scheduled_at: string | null
+          sent_at: string | null
+          sent_by_user_id: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          audience?: string
+          body: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          recipient_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_by_user_id?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          audience?: string
+          body?: string
+          channel?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          recipient_count?: number
+          scheduled_at?: string | null
+          sent_at?: string | null
+          sent_by_user_id?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "admin_broadcasts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "admin_broadcasts_sent_by_user_id_fkey"
+            columns: ["sent_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       app_reviews: {
         Row: {
           comment: string
@@ -47,6 +205,24 @@ export type Database = {
           rating?: number
           role?: string | null
           title?: string | null
+        }
+        Relationships: []
+      }
+      app_settings: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
         }
         Relationships: []
       }
@@ -2811,41 +2987,108 @@ export type Database = {
         }
         Relationships: []
       }
+      support_ticket_messages: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          is_internal: boolean
+          sender_id: string | null
+          sender_type: string
+          ticket_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          sender_id?: string | null
+          sender_type?: string
+          ticket_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          is_internal?: boolean
+          sender_id?: string | null
+          sender_type?: string
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_messages_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
+          assigned_to: string | null
           category: string
           created_at: string
           email: string
           id: string
           message: string
           name: string
+          priority: string
+          resolved_at: string | null
           status: string
           subject: string
+          updated_at: string
           user_id: string | null
+          user_type: string | null
         }
         Insert: {
+          assigned_to?: string | null
           category: string
           created_at?: string
           email: string
           id?: string
           message: string
           name: string
+          priority?: string
+          resolved_at?: string | null
           status?: string
           subject: string
+          updated_at?: string
           user_id?: string | null
+          user_type?: string | null
         }
         Update: {
+          assigned_to?: string | null
           category?: string
           created_at?: string
           email?: string
           id?: string
           message?: string
           name?: string
+          priority?: string
+          resolved_at?: string | null
           status?: string
           subject?: string
+          updated_at?: string
           user_id?: string | null
+          user_type?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "support_tickets_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "support_tickets_user_id_fkey"
             columns: ["user_id"]
@@ -2892,8 +3135,10 @@ export type Database = {
           email: string
           first_name: string | null
           id: string
+          is_active: boolean
           is_admin: boolean
           is_provider: boolean | null
+          last_active_at: string | null
           last_name: string | null
           password: string
           phone: string | null
@@ -2909,8 +3154,10 @@ export type Database = {
           email: string
           first_name?: string | null
           id?: string
+          is_active?: boolean
           is_admin?: boolean
           is_provider?: boolean | null
+          last_active_at?: string | null
           last_name?: string | null
           password: string
           phone?: string | null
@@ -2926,8 +3173,10 @@ export type Database = {
           email?: string
           first_name?: string | null
           id?: string
+          is_active?: boolean
           is_admin?: boolean
           is_provider?: boolean | null
+          last_active_at?: string | null
           last_name?: string | null
           password?: string
           phone?: string | null
@@ -2977,6 +3226,9 @@ export type Database = {
         | "completed"
         | "cancelled"
         | "weather_held"
+        | "confirmed"
+        | "on_my_way"
+        | "arrived"
       maintenance_reminder_frequency:
         | "monthly"
         | "quarterly"
@@ -3179,6 +3431,9 @@ export const Constants = {
         "completed",
         "cancelled",
         "weather_held",
+        "confirmed",
+        "on_my_way",
+        "arrived",
       ],
       maintenance_reminder_frequency: [
         "monthly",
