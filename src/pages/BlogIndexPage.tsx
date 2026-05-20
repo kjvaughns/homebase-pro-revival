@@ -25,7 +25,7 @@ const BlogIndexPage = () => {
         description="Practical guides, articles, and tools for independent home-service providers — pricing, scheduling, reviews, payments, and more."
         path="/blog"
       />
-      <Navbar>
+      <Navbar />
       <main className="flex-1">
         <header className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">HomeBase Blog</h1>
