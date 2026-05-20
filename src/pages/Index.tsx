@@ -6,6 +6,7 @@ import AIDemoSection from "@/components/landing/AIDemoSection";
 import HouseFaxSection from "@/components/landing/HouseFaxSection";
 import CaseStudiesSection from "@/components/landing/CaseStudiesSection";
 import PricingSection from "@/components/landing/PricingSection";
+import ComparisonSection from "@/components/landing/ComparisonSection";
 import TestimonialsSection from "@/components/landing/TestimonialsSection";
 import FAQSection from "@/components/landing/FAQSection";
 import FinalCTA from "@/components/landing/FinalCTA";
