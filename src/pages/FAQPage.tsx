@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import Seo from "@/components/Seo";
 
 const faqCategories = [
   {
@@ -49,12 +50,29 @@ const faqCategories = [
 
 export default function FAQPage() {
   useEffect(() => {
-    document.title = "FAQ — HomeBase Pro";
     window.scrollTo(0, 0);
   }, []);
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqCategories.flatMap((c) =>
+      c.items.map((i) => ({
+        "@type": "Question",
+        name: i.q,
+        acceptedAnswer: { "@type": "Answer", text: i.a },
+      })),
+    ),
+  };
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <Seo
+        title="FAQ — HomeBase Pro"
+        description="Answers to common questions about HomeBase: pricing, AI booking, payments, accounts, and data security."
+        path="/faq"
+        jsonLd={faqJsonLd}
+      />
       <nav className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur px-6 py-4">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="HomeBase logo" className="w-8 h-8" />

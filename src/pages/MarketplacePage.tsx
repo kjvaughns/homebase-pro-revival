@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Star, Search, Shield, Sparkles, Menu, X } from "lucide-react";
 import logo from "@/assets/logo.png";
+import Seo from "@/components/Seo";
 
 interface Provider {
   id: string;
@@ -105,7 +106,7 @@ const MarketplacePage = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    document.title = "Find a Pro | HomeBase";
+    // title is handled by <Seo />
   }, []);
 
   useEffect(() => {
@@ -151,6 +152,11 @@ const MarketplacePage = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      <Seo
+        title="Find a Pro — HomeBase Marketplace"
+        description="Browse verified home service professionals on HomeBase — plumbers, electricians, HVAC techs, cleaners, and more. Book instantly."
+        path="/marketplace"
+      />
       {/* Navbar */}
       <nav className="w-full border-b border-border/50 bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
