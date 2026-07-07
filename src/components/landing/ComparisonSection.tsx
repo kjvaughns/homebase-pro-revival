@@ -1,5 +1,6 @@
 import { Check, X, DollarSign, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 type Cell = "yes" | "no" | "addon" | "paid";
 
