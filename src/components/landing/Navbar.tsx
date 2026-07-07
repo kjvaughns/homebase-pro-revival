@@ -40,8 +40,13 @@ const Navbar = () => {
           <Link to="/marketplace" onClick={() => setOpen(false)} className="block text-sm font-medium text-foreground py-2">Marketplace</Link>
           <a href="#pricing" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Pricing</a>
           <Link to="/blog" onClick={() => setOpen(false)} className="block text-sm text-muted-foreground py-2">Blog</Link>
+          <Link to="/signup" onClick={() => setOpen(false)} className="block">
+            <Button variant="outline" className="w-full rounded-full font-semibold mt-2">
+              Sign up
+            </Button>
+          </Link>
           <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" onClick={() => setOpen(false)} className="block">
-            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full mt-2">
+            <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full">
               Start Free
             </Button>
           </a>
