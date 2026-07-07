@@ -19,11 +19,18 @@ const Navbar = () => {
           <a href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</a>
           <Link to="/blog" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Blog</Link>
         </div>
-        <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" className="hidden md:block">
-          <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
-            Start Free
-          </Button>
-        </a>
+        <div className="hidden md:flex items-center gap-3">
+          <Link to="/signup">
+            <Button variant="ghost" className="text-foreground hover:bg-secondary rounded-full font-semibold">
+              Sign up
+            </Button>
+          </Link>
+          <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer">
+            <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-6">
+              Start Free
+            </Button>
+          </a>
+        </div>
         <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-foreground" aria-label="Toggle menu">
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </button>
