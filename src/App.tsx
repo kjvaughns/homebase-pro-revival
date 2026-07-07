@@ -18,6 +18,8 @@ import TermsOfService from "./pages/TermsOfService.tsx";
 import FAQPage from "./pages/FAQPage.tsx";
 import AIBookingPage from "./pages/AIBookingPage.tsx";
 import SignUpPage from "./pages/SignUpPage.tsx";
+import HomeownerSignupPage from "./pages/HomeownerSignupPage.tsx";
+import ProviderSignupPage from "./pages/ProviderSignupPage.tsx";
 import SignInPage from "./pages/SignInPage.tsx";
 import GuestBookingPage from "./pages/GuestBookingPage.tsx";
 import BookingConfirmedPage from "./pages/BookingConfirmedPage.tsx";
@@ -52,6 +54,8 @@ const App = () => (
           <Route path="/faq" element={<FAQPage />} />
           <Route path="/ai-booking" element={<AIBookingPage />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup/homeowner" element={<HomeownerSignupPage />} />
+          <Route path="/signup/provider" element={<ProviderSignupPage />} />
           <Route path="/login" element={<SignInPage />} />
           <Route path="/payment-success" element={<PaymentSuccessPage />} />
           <Route path="/payment-cancelled" element={<PaymentCancelledPage />} />
