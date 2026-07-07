@@ -13,11 +13,18 @@ const FinalCTA = () => (
       <p className="text-lg text-muted-foreground max-w-xl mx-auto">
         Join thousands of home service pros who are booking more jobs, getting paid faster, and growing on autopilot.
       </p>
-      <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer">
-        <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-10 text-base">
-          Start Free
-        </Button>
-      </a>
+      <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
+        <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer">
+          <Button size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-full px-10 text-base">
+            Start Free
+          </Button>
+        </a>
+        <Link to="/signup">
+          <Button size="lg" variant="outline" className="rounded-full px-10 text-base font-semibold">
+            Sign up online
+          </Button>
+        </Link>
+      </div>
       <div className="flex justify-center pt-4">
         <a href="https://apps.apple.com/app/homebase-pro-app/id6760936703" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-card border border-border rounded-xl px-4 py-2.5">
           <svg className="h-5 w-5 text-foreground" viewBox="0 0 24 24" fill="currentColor">

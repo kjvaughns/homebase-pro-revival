@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const features = [
   "AI-powered booking & scheduling",
@@ -45,6 +46,9 @@ const PricingSection = () => (
             Start Free
           </Button>
         </a>
+        <Link to="/signup" className="block text-sm font-semibold text-primary hover:text-primary/80">
+          Or sign up online →
+        </Link>
       </div>
     </div>
   </section>

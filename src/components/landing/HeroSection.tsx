@@ -33,9 +33,11 @@ const HeroSection = () => (
               Get Your First Client Free
             </Button>
           </a>
-          <Button size="lg" variant="outline" className="rounded-full px-6 sm:px-8 text-sm sm:text-base border-border text-foreground hover:bg-secondary">
-            See How It Works
-          </Button>
+          <Link to="/signup">
+            <Button size="lg" variant="outline" className="rounded-full px-6 sm:px-8 text-sm sm:text-base border-border text-foreground hover:bg-secondary">
+              Sign up online
+            </Button>
+          </Link>
         </div>
         <div className="flex flex-wrap gap-4 sm:gap-6 pt-2">
           {[
