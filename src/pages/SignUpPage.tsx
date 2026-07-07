@@ -1,133 +1,109 @@
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import logo from "@/assets/logo.png";
+import { useEffect } from "react";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { OnboardShell } from "@/components/onboarding/OnboardShell";
+import { captureReferralFromUrl } from "@/lib/onboarding";
 
+// /signup — role picker. Reads ?ref (stored invisibly) and ?role (skip ahead).
 const SignUpPage = () => {
   const navigate = useNavigate();
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [params] = useSearchParams();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    if (password !== confirmPassword) {
-      setError("Passwords don't match.");
-      return;
-    }
-
-    setLoading(true);
-    const { error: signUpError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { full_name: fullName } },
-    });
-    setLoading(false);
-
-    if (signUpError) {
-      setError(signUpError.message);
-    } else {
-      navigate("/ai-booking");
-    }
-  };
+  useEffect(() => {
+    captureReferralFromUrl();
+    const role = params.get("role");
+    if (role === "homeowner")
+      navigate("/signup/homeowner", { replace: true });
+    else if (role === "provider")
+      navigate("/signup/provider", { replace: true });
+  }, [params, navigate]);
 
   return (
-    <div className="min-h-screen" style={{ background: "#0a0a0a" }}>
-      <nav className="sticky top-0 z-50 border-b border-gray-800 bg-[#0a0a0a]/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center">
-          <Link to="/" className="flex items-center gap-2">
-            <img src={logo} alt="HomeBase" className="h-8 w-8" />
-            <span className="text-white font-bold text-xl">HomeBase</span>
-          </Link>
-        </div>
-      </nav>
-
-      <div className="flex items-center justify-center px-4 py-20">
-        <div className="w-full max-w-[400px] bg-gray-900 border border-gray-800 rounded-xl p-8">
-          <h1 className="text-2xl font-bold text-white text-center mb-2">Create your free account</h1>
-          <p className="text-gray-400 text-center text-sm mb-6">Get matched with the right pro in minutes.</p>
-
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 text-sm">
-              {error}
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label className="text-gray-300 text-sm">Full Name</Label>
-              <Input
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                required
-                className="mt-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                placeholder="John Doe"
-              />
-            </div>
-            <div>
-              <Label className="text-gray-300 text-sm">Email</Label>
-              <Input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="mt-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                placeholder="you@example.com"
-              />
-            </div>
-            <div>
-              <Label className="text-gray-300 text-sm">Password</Label>
-              <Input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="mt-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                placeholder="••••••••"
-              />
-            </div>
-            <div>
-              <Label className="text-gray-300 text-sm">Confirm Password</Label>
-              <Input
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                minLength={6}
-                className="mt-1 bg-gray-800 border-gray-700 text-white placeholder:text-gray-500"
-                placeholder="••••••••"
-              />
-            </div>
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full"
-            >
-              {loading ? <Loader2 className="animate-spin mr-2 h-4 w-4" /> : null}
-              Create Account
-            </Button>
-          </form>
-
-          <p className="text-gray-400 text-sm text-center mt-6">
-            Already have an account?{" "}
-            <Link to="/login" className="text-green-400 hover:text-green-300 font-medium">
-              Sign In
-            </Link>
-          </p>
-        </div>
+    <OnboardShell>
+      <div className="text-center">
+        <h1 className="text-2xl font-bold text-white">
+          Get started with HomeBase
+        </h1>
+        <p className="mt-1 text-sm text-gray-400">
+          Find trusted pros. Grow your business.
+        </p>
       </div>
-    </div>
+
+      <div className="mt-8 flex flex-col gap-4">
+        <RoleCard
+          title="I need home services"
+          subtitle="Find and book trusted local pros."
+          onClick={() => navigate("/signup/homeowner")}
+          icon={<HomeIcon />}
+        />
+        <RoleCard
+          title="I'm a service pro"
+          subtitle="Get discovered and manage your business."
+          onClick={() => navigate("/signup/provider")}
+          icon={<ToolIcon />}
+        />
+      </div>
+
+      <p className="mt-8 text-center text-sm text-gray-400">
+        Already have an account?{" "}
+        <Link to="/login" className="font-semibold text-green-400 hover:text-green-300">
+          Log in
+        </Link>
+      </p>
+    </OnboardShell>
   );
 };
+
+function RoleCard({
+  title,
+  subtitle,
+  onClick,
+  icon,
+}: {
+  title: string;
+  subtitle: string;
+  onClick: () => void;
+  icon: React.ReactNode;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="group flex items-center gap-4 rounded-xl border border-gray-800 bg-gray-800/50 p-5 text-left transition-all hover:border-green-500 active:scale-[0.99]"
+    >
+      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-green-500/15 text-green-400">
+        {icon}
+      </div>
+      <div className="flex-1">
+        <div className="text-[17px] font-semibold text-white">{title}</div>
+        <div className="mt-0.5 text-sm text-gray-400">{subtitle}</div>
+      </div>
+      <svg
+        width="20"
+        height="20"
+        viewBox="0 0 24 24"
+        fill="none"
+        className="text-gray-600 transition-colors group-hover:text-green-400"
+        aria-hidden="true"
+      >
+        <path d="m9 6 6 6-6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    </button>
+  );
+}
+
+function HomeIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M3 10.5 12 3l9 7.5M5 9.5V20h14V9.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function ToolIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path d="M14.7 6.3a3.5 3.5 0 0 0-4.6 4.6l-6.1 6.1a1.5 1.5 0 0 0 2.1 2.1l6.1-6.1a3.5 3.5 0 0 0 4.6-4.6l-2.2 2.2-1.8-.3-.3-1.8 2.2-2.2Z" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
 
 export default SignUpPage;
