@@ -143,6 +143,11 @@ const ComparisonSection = () => (
             Download HomeBase Pro
           </Button>
         </a>
+        <Link to="/signup">
+          <Button size="lg" variant="outline" className="rounded-full font-semibold">
+            Sign up online
+          </Button>
+        </Link>
       </div>
     </div>
   </section>
