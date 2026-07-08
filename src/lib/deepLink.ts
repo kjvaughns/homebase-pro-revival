@@ -1,5 +1,22 @@
 export const APP_STORE_URL = "https://apps.apple.com/app/homebase-pro-app/id6760936703";
 export const TESTFLIGHT_URL = APP_STORE_URL;
+export const APP_STORE_ID = "6760936703";
+
+// Custom URL scheme for the HomeBase iOS app (bundle com.homebasepro.app).
+// Keep these route shapes in sync with the app's deep-link handlers.
+export const deepLinks = {
+  provider: (id: string) => `homebase://provider?id=${encodeURIComponent(id)}`,
+  book: (slug: string) => `homebase://book?slug=${encodeURIComponent(slug)}`,
+  marketplace: (categoryId?: string) =>
+    categoryId
+      ? `homebase://marketplace?categoryId=${encodeURIComponent(categoryId)}`
+      : `homebase://marketplace`,
+};
+
+// Open the app via its scheme; fall back to the App Store if it isn't installed.
+export function openInApp(deepLinkUrl: string): void {
+  tryDeepLink(deepLinkUrl, APP_STORE_URL, 1500);
+}
 
 export function isIOS(): boolean {
   if (typeof navigator === "undefined") return false;
