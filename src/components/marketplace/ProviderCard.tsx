@@ -1,119 +1,79 @@
-import { Star, MapPin, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { ProviderRow } from "@/lib/marketplace";
+import { RatingStars } from "./RatingStars";
+import { BadgePill } from "./BadgePill";
 
-interface ProviderCardProps {
-    id: string;
-    businessName: string;
-    description?: string | null;
-    serviceArea?: string | null;
-    averageRating?: number | null;
-    reviewCount?: number | null;
-    avatarUrl?: string | null;
-    capabilityTags?: string[] | null;
-    hourlyRate?: number | null;
-    slug?: string | null;
-}
+// Spec-aligned marketplace card: avatar/initials, badges, gold rating, tags,
+// service area, "View Profile" → /providers/:id. Data comes from Supabase.
+export function ProviderCard({ p }: { p: ProviderRow }) {
+  const navigate = useNavigate();
+  const rating = p.average_rating ?? p.rating ?? 0;
+  const tags = (p.capability_tags ?? []).slice(0, 3);
+  const price = p.hourly_rate ? `$${Number(p.hourly_rate).toFixed(0)}/hr` : null;
 
-const ProviderCard = ({
-    id,
-    businessName,
-    description,
-    serviceArea,
-    averageRating,
-    reviewCount,
-    avatarUrl,
-    capabilityTags,
-    hourlyRate,
-    slug,
-}: ProviderCardProps) => {
-    const bookingUrl = slug
-      ? `https://home-base-pro-app.replit.app/book/${slug}`
-      : `/marketplace/${id}`;
-    const isExternal = !!slug;
-
-    return (
-      <a
-        href={bookingUrl}
-        target={isExternal ? "_blank" : "_self"}
-        rel={isExternal ? "noopener noreferrer" : undefined}
-        className="group block rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-5 transition-all hover:border-primary/40 hover:bg-white/[0.08] hover:shadow-lg hover:shadow-primary/5 no-underline"
-      >
-        <div className="flex items-start gap-4">
-          {avatarUrl ? (
-            <img
-              src={avatarUrl}
-              alt={businessName}
-              className="w-14 h-14 rounded-xl object-cover flex-shrink-0"
-            />
-          ) : (
-            <div className="w-14 h-14 rounded-xl bg-primary/20 flex items-center justify-center flex-shrink-0">
-              <span className="text-lg font-bold text-primary">
-                {businessName?.charAt(0)}
-              </span>
+  return (
+    <div className="flex flex-col rounded-2xl border border-border bg-card p-5 transition-all hover:border-primary/40">
+      <div className="flex items-start gap-3">
+        {p.avatar_url ? (
+          <img
+            src={p.avatar_url}
+            alt={p.business_name}
+            className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+          />
+        ) : (
+          <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary/20">
+            <span className="text-lg font-bold text-primary">
+              {p.business_name.charAt(0).toUpperCase()}
+            </span>
+          </div>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold text-foreground">{p.business_name}</p>
+          {p.is_verified && (
+            <div className="mt-1 flex flex-wrap items-center gap-1.5">
+              <BadgePill kind="verified" />
             </div>
           )}
-          <div className="flex-1 min-w-0">
-            <p className="font-semibold text-foreground truncate group-hover:text-primary transition-colors">
-              {businessName}
-            </p>
-            {serviceArea && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
-                <MapPin className="h-3 w-3" />
-                {serviceArea}
-              </p>
-            )}
-            <div className="flex items-center gap-3 mt-1.5">
-              {averageRating && (
-                <span className="flex items-center gap-1 text-xs font-medium text-primary">
-                  <Star className="h-3.5 w-3.5 fill-primary" />
-                  {Number(averageRating).toFixed(1)}
-                  {reviewCount && (
-                    <span className="text-muted-foreground font-normal">
-                      ({reviewCount})
-                    </span>
-                  )}
-                </span>
-              )}
-              {hourlyRate && (
-                <span className="text-xs text-muted-foreground">
-                  From ${Number(hourlyRate).toFixed(0)}/hr
-                </span>
-              )}
-            </div>
-          </div>
-          <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors mt-1 flex-shrink-0" />
         </div>
+      </div>
 
-        {description && (
-          <p className="text-sm text-muted-foreground mt-3 line-clamp-2">
-            {description}
-          </p>
-        )}
+      <div className="mt-3">
+        <RatingStars rating={rating} reviewCount={p.review_count ?? 0} />
+      </div>
 
-        {capabilityTags && capabilityTags.length > 0 && (
-          <div className="flex flex-wrap gap-1.5 mt-3">
-            {capabilityTags.slice(0, 3).map((tag) => (
-              <span
-                key={tag}
-                className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-primary/10 text-primary"
-              >
-                {tag}
-              </span>
-            ))}
-            {capabilityTags.length > 3 && (
-              <span className="text-[11px] text-muted-foreground px-2 py-0.5">
-                +{capabilityTags.length - 3}
-              </span>
-            )}
-          </div>
-        )}
+      {price && <p className="mt-2 text-sm font-medium text-primary">{price}</p>}
 
-        <div className="mt-4 flex justify-end">
-          <span className="text-xs font-semibold text-primary group-hover:underline">
-            {slug ? "Book Now →" : "View Profile →"}
-          </span>
+      {p.description && (
+        <p className="mt-2 line-clamp-1 text-sm text-muted-foreground">
+          {p.description}
+        </p>
+      )}
+
+      {tags.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {tags.map((t) => (
+            <span
+              key={t}
+              className="rounded-full bg-secondary px-2.5 py-1 text-[11px] text-muted-foreground"
+            >
+              {t}
+            </span>
+          ))}
         </div>
-      </a>
-    );
-};
+      )}
+
+      {p.service_area && (
+        <p className="mt-2 text-xs text-muted-foreground">{p.service_area}</p>
+      )}
+
+      <button
+        onClick={() => navigate(`/providers/${p.id}`)}
+        className="mt-4 h-[50px] w-full rounded-xl border border-primary text-sm font-semibold text-primary transition-colors hover:bg-primary hover:text-primary-foreground active:scale-[0.98]"
+      >
+        View Profile
+      </button>
+    </div>
+  );
+}
 
 export default ProviderCard;

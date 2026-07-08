@@ -195,7 +195,12 @@ const ProviderProfilePage = () => {
   /* handlers */
   const handleBook = () => {
     if (!provider) return;
-    navigate(`/book/appointment/${provider.id}`);
+    // Prefer the app-style multi-step booking flow when the pro has a booking link
+    if (bookingLink?.slug) {
+      navigate(`/book/${bookingLink.slug}`);
+    } else {
+      navigate(`/book/appointment/${provider.id}`);
+    }
   };
 
   const getShareUrl = (slug: string) => `https://homebaseproapp.com/providers/${slug}`;
@@ -207,12 +212,33 @@ const ProviderProfilePage = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleShare = async () => {
+    if (!provider) return;
+    const url = window.location.href;
+    const title = `${provider.business_name} | HomeBase`;
+    if (navigator.share) {
+      try {
+        await navigator.share({ title, text: `Check out ${provider.business_name} on HomeBase`, url });
+        return;
+      } catch {
+        /* user cancelled — fall through to copy */
+      }
+    }
+    await navigator.clipboard.writeText(url);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   /* nav */
   const Navbar = () => (
     <nav className="w-full border-b border-neutral-800 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="max-w-3xl mx-auto px-4 flex items-center h-14">
+      <div className="max-w-3xl mx-auto px-4 flex items-center justify-between h-14">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors">
           <ArrowLeft className="h-5 w-5" />
+        </button>
+        <button onClick={handleShare} aria-label="Share" className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors text-sm">
+          {copied ? <Check className="h-4 w-4 text-green-400" /> : <Share2 className="h-4 w-4" />}
+          <span className="hidden sm:inline">{copied ? "Copied" : "Share"}</span>
         </button>
       </div>
     </nav>
