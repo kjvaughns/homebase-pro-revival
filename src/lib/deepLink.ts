@@ -3,10 +3,16 @@ export const TESTFLIGHT_URL = APP_STORE_URL;
 export const APP_STORE_ID = "6760936703";
 
 // Custom URL scheme for the HomeBase iOS app (bundle com.homebasepro.app).
-// Keep these route shapes in sync with the app's deep-link handlers.
+// Route shapes + param names are kept in sync with the app's linking config
+// (artifacts/homebase/app/index.tsx) and the screens they open:
+//   provider  -> ProviderProfile  (reads route.params.providerId)
+//   book      -> SimpleBooking     (reads route.params.providerId)
+//   marketplace -> ProviderList    (reads route.params.categoryId)
 export const deepLinks = {
-  provider: (id: string) => `homebase://provider?id=${encodeURIComponent(id)}`,
-  book: (slug: string) => `homebase://book?slug=${encodeURIComponent(slug)}`,
+  provider: (providerId: string) =>
+    `homebase://provider?providerId=${encodeURIComponent(providerId)}`,
+  book: (providerId: string) =>
+    `homebase://SimpleBooking?providerId=${encodeURIComponent(providerId)}`,
   marketplace: (categoryId?: string) =>
     categoryId
       ? `homebase://marketplace?categoryId=${encodeURIComponent(categoryId)}`

@@ -415,7 +415,7 @@ const BookingPage = () => {
         </div>
       </div>
 
-      <OpenInAppBanner deepLink={deepLinks.book(data.slug)} label="Book in the HomeBase App" />
+      <OpenInAppBanner deepLink={deepLinks.book(data.providerId)} label="Book in the HomeBase App" />
     </div>
   );
 };
